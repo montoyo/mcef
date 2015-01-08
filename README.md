@@ -7,3 +7,10 @@ It is based on JCEF (https://code.google.com/p/javachromiumembedded/), which is 
 Right now MCEF supports Windows 32 and 64 bits. I'll compile JCEF for linux as soon as possible. However I can't compile it for Mac.
 If you want to compile the natives for Mac, you can follow the instructions here: https://code.google.com/p/javachromiumembedded/wiki/BranchesAndBuilding
 On checkout, please take the revision 113.
+
+# For modders
+You just need to copy the net.montoyo.mcef.api package into your project. Users will have to download the mod from the MinecraftForum thread.
+To understand how it works, you may look at the net.montoyo.mcef.example package, which contains an example browser.
+
+# For players
+This is the Github project of MCEF; here you can only read the source code of it. Please go to the MinecraftForum thread.
