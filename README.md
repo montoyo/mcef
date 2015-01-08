@@ -13,4 +13,5 @@ You just need to copy the net.montoyo.mcef.api package into your project. Users 
 To understand how it works, you may look at the net.montoyo.mcef.example package, which contains an example browser.
 
 # For players
-This is the Github project of MCEF; here you can only read the source code of it. Please go to the MinecraftForum thread.
+This is the Github project of MCEF; here you can only read the source code of it.
+You can download the mod in its latest version from here: http://montoyo.net/wd2.php?t=mcef&v=latest
