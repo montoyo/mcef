@@ -14,7 +14,7 @@ To understand how it works, you may look at the net.montoyo.mcef.example package
 
 # For players
 This is the Github project of MCEF; here you can only read the source code of it.
-You can download the mod in its latest version from here: http://montoyo.net/wd2.php?t=mcef&v=latest
+You can download the mod in its latest version from here: http://www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/2324969-minecraft-chromium-embedded-framework-mcef
 
 # Wanna host a MCEF mirror?
 I'm looking for file hosters that may provide a MCEF resource mirror. This mirror will frequently be used by players to download essential MCEF files.
