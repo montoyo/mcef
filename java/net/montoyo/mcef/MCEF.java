@@ -8,7 +8,7 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 @Mod(modid = "MCEF", name = "MCEF", version = MCEF.VERSION)
 public class MCEF {
 	
-	public static final String VERSION = "0.1";
+	public static final String VERSION = "0.2";
 	
 	@Mod.Instance
 	public static MCEF INSTANCE;
@@ -18,7 +18,7 @@ public class MCEF {
 	
 	@Mod.EventHandler
 	public void onInit(FMLInitializationEvent ev) {
-		Log.info("Now initializing MCEF v%s...", MCEF.VERSION);
+		Log.info("Now initializing MCEF v%s...", VERSION);
 		PROXY.onInit();
 	}
 

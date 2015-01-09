@@ -11,9 +11,13 @@ import org.cef.browser.CefBrowserOsr;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.PlayerEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
 import cpw.mods.fml.relauncher.Side;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
 import net.montoyo.mcef.BaseProxy;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IDisplayHandler;
@@ -30,6 +34,7 @@ public class ClientProxy extends BaseProxy {
 	private CefApp cefApp;
 	private CefClient cefClient;
 	private ArrayList<CefBrowserOsr> browsers = new ArrayList<CefBrowserOsr>();
+	private String updateStr;
 	
 	@Override
 	public void onInit() {
@@ -52,6 +57,7 @@ public class ClientProxy extends BaseProxy {
 			return;
 		}
 		
+		updateStr = cfg.getUpdateString();
 		uf.dispose();
 		
 		if(VIRTUAL)
@@ -135,6 +141,20 @@ public class ClientProxy extends BaseProxy {
 			for(CefBrowserOsr b: browsers)
 				b.mcefUpdate();
 		}
+	}
+	
+	@SubscribeEvent
+	public void onLogin(PlayerEvent.PlayerLoggedInEvent ev) {
+		if(updateStr == null)
+			return;
+		
+		ChatStyle cs = new ChatStyle();
+		cs.setColor(EnumChatFormatting.LIGHT_PURPLE);
+		
+		ChatComponentText cct = new ChatComponentText(updateStr);
+		cct.setChatStyle(cs);
+		
+		ev.player.addChatComponentMessage(cct);
 	}
 	
 	public void removeBrowser(CefBrowserOsr b) {

@@ -202,6 +202,9 @@ public class RemoteConfig {
 	 * @return an info string if a newer version exists, null otherwise.
 	 */
 	public String getUpdateString() {
+		if(version == null)
+			return null;
+		
 		Version cur = new Version(MCEF.VERSION);
 		Version cfg = new Version(version);
 		

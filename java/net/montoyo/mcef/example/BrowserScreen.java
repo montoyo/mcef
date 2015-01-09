@@ -54,6 +54,15 @@ public class BrowserScreen extends GuiScreen {
 			buttonList.add(fwd);
 			buttonList.add(go);
 			buttonList.add(min);
+			
+			//Handle resizing
+			go.xPosition = width - 40;
+			min.xPosition = width - 20;
+			
+			String old = url.getText();
+			url = new GuiTextField(fontRendererObj, 40, 0, width - 80, 20);
+			url.setMaxStringLength(65535);
+			url.setText(old);
 		}
 	}
 	
