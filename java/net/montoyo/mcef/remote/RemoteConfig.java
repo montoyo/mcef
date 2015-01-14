@@ -160,8 +160,17 @@ public class RemoteConfig {
 		}
 		
 		JsonElement ver = cfg.get("version");
-		if(ver != null && ver.isJsonPrimitive())
-			version = ver.getAsString();
+		if(ver != null && ver.isJsonPrimitive()) {
+			String vstr = ver.getAsString();
+			
+			if(vstr.indexOf('-') < 0)
+				version = vstr;
+			else {
+				String[] parts = vstr.split("-");
+				//TODO: Check that parts[0] == mcVersion
+				version = parts[1];
+			}
+		}
 	}
 	
 	/**
@@ -176,6 +185,8 @@ public class RemoteConfig {
 		
 		if(resources.size() > 0) {
 			Log.info("Found %d missing resources. Downloading...", resources.size());
+			Log.info(Mirror.getCurrent().getMirrorString());
+			
 			for(Resource r: resources) {
 				if(!r.download(ipl, PLATFORM))
 					return false;

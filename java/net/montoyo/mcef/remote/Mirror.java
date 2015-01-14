@@ -17,14 +17,17 @@ import net.montoyo.mcef.utilities.Log;
  */
 public enum Mirror {
 	
-	MONTOYO("http://montoyo.net/jcef");
+	MONTOYO("http://montoyo.net/jcef", "montoyo.net"),
+	IROAS("http://montoyo.iroas.fr/jcef", "www.iroas.fr (French PvP server)");
 
 	private static Mirror current = pickRandom();
 	private final String url;
+	private final String name;
 	private boolean broken;
 	
-	Mirror(String url) {
+	Mirror(String url, String name) {
 		this.url = url;
+		this.name = name;
 		broken = false;
 	}
 	
@@ -34,6 +37,14 @@ public enum Mirror {
 	 */
 	public boolean isBroken() {
 		return broken;
+	}
+	
+	/**
+	 * Returns a "thanks" string.
+	 * @return The "thanks" string.
+	 */
+	public String getMirrorString() {
+		return "Mirror kindly provided by " + name;
 	}
 	
 	/**

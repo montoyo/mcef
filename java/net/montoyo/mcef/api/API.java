@@ -13,8 +13,16 @@ public interface API {
 	/**
 	 * Registers a display handler.
 	 * @param idh The display handler to register.
+	 * @see IDisplayHandler
 	 */
 	public void registerDisplayHandler(IDisplayHandler idh);
+	
+	/**
+	 * Registers a JavaScript query handler.
+	 * @param iqh The JavaScript query handler to register.
+	 * @see IJSQueryHandler
+	 */
+	public void registerJSQueryHandler(IJSQueryHandler iqh);
 	
 	/**
 	 * Call this to know if MCEF is in virtual mode.

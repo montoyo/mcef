@@ -8,7 +8,7 @@ import cpw.mods.fml.common.event.FMLInitializationEvent;
 @Mod(modid = "MCEF", name = "MCEF", version = MCEF.VERSION)
 public class MCEF {
 	
-	public static final String VERSION = "0.2";
+	public static final String VERSION = "0.4";
 	
 	@Mod.Instance
 	public static MCEF INSTANCE;

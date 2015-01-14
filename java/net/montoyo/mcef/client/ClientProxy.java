@@ -1,6 +1,7 @@
 package net.montoyo.mcef.client;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
@@ -8,6 +9,8 @@ import org.cef.CefApp;
 import org.cef.CefClient;
 import org.cef.CefSettings;
 import org.cef.browser.CefBrowserOsr;
+import org.cef.browser.CefMessageRouter;
+import org.cef.browser.CefMessageRouter.CefMessageRouterConfig;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -21,6 +24,7 @@ import net.minecraft.util.EnumChatFormatting;
 import net.montoyo.mcef.BaseProxy;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IDisplayHandler;
+import net.montoyo.mcef.api.IJSQueryHandler;
 import net.montoyo.mcef.example.ExampleMod;
 import net.montoyo.mcef.remote.RemoteConfig;
 import net.montoyo.mcef.utilities.Log;
@@ -33,12 +37,14 @@ public class ClientProxy extends BaseProxy {
 	
 	private CefApp cefApp;
 	private CefClient cefClient;
+	private CefMessageRouter cefRouter;
+	private boolean firstRouter = true;
 	private ArrayList<CefBrowserOsr> browsers = new ArrayList<CefBrowserOsr>();
 	private String updateStr;
+	private Minecraft mc = Minecraft.getMinecraft();
 	
 	@Override
 	public void onInit() {
-		Minecraft mc = Minecraft.getMinecraft();
 		ROOT = mc.mcDataDir.getAbsolutePath().replaceAll("\\\\", "/");
 		
 		if(ROOT.endsWith("."))
@@ -93,6 +99,8 @@ public class ClientProxy extends BaseProxy {
 		try {
 			cefApp = CefApp.getInstance(settings);
 			cefApp.myLoc = ROOT.replace('/', File.separatorChar);
+			
+			CefApp.addAppHandler(new AppHandler());
 			cefClient = cefApp.createClient();
 		} catch(Throwable t) {
 			Log.error("Going in virtual mode; couldn't initialize CEF.");
@@ -103,10 +111,17 @@ public class ClientProxy extends BaseProxy {
 		}
 		
 		Log.info(cefApp.getVersion().toString());
+		cefRouter = CefMessageRouter.create(new CefMessageRouterConfig("mcefQuery", "mcefCancel"));
+		cefClient.addMessageRouter(cefRouter);
+		
 		(new ShutdownThread()).start();
 		FMLCommonHandler.instance().bus().register(this);
 		(new ExampleMod()).onInit();
 		Log.info("MCEF loaded successfuly.");
+	}
+	
+	public CefApp getCefApp() {
+		return cefApp;
 	}
 	
 	@Override
@@ -135,11 +150,24 @@ public class ClientProxy extends BaseProxy {
 		ExampleMod.INSTANCE.showScreen(url);
 	}
 	
+	@Override
+	public void registerJSQueryHandler(IJSQueryHandler iqh) {
+		if(!VIRTUAL)
+			cefRouter.addHandler(new MessageRouter(iqh), firstRouter); //SwingUtilities.invokeLater() ?
+		
+		if(firstRouter)
+			firstRouter = false;
+	}
+	
 	@SubscribeEvent
 	public void onTick(TickEvent ev) {
 		if(ev.side == Side.CLIENT && ev.phase == TickEvent.Phase.START && ev.type == TickEvent.Type.CLIENT) {
+			mc.mcProfiler.startSection("MCEF");
+			
 			for(CefBrowserOsr b: browsers)
 				b.mcefUpdate();
+			
+			mc.mcProfiler.endSection();
 		}
 	}
 	
@@ -159,6 +187,38 @@ public class ClientProxy extends BaseProxy {
 	
 	public void removeBrowser(CefBrowserOsr b) {
 		browsers.remove(b);
+	}
+	
+	private static Class sclass(Class c, boolean supc) {
+		if(supc)
+			return c.getSuperclass();
+		else
+			return c;
+	}
+	
+	//This is probably the worst code I ever wrote; replace this asap!
+	public static Object fixObject(Object obj, String cname, boolean supc) {
+		try {
+			Field f = sclass(obj.getClass(), supc).getDeclaredField("N_CefHandle");
+			f.setAccessible(true);
+			
+			long handle = f.getLong(obj);
+			f.setLong(obj, 0);
+			
+			Class c = Class.forName(cname);
+			Constructor ctor = c.getDeclaredConstructor();
+			ctor.setAccessible(true);
+			
+			Object ret = ctor.newInstance();
+			f = sclass(c, supc).getDeclaredField("N_CefHandle");
+			f.setAccessible(true);
+			f.setLong(ret, handle);
+			
+			return ret;
+		} catch(Throwable t) {
+			t.printStackTrace();
+			return null;
+		}
 	}
 
 }

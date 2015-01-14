@@ -7,7 +7,10 @@ import net.minecraft.client.settings.KeyBinding;
 import net.montoyo.mcef.api.API;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IDisplayHandler;
+import net.montoyo.mcef.api.IJSQueryCallback;
+import net.montoyo.mcef.api.IJSQueryHandler;
 import net.montoyo.mcef.api.MCEFApi;
+
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
@@ -22,7 +25,7 @@ import cpw.mods.fml.relauncher.Side;
  * @author montoyo
  *
  */
-public class ExampleMod implements IDisplayHandler {
+public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
 	
 	public static ExampleMod INSTANCE;
 	
@@ -42,8 +45,9 @@ public class ExampleMod implements IDisplayHandler {
 		if(api == null)
 			return;
 		
-		//Register this class to handle onAddressChange events
+		//Register this class to handle onAddressChange and onQuery events
 		api.registerDisplayHandler(this);
+		api.registerJSQueryHandler(this);
 	}
 	
 	public void setBackup(BrowserScreen bu) {
@@ -70,6 +74,15 @@ public class ExampleMod implements IDisplayHandler {
 		}
 		
 		scr.loadURL(url);
+	}
+	
+	public IBrowser getBrowser() {
+		if(mc.currentScreen instanceof BrowserScreen)
+			return ((BrowserScreen) mc.currentScreen).browser;
+		else if(backup != null)
+			return backup.browser;
+		else
+			return null;
 	}
 	
 	@SubscribeEvent
@@ -109,6 +122,27 @@ public class ExampleMod implements IDisplayHandler {
 	@Override
 	public boolean onConsoleMessage(IBrowser browser, String message, String source, int line) {
 		return false;
+	}
+
+	@Override
+	public boolean handleQuery(IBrowser b, long queryId, String query, boolean persistent, IJSQueryCallback cb) {
+		if(b == getBrowser() && query.equalsIgnoreCase("username")) {
+			try {
+				String name = mc.getSession().getUsername();
+				cb.success(name);
+			} catch(Throwable t) {
+				cb.failure(500, "Internal error.");
+				t.printStackTrace();
+			}
+			
+			return true;
+		}
+		
+		return false;
+	}
+
+	@Override
+	public void cancelQuery(IBrowser b, long queryId) {
 	}
 
 }

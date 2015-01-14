@@ -29,7 +29,7 @@ public class BrowserScreen extends GuiScreen {
 				return;
 			
 			//Create a browser and resize it to fit the screen
-			browser = api.createBrowser("https://www.google.com");
+			browser = api.createBrowser("mod://mcef/home.html");
 		}
 		
 		//Resize the browser if window size changed

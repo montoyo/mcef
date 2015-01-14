@@ -3,6 +3,7 @@ package net.montoyo.mcef;
 import net.montoyo.mcef.api.API;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IDisplayHandler;
+import net.montoyo.mcef.api.IJSQueryHandler;
 import net.montoyo.mcef.utilities.Log;
 
 public class BaseProxy implements API {
@@ -30,6 +31,11 @@ public class BaseProxy implements API {
 	@Override
 	public void openExampleBrowser(String url) {
 		Log.warning("A mod called API.openExampleBrowser() from server! URL: %s", url);
+	}
+
+	@Override
+	public void registerJSQueryHandler(IJSQueryHandler iqh) {
+		Log.warning("A mod called API.registerJSQueryHandler() from server!");
 	}
 
 }
