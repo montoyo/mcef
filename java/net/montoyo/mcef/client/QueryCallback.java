@@ -8,7 +8,7 @@ public class QueryCallback implements IJSQueryCallback {
 	private CefQueryCallback cb;
 	
 	public QueryCallback(CefQueryCallback cb) {
-		this.cb = (CefQueryCallback) ClientProxy.fixObject(cb, "org.cef.callback.CefQueryCallback_N", true);
+		this.cb = cb;
 	}
 	
 	@Override

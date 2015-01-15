@@ -484,6 +484,13 @@ public class CefApp extends CefAppHandlerAdapter {
    * @return true on success
    */
   private final void initialize() {
+	  try {
+		  //montoyo: This will fix the mess done by FML in class loaders
+		  N_SetClassLoader(getClass().getClassLoader());
+	  } catch(Throwable t) {
+		  t.printStackTrace();
+	  }
+	  
     try {
       Runnable r = new Runnable() {
         @Override
@@ -621,6 +628,7 @@ public class CefApp extends CefAppHandlerAdapter {
     return library_path;
   }
 
+  private final native void N_SetClassLoader(ClassLoader cl);
   private final native boolean N_Initialize(String pathToJavaDLL,
       CefAppHandler appHandler, CefSettings settings);
   private final native void N_Shutdown();

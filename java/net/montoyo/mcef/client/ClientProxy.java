@@ -1,7 +1,6 @@
 package net.montoyo.mcef.client;
 
 import java.io.File;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 
@@ -187,38 +186,6 @@ public class ClientProxy extends BaseProxy {
 	
 	public void removeBrowser(CefBrowserOsr b) {
 		browsers.remove(b);
-	}
-	
-	private static Class sclass(Class c, boolean supc) {
-		if(supc)
-			return c.getSuperclass();
-		else
-			return c;
-	}
-	
-	//This is probably the worst code I ever wrote; replace this asap!
-	public static Object fixObject(Object obj, String cname, boolean supc) {
-		try {
-			Field f = sclass(obj.getClass(), supc).getDeclaredField("N_CefHandle");
-			f.setAccessible(true);
-			
-			long handle = f.getLong(obj);
-			f.setLong(obj, 0);
-			
-			Class c = Class.forName(cname);
-			Constructor ctor = c.getDeclaredConstructor();
-			ctor.setAccessible(true);
-			
-			Object ret = ctor.newInstance();
-			f = sclass(c, supc).getDeclaredField("N_CefHandle");
-			f.setAccessible(true);
-			f.setLong(ret, handle);
-			
-			return ret;
-		} catch(Throwable t) {
-			t.printStackTrace();
-			return null;
-		}
 	}
 
 }

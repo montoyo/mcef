@@ -48,7 +48,7 @@ public class BrowserScreen extends GuiScreen {
 			
 			url = new GuiTextField(fontRendererObj, 40, 0, width - 80, 20);
 			url.setMaxStringLength(65535);
-			url.setText("http://www.google.com");
+			url.setText("mod://mcef/home.html");
 		} else {
 			buttonList.add(back);
 			buttonList.add(fwd);
@@ -108,12 +108,12 @@ public class BrowserScreen extends GuiScreen {
 				return;
 			}
 			
+			boolean pressed = Keyboard.getEventKeyState();
+			boolean focused = url.isFocused();
 			char key = Keyboard.getEventCharacter();
 			int num = Keyboard.getEventKey();
 			
-			if(browser != null) { //Inject events into browser. TODO: Handle mods.
-				boolean pressed = Keyboard.getEventKeyState();
-				
+			if(browser != null && !focused) { //Inject events into browser. TODO: Handle keyboard mods.
 				if(key != '.' && key != ';' && key != ',') { //Workaround
 					if(pressed)
 						browser.injectKeyPressed(key, 0);
@@ -126,7 +126,10 @@ public class BrowserScreen extends GuiScreen {
 			}
 			
 			//Forward event to text box.
-			url.textboxKeyTyped(key, num);
+			if(!pressed && focused && num == Keyboard.KEY_RETURN)
+				actionPerformed(go);
+			else
+				url.textboxKeyTyped(key, num);
 		}
 		
 		while(Mouse.next()) {
