@@ -3,7 +3,7 @@
   "modid": "MCEF",
   "name": "Minecraft Chromium Embedded Framework",
   "description": "API required for mods that uses Chromium in Minecraft",
-  "version": "0.3",
+  "version": "0.4",
   "mcversion": "1.7.10",
   "updateUrl": "",
   "authors": [ "montoyo" ],
