@@ -226,7 +226,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 			  }
 		  }
 		  
-		  queue.push(pd);
+		  queue.addLast(pd);
 	  }
   }
   
