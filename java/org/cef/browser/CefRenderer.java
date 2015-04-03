@@ -10,6 +10,7 @@ import java.awt.Rectangle;
 import java.nio.ByteBuffer;
 
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldRenderer;
 
 import org.lwjgl.opengl.EXTBgra;
 
@@ -57,18 +58,19 @@ class CefRenderer {
     if (view_width_ == 0 || view_height_ == 0)
       return;
     
-    Tessellator t = Tessellator.instance;
+    Tessellator t = Tessellator.getInstance();
+    WorldRenderer wr = t.getWorldRenderer();
 	glBindTexture(GL_TEXTURE_2D, texture_id_[0]);
 	
-	t.startDrawingQuads();
+	wr.startDrawingQuads();
 	//t.disableColor(); //Doesn't work?
-	t.setColorOpaque(255, 255, 255);
+	wr.setColorOpaque(255, 255, 255);
 	
 	//                 X   Y  Z          U    V
-	t.addVertexWithUV(x1, y1, 0,       0   , 1.f);
-	t.addVertexWithUV(x2, y1, 0,       1.f, 1.f);
-	t.addVertexWithUV(x2, y2, 0,       1.f, 0);
-	t.addVertexWithUV(x1, y2, 0,       0   , 0);
+	wr.addVertexWithUV(x1, y1, 0,       0   , 1.f);
+	wr.addVertexWithUV(x2, y1, 0,       1.f, 1.f);
+	wr.addVertexWithUV(x2, y2, 0,       1.f, 0);
+	wr.addVertexWithUV(x1, y2, 0,       0   , 0);
 	t.draw();
 	
 	glBindTexture(GL_TEXTURE_2D, 0);

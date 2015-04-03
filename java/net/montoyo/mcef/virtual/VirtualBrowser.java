@@ -1,6 +1,7 @@
 package net.montoyo.mcef.virtual;
 
 import net.montoyo.mcef.api.IBrowser;
+import net.montoyo.mcef.api.IStringVisitor;
 
 public class VirtualBrowser implements IBrowser {
 
@@ -64,6 +65,11 @@ public class VirtualBrowser implements IBrowser {
 	@Override
 	public String getURL() {
 		return "about:blank";
+	}
+
+	@Override
+	public void visitSource(IStringVisitor isv) {
+		isv.visit("https://www.youtube.com/watch?v=VX5gXHcbJAk");
 	}
 
 }

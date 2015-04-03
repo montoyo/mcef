@@ -117,5 +117,13 @@ public interface IBrowser {
 	 * @return The current browser's URL.
 	 */
 	public String getURL();
+	
+	/**
+	 * Asynchronously retrieves the current page's source code.
+	 * FIXME: This is asynchronous; so you won't get your source right after calling this method!
+	 * 
+	 * @param isv An object that handles strings.
+	 */
+	public void visitSource(IStringVisitor isv);
 
 }

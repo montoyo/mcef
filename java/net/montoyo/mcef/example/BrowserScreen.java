@@ -1,5 +1,7 @@
 package net.montoyo.mcef.example;
 
+import java.io.IOException;
+
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -10,6 +12,7 @@ import net.minecraft.client.gui.GuiTextField;
 import net.montoyo.mcef.api.API;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.MCEFApi;
+import net.montoyo.mcef.utilities.Log;
 
 public class BrowserScreen extends GuiScreen {
 	
@@ -46,7 +49,7 @@ public class BrowserScreen extends GuiScreen {
 			buttonList.add(go = (new GuiButton(2, width - 40, 0, 20, 20, "Go")));
 			buttonList.add(min = (new GuiButton(3, width - 20, 0, 20, 20, "_")));
 			
-			url = new GuiTextField(fontRendererObj, 40, 0, width - 80, 20);
+			url = new GuiTextField(1234, fontRendererObj, 40, 0, width - 80, 20);
 			url.setMaxStringLength(65535);
 			url.setText("mod://mcef/home.html");
 		} else {
@@ -60,7 +63,7 @@ public class BrowserScreen extends GuiScreen {
 			min.xPosition = width - 20;
 			
 			String old = url.getText();
-			url = new GuiTextField(fontRendererObj, 40, 0, width - 80, 20);
+			url = new GuiTextField(1234, fontRendererObj, 40, 0, width - 80, 20);
 			url.setMaxStringLength(65535);
 			url.setText(old);
 		}
@@ -151,7 +154,13 @@ public class BrowserScreen extends GuiScreen {
 				int x = sx * width / mc.displayWidth;
 				int y = height - (sy * height / mc.displayHeight) - 1;
 				
-				mouseClicked(x, y, btn);
+				try {
+					mouseClicked(x, y, btn);
+				} catch(IOException e) {
+					Log.error("Uh?!?");
+					e.printStackTrace();
+				}
+				
 				url.mouseClicked(x, y, btn);
 			}
 		}
@@ -169,9 +178,9 @@ public class BrowserScreen extends GuiScreen {
 		if(browser == null)
 			return;
 		
-		if(src.id == 0)
+		if(src.id == 0) {
 			browser.goBack();
-		else if(src.id == 1)
+		} else if(src.id == 1)
 			browser.goForward();
 		else if(src.id == 2)
 			browser.loadURL(url.getText());

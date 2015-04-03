@@ -12,17 +12,24 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
 
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.IBrowser;
+import net.montoyo.mcef.api.IStringVisitor;
 import net.montoyo.mcef.client.ClientProxy;
+import net.montoyo.mcef.client.StringVisitor;
+import net.montoyo.mcef.utilities.Log;
 
 import org.cef.DummyComponent;
 import org.cef.callback.CefDragData;
 import org.cef.handler.CefClientHandler;
 import org.cef.handler.CefRenderHandler;
+
+import com.google.common.base.Preconditions;
 
 /**
  * This class represents an off-screen rendered browser.
@@ -98,6 +105,19 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
     if(CLEANUP) {
 	    ((ClientProxy) MCEF.PROXY).removeBrowser(this);
 	    renderer_.cleanup();
+    }
+    
+    synchronized(queue) {
+	    while(queue.size() > 0) {
+			PaintData del = queue.pop();
+			
+			//Fix "out of memory errors" on 32bits JVMs...
+			try {
+			 destroyDirectByteBuffer(del.buffer);
+			} catch(Throwable t) {
+			 //t.printStackTrace();
+			}
+		}
     }
     
     super.close();
@@ -191,8 +211,20 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 	  pd.height = height;
 	  
 	  synchronized(queue) {
-		  if(queue.size() > 16)
-			  queue.clear();
+		  if(queue.size() > 16) { //Wayyyy to much; Minecraft must be laggy...
+			  Log.warning("Paint queue is big; is Minecraft laggy?");
+			  
+			  while(queue.size() > 0) {
+				  PaintData del = queue.pop();
+				  
+				  //Fix "out of memory errors" on 32bits JVMs...
+				  try {
+					  destroyDirectByteBuffer(del.buffer);
+				  } catch(Throwable t) {
+					  //t.printStackTrace();
+				  }
+			  }
+		  }
 		  
 		  queue.push(pd);
 	  }
@@ -203,9 +235,34 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 		  while(queue.size() > 0) {
 			  PaintData pd = queue.pop();
 			  renderer_.onPaint(false, pd.dirtyRects, pd.buffer, pd.width, pd.height);
+			  
+			  //Fix "out of memory errors" on 32bits JVMs...
+			  try {
+				  destroyDirectByteBuffer(pd.buffer);
+			  } catch(Throwable t) {
+				  //t.printStackTrace();
+			  }
 		  }
 	  }
   }
+  
+  //Stolen from http://stackoverflow.com/questions/1854398/how-to-garbage-collect-a-direct-buffer-java
+  //Thanks to Li Pi
+  public static void destroyDirectByteBuffer(ByteBuffer toBeDestroyed)
+		    throws IllegalArgumentException, IllegalAccessException,
+		    InvocationTargetException, SecurityException, NoSuchMethodException {
+
+		  Preconditions.checkArgument(toBeDestroyed.isDirect(),
+		      "toBeDestroyed isn't direct!");
+
+		  Method cleanerMethod = toBeDestroyed.getClass().getMethod("cleaner");
+		  cleanerMethod.setAccessible(true);
+		  Object cleaner = cleanerMethod.invoke(toBeDestroyed);
+		  Method cleanMethod = cleaner.getClass().getMethod("clean");
+		  cleanMethod.setAccessible(true);
+		  cleanMethod.invoke(cleaner);
+
+		}
   
   @Override
   public void injectMouseMove(int x, int y, int mods, boolean left) {
@@ -265,6 +322,11 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 	@Override
 	public void runJS(String script, String frame) {
 		executeJavaScript(script, frame, 0);
+	}
+
+	@Override
+	public void visitSource(IStringVisitor isv) {
+		getSource(new StringVisitor(isv));
 	}
 
 }

@@ -1,6 +1,6 @@
 package net.montoyo.mcef.api;
 
-import cpw.mods.fml.common.Loader;
+import net.minecraftforge.fml.common.Loader;
 
 public class MCEFApi {
 	

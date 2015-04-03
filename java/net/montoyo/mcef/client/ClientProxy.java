@@ -11,16 +11,17 @@ import org.cef.browser.CefBrowserOsr;
 import org.cef.browser.CefMessageRouter;
 import org.cef.browser.CefMessageRouter.CefMessageRouterConfig;
 
-import cpw.mods.fml.common.FMLCommonHandler;
-import cpw.mods.fml.common.eventhandler.SubscribeEvent;
-import cpw.mods.fml.common.gameevent.PlayerEvent;
-import cpw.mods.fml.common.gameevent.TickEvent;
-import cpw.mods.fml.relauncher.Side;
+import net.minecraftforge.fml.common.FMLCommonHandler;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.PlayerEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.relauncher.Side;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
 import net.montoyo.mcef.BaseProxy;
+import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IDisplayHandler;
 import net.montoyo.mcef.api.IJSQueryHandler;
@@ -94,6 +95,7 @@ public class ClientProxy extends BaseProxy {
 		settings.windowless_rendering_enabled = true;
 		settings.background_color = settings.new ColorType(255, 255, 255, 255);
 		settings.locales_dir_path = (new File(ROOT, "MCEFLocales")).getAbsolutePath();
+		settings.cache_path = (new File(ROOT, "MCEFCache")).getAbsolutePath();
 		
 		try {
 			cefApp = CefApp.getInstance(settings);
@@ -113,9 +115,12 @@ public class ClientProxy extends BaseProxy {
 		cefRouter = CefMessageRouter.create(new CefMessageRouterConfig("mcefQuery", "mcefCancel"));
 		cefClient.addMessageRouter(cefRouter);
 		
-		(new ShutdownThread()).start();
+		(new ShutdownThread(browsers)).start();
 		FMLCommonHandler.instance().bus().register(this);
-		(new ExampleMod()).onInit();
+		
+		if(MCEF.ENABLE_EXAMPLE)
+			(new ExampleMod()).onInit();
+		
 		Log.info("MCEF loaded successfuly.");
 	}
 	
@@ -146,7 +151,8 @@ public class ClientProxy extends BaseProxy {
 	
 	@Override
 	public void openExampleBrowser(String url) {
-		ExampleMod.INSTANCE.showScreen(url);
+		if(MCEF.ENABLE_EXAMPLE)
+			ExampleMod.INSTANCE.showScreen(url);
 	}
 	
 	@Override

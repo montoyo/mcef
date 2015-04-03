@@ -2,6 +2,7 @@ package net.montoyo.mcef.client;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 
 import org.cef.CefApp;
 import org.cef.browser.CefBrowserOsr;
@@ -13,9 +14,11 @@ public class ShutdownThread extends Thread {
 	
 	private Field running = null;
 	private Minecraft mc = Minecraft.getMinecraft();
+	private ArrayList<CefBrowserOsr> browsers = null;
 	
-	public ShutdownThread() {
+	public ShutdownThread(ArrayList<CefBrowserOsr> b) {
 		super("MCEF-Shutdown");
+		browsers = b;
 		
 		try {
 			Field[] fields = Minecraft.class.getDeclaredFields();
@@ -60,9 +63,19 @@ public class ShutdownThread extends Thread {
 			} catch(Throwable t) {}
 		}
 		
-		//FIXME: Shouldn't we run from the original thread? Might be dangerous...
 		Log.info("Shutting down JCEF...");
 		CefBrowserOsr.CLEANUP = false; //Workaround
+		
+		for(CefBrowserOsr b: browsers)
+			b.close();
+		
+		browsers.clear();
+		System.gc();
+		
+		try {
+			//Yea sometimes, this is needed for some reasons.
+			sleep(100);
+		} catch(Throwable t) {}
 		CefApp.getInstance().dispose();
 	}
 

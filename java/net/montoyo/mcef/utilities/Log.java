@@ -2,7 +2,7 @@ package net.montoyo.mcef.utilities;
 
 import org.apache.logging.log4j.Level;
 
-import cpw.mods.fml.common.FMLLog;
+import net.minecraftforge.fml.common.FMLLog;
 
 /**
  * A set of functions to log messages into the MCEF log channel.
