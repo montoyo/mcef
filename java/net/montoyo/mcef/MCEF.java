@@ -12,6 +12,7 @@ public class MCEF {
 	
 	public static final String VERSION = "0.5";
 	public static boolean ENABLE_EXAMPLE;
+	public static String FORCE_MIRROR = null;
 	
 	@Mod.Instance
 	public static MCEF INSTANCE;
@@ -25,6 +26,11 @@ public class MCEF {
 		
 		Configuration cfg = new Configuration(ev.getSuggestedConfigurationFile());
 		ENABLE_EXAMPLE = cfg.getBoolean("exampleBrowser", "main", true, "Set this to false if you don't want to enable the F10 browser.");
+
+		String mirror = cfg.getString("forcedMirror", "main", "", "A URL that contains every MCEF resources; for instance http://montoyo.net/jcef.").trim();
+		if(mirror.length() > 0)
+			FORCE_MIRROR = mirror;
+
 		cfg.save();
 	}
 	

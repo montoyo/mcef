@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Random;
 
+import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.utilities.Log;
 
 /**
@@ -44,7 +45,10 @@ public enum Mirror {
 	 * @return The "thanks" string.
 	 */
 	public String getMirrorString() {
-		return "Mirror kindly provided by " + name;
+		if(MCEF.FORCE_MIRROR == null)
+			return "Mirror kindly provided by " + name;
+		else
+			return "Mirror location was set to " + MCEF.FORCE_MIRROR;
 	}
 	
 	/**
@@ -56,7 +60,7 @@ public enum Mirror {
 	 * @throws IOException if an I/O exception occurs.
 	 */
 	public HttpURLConnection getResource(String name) throws MalformedURLException, IOException {
-		HttpURLConnection ret = (HttpURLConnection) (new URL(url + '/' + name)).openConnection();
+		HttpURLConnection ret = (HttpURLConnection) (new URL((MCEF.FORCE_MIRROR == null ? url : MCEF.FORCE_MIRROR) + '/' + name)).openConnection();
 		ret.setConnectTimeout(30000);
 		ret.setReadTimeout(15000);
 		ret.setRequestProperty("User-Agent", "MCEF");

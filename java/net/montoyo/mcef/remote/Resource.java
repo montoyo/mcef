@@ -52,7 +52,7 @@ public class Resource {
 	 * Downloads the resource from the current mirror.
 	 * 
 	 * @param ipl Progress listener. May be null.
-	 * @param 
+	 * @param platform The platform
 	 * @return true if the operation was successful.
 	 */
 	public boolean download(IProgressListener ipl, String platform) {
