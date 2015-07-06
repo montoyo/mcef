@@ -2,6 +2,7 @@ package net.montoyo.mcef.remote;
 
 import java.io.File;
 
+import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.utilities.IProgressListener;
 import net.montoyo.mcef.utilities.Log;
@@ -56,7 +57,7 @@ public class Resource {
 	 * @return true if the operation was successful.
 	 */
 	public boolean download(IProgressListener ipl, String platform) {
-		return Util.download(platform + '/' + name, new File(ClientProxy.ROOT, name), ipl);
+		return Util.download(MCEF.VERSION + '/' + platform + '/' + name, new File(ClientProxy.ROOT, name), ipl);
 	}
 	
 	/**

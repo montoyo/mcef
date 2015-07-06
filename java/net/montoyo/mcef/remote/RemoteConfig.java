@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import net.minecraft.client.Minecraft;
 import org.cef.OS;
 
 import net.montoyo.mcef.MCEF;
@@ -66,10 +67,10 @@ public class RemoteConfig {
 	 * @return The parsed configuration file.
 	 */
 	private JsonObject readConfig() {
-		File newCfg = new File(ClientProxy.ROOT, "mcef.new");
-		File cfgFle = new File(ClientProxy.ROOT, "mcef.json");
+		File newCfg = new File(ClientProxy.ROOT, "mcef2.new");
+		File cfgFle = new File(ClientProxy.ROOT, "mcef2.json");
 		
-		boolean ok = Util.download("config.json", newCfg, null);
+		boolean ok = Util.download("config2.json", newCfg, null);
 		Mirror.reset(); //We may reset mirrors state because config.json is a special case.
 		
 		if(ok) {
@@ -78,7 +79,7 @@ public class RemoteConfig {
 			if(newCfg.renameTo(cfgFle))
 				return readConfig(cfgFle);
 			else {
-				Log.warning("Couldn't rename mcef.new to mcef.json.");
+				Log.warning("Couldn't rename mcef2.new to mcef2.json.");
 				return readConfig(newCfg);
 			}
 			
@@ -93,8 +94,8 @@ public class RemoteConfig {
 	 * Fills the resources, extract and version fields from it.
 	 */
 	public void load() {
-		JsonObject cfg = readConfig();
-		if(cfg == null) {
+		JsonObject json = readConfig();
+		if(json == null) {
 			Log.error("Could NOT read either remote and local configuration files. Entering virtual mode.");
 			ClientProxy.VIRTUAL = true;
 			return;
@@ -124,8 +125,16 @@ public class RemoteConfig {
 		
 		PLATFORM = id + arch;
 		Log.info("Detected platform: %s", PLATFORM);
-		
-		JsonElement cat = cfg.get("platforms");
+
+        JsonElement ver = json.get(MCEF.VERSION);
+        if(ver == null || !ver.isJsonObject()) {
+            Log.error("Config file does NOT contain the latest MCEF version (wtf??). Entering virtual mode.");
+            ClientProxy.VIRTUAL = true;
+            return;
+        }
+
+        JsonObject vData = ver.getAsJsonObject();
+		JsonElement cat = vData.get("platforms");
 		if(cat == null || !cat.isJsonObject()) {
 			Log.error("Config file is missing \"platforms\" object. Entering virtual mode.");
 			ClientProxy.VIRTUAL = true;
@@ -149,7 +158,7 @@ public class RemoteConfig {
 			resources.add(new Resource(e.getKey(), e.getValue().getAsString()));
 		}
 		
-		JsonElement ext = cfg.get("extract");
+		JsonElement ext = vData.get("extract");
 		if(ext != null && ext.isJsonArray()) {
 			JsonArray ray = ext.getAsJsonArray();
 			
@@ -159,17 +168,12 @@ public class RemoteConfig {
 			}
 		}
 		
-		JsonElement ver = cfg.get("version");
-		if(ver != null && ver.isJsonPrimitive()) {
-			String vstr = ver.getAsString();
-			
-			if(vstr.indexOf('-') < 0)
-				version = vstr;
-			else {
-				String[] parts = vstr.split("-");
-				//TODO: Check that parts[0] == mcVersion
-				version = parts[1];
-			}
+		JsonElement mcVersions = json.get("latestVersions");
+		if(mcVersions != null && mcVersions.isJsonObject()) {
+            JsonElement cVer = mcVersions.getAsJsonObject().get(Minecraft.getMinecraft().getVersion());
+
+            if(cVer != null && cVer.isJsonPrimitive())
+                version = cVer.getAsString();
 		}
 	}
 	
@@ -187,7 +191,7 @@ public class RemoteConfig {
 
 		Log.info("Checking for missing resources...");
 		resources.removeExistings();
-		
+
 		if(resources.size() > 0) {
 			Log.info("Found %d missing resources. Downloading...", resources.size());
 			Log.info(Mirror.getCurrent().getMirrorString());

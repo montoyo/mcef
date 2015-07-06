@@ -178,7 +178,7 @@ public class ClientProxy extends BaseProxy {
 	
 	@SubscribeEvent
 	public void onLogin(PlayerEvent.PlayerLoggedInEvent ev) {
-		if(updateStr == null)
+		if(updateStr == null || !MCEF.WARN_UPDATES)
 			return;
 		
 		ChatStyle cs = new ChatStyle();
