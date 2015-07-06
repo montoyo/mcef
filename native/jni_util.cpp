@@ -2,8 +2,6 @@
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 
-//Modified by montoyo for MCEF.
-
 #include "jni_util.h"
 #include "client_handler.h"
 #include <jawt.h>
@@ -60,6 +58,46 @@ void DetachFromThread(bool *mustDetach) {
     g_jvm->DetachCurrentThread();
 }
 
+//montoyo: classloader fix.
+void SetJNIClassLoader(JNIEnv* env, jobject cl)
+{
+	if(g_cloader != NULL)
+		env->DeleteGlobalRef(g_cloader);
+
+	if(cl == NULL)
+		g_cloader = NULL;
+	else
+		g_cloader = env->NewGlobalRef(cl);
+}
+
+//montoyo: classloader fix.
+static jclass JNIFindClass(JNIEnv *env, const char *name)
+{
+	jclass cls;
+
+	if(g_cloader == NULL)
+		cls = env->FindClass(name);
+	else {
+		jclass clc = env->GetObjectClass(g_cloader);
+		jmethodID mid = env->GetMethodID(clc, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
+
+		char cname[256]; //Faster than allocating some new memory i guess...
+		int i;
+
+		for(i = 0; name[i] != 0; i++) {
+			if(name[i] == '/') //We need to replace every slashes by dots.
+				cname[i] = '.';
+			else
+				cname[i] = name[i];
+		}
+
+		cname[i] = 0;
+		cls = static_cast<jclass>(env->CallObjectMethod(g_cloader, mid, env->NewStringUTF(cname)));
+	}
+
+	return cls;
+}
+
 jobject NewJNIObject(JNIEnv* env, jclass cls) {
   jmethodID initID = env->GetMethodID(cls, "<init>", "()V");
   if(initID == 0) {
@@ -76,42 +114,8 @@ jobject NewJNIObject(JNIEnv* env, jclass cls) {
   return obj;
 }
 
-//montoyo: classloader fix.
-void SetJNIClassLoader(JNIEnv* env, jobject cl)
-{
-	if(g_cloader != NULL)
-		env->DeleteGlobalRef(g_cloader);
-
-	if(cl == NULL)
-		g_cloader = NULL;
-	else
-		g_cloader = env->NewGlobalRef(cl);
-}
-
-//montoyo: classloader fix.
 jobject NewJNIObject(JNIEnv* env, const char* class_name) {
-  jclass cls;
-
-  if(g_cloader == NULL)
-	  cls = env->FindClass(class_name);
-  else {
-	  jclass clc = env->GetObjectClass(g_cloader);
-	  jmethodID mid = env->GetMethodID(clc, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
-
-	  char cname[256]; //Faster than allocating some new memory i guess...
-	  int i;
-
-	  for(i = 0; class_name[i] != 0; i++) {
-		  if(class_name[i] == '/') //We need to replace every slashes by dots.
-			  cname[i] = '.';
-		  else
-			  cname[i] = class_name[i];
-	  }
-
-	  cname[i] = 0;
-	  cls = static_cast<jclass>(env->CallObjectMethod(g_cloader, mid, env->NewStringUTF(cname)));
-  }
-
+	jclass cls = JNIFindClass(env, class_name); //montoyo: classloader fix.
   if (!cls)
     return NULL;
 
@@ -119,7 +123,7 @@ jobject NewJNIObject(JNIEnv* env, const char* class_name) {
 }
 
 jobject NewJNIObject(JNIEnv* env, const char* class_name, const char* sig, ...) {
-  jclass cls = env->FindClass(class_name); //Note: Shouldn't I apply the same patch as the one I applied in the previous func?
+	jclass cls = JNIFindClass(env, class_name); //montoyo: classloader fix.
   if (!cls)
     return NULL;
 

@@ -10,8 +10,9 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 @Mod(modid = "MCEF", name = "MCEF", version = MCEF.VERSION)
 public class MCEF {
 	
-	public static final String VERSION = "0.5";
+	public static final String VERSION = "0.6";
 	public static boolean ENABLE_EXAMPLE;
+    public static boolean SKIP_UPDATES;
 	public static String FORCE_MIRROR = null;
 	
 	@Mod.Instance
@@ -26,6 +27,7 @@ public class MCEF {
 		
 		Configuration cfg = new Configuration(ev.getSuggestedConfigurationFile());
 		ENABLE_EXAMPLE = cfg.getBoolean("exampleBrowser", "main", true, "Set this to false if you don't want to enable the F10 browser.");
+        SKIP_UPDATES = cfg.getBoolean("skipUpdates", "main", false, "Do not update binaries.");
 
 		String mirror = cfg.getString("forcedMirror", "main", "", "A URL that contains every MCEF resources; for instance http://montoyo.net/jcef.").trim();
 		if(mirror.length() > 0)

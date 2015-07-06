@@ -18,8 +18,7 @@ import net.montoyo.mcef.utilities.Log;
  */
 public enum Mirror {
 	
-	MONTOYO("http://montoyo.net/jcef", "montoyo.net"),
-	IROAS("http://montoyo.iroas.fr/jcef", "www.iroas.fr (French PvP server)");
+	MONTOYO("http://montoyo.net/jcef", "montoyo.net");
 
 	private static Mirror current = pickRandom();
 	private final String url;

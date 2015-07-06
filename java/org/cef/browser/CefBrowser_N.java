@@ -17,7 +17,9 @@ import org.cef.callback.CefNativeAdapter;
 import org.cef.callback.CefRunFileDialogCallback;
 import org.cef.callback.CefStringVisitor;
 import org.cef.handler.CefClientHandler;
+import org.cef.handler.CefRenderHandler;
 import org.cef.handler.CefDialogHandler.FileDialogMode;
+import org.cef.handler.CefWindowHandler;
 import org.cef.network.CefRequest;
 
 /**
@@ -28,6 +30,16 @@ import org.cef.network.CefRequest;
  */
 abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowser {
   private boolean isPending_ = false;
+
+  @Override
+  public CefRenderHandler getRenderHandler() {
+    return null;
+  }
+
+  @Override
+  public CefWindowHandler getWindowHandler() {
+    return null;
+  }
 
   /**
    * Create a new browser.
@@ -412,7 +424,7 @@ abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowser {
   * Send a key event.
   * @param e The event to send.
   */
-  public final void sendKeyEvent(KeyEvent e) {
+  protected final void sendKeyEvent(KeyEvent e) {
     try {
       N_SendKeyEvent(e);
     } catch (UnsatisfiedLinkError ule) {
@@ -424,7 +436,7 @@ abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowser {
    * Send a mouse event.
    * @param e The event to send.
    */
-  public final void sendMouseEvent(MouseEvent e) {
+  protected final void sendMouseEvent(MouseEvent e) {
     try {
       N_SendMouseEvent(e);
     } catch (UnsatisfiedLinkError ule) {
@@ -436,7 +448,7 @@ abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowser {
    * Send a mouse wheel event.
    * @param e The event to send.
    */
-  public final void sendMouseWheelEvent(MouseWheelEvent e) {
+  protected final void sendMouseWheelEvent(MouseWheelEvent e) {
     try {
       N_SendMouseWheelEvent(e);
     } catch (UnsatisfiedLinkError ule) {

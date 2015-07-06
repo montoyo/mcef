@@ -25,27 +25,27 @@ import org.cef.handler.CefAppHandlerAdapter;
  * Exposes static methods for managing the global CEF context.
  */
 public class CefApp extends CefAppHandlerAdapter {
-	
-	//(montoyo) Added this field to force him to use a defined location.
-	public String myLoc = null;
+
+    //montoyo: Added this field to force him to use a defined location.
+    public String myLoc = null;
 
   public final class CefVersion {
-    public final int JCEF_REVISION;
+    public final int JCEF_COMMIT_NUMBER;
 
     public final int CEF_VERSION_MAJOR;
-    public final int CEF_REVISION;
+    public final int CEF_COMMIT_NUMBER;
 
     public final int CHROME_VERSION_MAJOR;
     public final int CHROME_VERSION_MINOR;
     public final int CHROME_VERSION_BUILD;
     public final int CHROME_VERSION_PATCH;
 
-    private CefVersion(int jcefRev, int cefMajor, int cefRev,
+    private CefVersion(int jcefCommitNo, int cefMajor, int cefCommitNo,
                        int chrMajor, int chrMin, int chrBuild, int chrPatch) {
-      JCEF_REVISION = jcefRev;
+      JCEF_COMMIT_NUMBER = jcefCommitNo;
 
       CEF_VERSION_MAJOR = cefMajor;
-      CEF_REVISION = cefRev;
+      CEF_COMMIT_NUMBER = cefCommitNo;
 
       CHROME_VERSION_MAJOR = chrMajor;
       CHROME_VERSION_MINOR = chrMin;
@@ -56,14 +56,13 @@ public class CefApp extends CefAppHandlerAdapter {
     public String getJcefVersion() {
       return CEF_VERSION_MAJOR
           + "." + CHROME_VERSION_BUILD
-          + "." + CEF_REVISION
-          + "." + JCEF_REVISION;
+          + "." + JCEF_COMMIT_NUMBER;
     }
 
     public String getCefVersion() {
       return CEF_VERSION_MAJOR
           + "." + CHROME_VERSION_BUILD
-          + "." + CEF_REVISION;
+          + "." + CEF_COMMIT_NUMBER;
     }
 
     public String getChromeVersion() {
@@ -151,19 +150,18 @@ public class CefApp extends CefAppHandlerAdapter {
   private CefApp(String [] args, CefSettings settings)
       throws UnsatisfiedLinkError {
     super(args);
-    
     if (settings != null)
       settings_ = settings.clone();
-    
-    try {
-	    if (OS.isWindows()) {
-	      System.loadLibrary("jawt");
-	      System.loadLibrary("libcef");
-	    } else if (OS.isLinux()) {
-	      System.loadLibrary("cef");
-	    }
-    } catch(Throwable t) {} //(montoyo) I really dont think this is usefull. Java was trying to load a wrong CS:GO libcef.dll so i've put all this in a try/catch. 
-    
+
+      //montoyo: not needed.
+    /*if (OS.isWindows()) {
+      System.loadLibrary("jawt");
+      System.loadLibrary("libcef");
+    } else if (OS.isLinux()) {
+      System.loadLibrary("cef");
+    }*/
+
+
     System.loadLibrary("jcef");
     if (appHandler_ == null) {
       appHandler_ = this;
@@ -466,14 +464,14 @@ public class CefApp extends CefAppHandlerAdapter {
    * termination process is interrupted until CefApp calls continueTerminate().
    */
   final protected void handleBeforeTerminate() {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        CefAppHandler handler =
-            (CefAppHandler) ((appHandler_ == null) ? this : appHandler_);
-        if (!handler.onBeforeTerminate()) {
-          executeDefaultShutdown_ = true;
-          dispose();
+      SwingUtilities.invokeLater(new Runnable() {
+          @Override
+          public void run() {
+              CefAppHandler handler =
+                      (CefAppHandler) ((appHandler_ == null) ? this : appHandler_);
+              if(!handler.onBeforeTerminate()) {
+                  executeDefaultShutdown_ = true;
+                  dispose();
         }
       }
     });
@@ -484,13 +482,13 @@ public class CefApp extends CefAppHandlerAdapter {
    * @return true on success
    */
   private final void initialize() {
-	  try {
-		  //montoyo: This will fix the mess done by FML in class loaders
-		  N_SetClassLoader(getClass().getClassLoader());
-	  } catch(Throwable t) {
-		  t.printStackTrace();
-	  }
-	  
+      try {
+          //montoyo: This will fix the mess done by FML in class loaders
+          N_SetClassLoader(getClass().getClassLoader());
+      } catch(Throwable t) {
+          t.printStackTrace();
+      }
+
     try {
       Runnable r = new Runnable() {
         @Override
@@ -606,10 +604,10 @@ public class CefApp extends CefAppHandlerAdapter {
    * Get the path which contains the jcef library
    * @return The path to the jcef library
    */
-  private String getJcefLibPath() {
-	  if(myLoc != null)
-		  return myLoc;
-	  
+  private final String getJcefLibPath() {
+      if(myLoc != null) //montoyo: path overriding
+          return myLoc;
+
     String library_path = System.getProperty("java.library.path");
     String[] paths = library_path.split(System.getProperty("path.separator"));
     for (String path : paths) {
@@ -628,7 +626,7 @@ public class CefApp extends CefAppHandlerAdapter {
     return library_path;
   }
 
-  private final native void N_SetClassLoader(ClassLoader cl);
+    private final native void N_SetClassLoader(ClassLoader cl); //montoyo: function to fix classloaders.
   private final native boolean N_Initialize(String pathToJavaDLL,
       CefAppHandler appHandler, CefSettings settings);
   private final native void N_Shutdown();

@@ -180,6 +180,11 @@ public class RemoteConfig {
 	 * @return true if the operation was successful.
 	 */
 	public boolean downloadMissing(IProgressListener ipl) {
+        if(MCEF.SKIP_UPDATES) {
+            Log.warning("NOT downloading resources as specified in the configuration file");
+            return true;
+        }
+
 		Log.info("Checking for missing resources...");
 		resources.removeExistings();
 		
