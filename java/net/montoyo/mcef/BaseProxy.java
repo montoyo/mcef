@@ -13,7 +13,7 @@ public class BaseProxy implements API {
 	}
 
 	@Override
-	public IBrowser createBrowser(String url) {
+	public IBrowser createBrowser(String url, boolean transparent) {
 		Log.warning("A mod called API.createBrowser() from server! Returning null...");
 		return null;
 	}

@@ -1,9 +1,12 @@
 package net.montoyo.mcef.example;
 
+import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+
 import net.montoyo.mcef.api.API;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IDisplayHandler;
@@ -28,7 +31,8 @@ import net.minecraftforge.fml.relauncher.Side;
 public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
 	
 	public static ExampleMod INSTANCE;
-	
+
+    public ScreenCfg hudBrowser = null;
 	private KeyBinding key = new KeyBinding("Open Browser", Keyboard.KEY_F10, "key.categories.misc");
 	private Minecraft mc = Minecraft.getMinecraft();
 	private BrowserScreen backup = null;
@@ -39,6 +43,7 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
 		//Register key binding and listen to the FML event bus for ticks.
 		ClientRegistry.registerKeyBinding(key);
 		FMLCommonHandler.instance().bus().register(this);
+        MinecraftForge.EVENT_BUS.register(this);
 		
 		//Grab the API and make sure it isn't null.
 		API api = MCEFApi.getAPI();
@@ -144,5 +149,11 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
 	@Override
 	public void cancelQuery(IBrowser b, long queryId) {
 	}
+
+    @SubscribeEvent
+    public void onDrawHUD(RenderGameOverlayEvent ev) {
+        if(hudBrowser != null)
+            hudBrowser.drawScreen(0, 0, 0.f);
+    }
 
 }

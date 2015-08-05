@@ -58,6 +58,8 @@ class CefRenderer {
 
         Tessellator t = Tessellator.getInstance();
         WorldRenderer wr = t.getWorldRenderer();
+
+        int bound = glGetInteger(GL_TEXTURE_BINDING_2D);
         glBindTexture(GL_TEXTURE_2D, texture_id_[0]);
 
         wr.startDrawingQuads();
@@ -65,13 +67,13 @@ class CefRenderer {
         wr.setColorOpaque(255, 255, 255);
 
         //                 X   Y  Z          U    V
-        wr.addVertexWithUV(x1, y1, 0,       0   , 1.f);
-        wr.addVertexWithUV(x2, y1, 0,       1.f, 1.f);
-        wr.addVertexWithUV(x2, y2, 0,       1.f, 0);
-        wr.addVertexWithUV(x1, y2, 0,       0   , 0);
+        wr.addVertexWithUV(x1, y1, 0, 0, 1.f);
+        wr.addVertexWithUV(x2, y1, 0, 1.f, 1.f);
+        wr.addVertexWithUV(x2, y2, 0, 1.f, 0);
+        wr.addVertexWithUV(x1, y2, 0, 0, 0);
         t.draw();
 
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glBindTexture(GL_TEXTURE_2D, bound);
     }
 
     protected void onPopupSize(Rectangle rect) {

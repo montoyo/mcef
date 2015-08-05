@@ -6,9 +6,10 @@ public interface API {
 	 * Creates a web view and loads the specified URL.
 	 * 
 	 * @param url The URL to start from.
+     * @param transp True is the web view can be transparent
 	 * @return The created web view, or null if this is run on server.
 	 */
-	public IBrowser createBrowser(String url);
+	public IBrowser createBrowser(String url, boolean transp);
 	
 	/**
 	 * Registers a display handler.

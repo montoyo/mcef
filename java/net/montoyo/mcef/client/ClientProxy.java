@@ -93,9 +93,10 @@ public class ClientProxy extends BaseProxy {
 		
 		CefSettings settings = new CefSettings();
 		settings.windowless_rendering_enabled = true;
-		settings.background_color = settings.new ColorType(255, 255, 255, 255);
+		settings.background_color = settings.new ColorType(0, 255, 255, 255);
 		settings.locales_dir_path = (new File(ROOT, "MCEFLocales")).getAbsolutePath();
 		settings.cache_path = (new File(ROOT, "MCEFCache")).getAbsolutePath();
+        //settings.log_severity = CefSettings.LogSeverity.LOGSEVERITY_VERBOSE;
 		
 		try {
 			cefApp = CefApp.getInstance(settings);
@@ -129,11 +130,11 @@ public class ClientProxy extends BaseProxy {
 	}
 	
 	@Override
-	public IBrowser createBrowser(String url) {
+	public IBrowser createBrowser(String url, boolean transp) {
 		if(VIRTUAL)
 			return new VirtualBrowser();
 		
-		CefBrowserOsr ret = (CefBrowserOsr) cefClient.createBrowser(url, true, false);
+		CefBrowserOsr ret = (CefBrowserOsr) cefClient.createBrowser(url, true, transp);
 		browsers.add(ret);
 		return ret;
 	}

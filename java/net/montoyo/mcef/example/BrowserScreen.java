@@ -1,7 +1,5 @@
 package net.montoyo.mcef.example;
 
-import java.io.IOException;
-
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -12,7 +10,8 @@ import net.minecraft.client.gui.GuiTextField;
 import net.montoyo.mcef.api.API;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.MCEFApi;
-import net.montoyo.mcef.utilities.Log;
+
+import java.io.IOException;
 
 public class BrowserScreen extends GuiScreen {
 	
@@ -21,10 +20,17 @@ public class BrowserScreen extends GuiScreen {
 	private GuiButton fwd = null;
 	private GuiButton go = null;
 	private GuiButton min = null;
+    private GuiButton vidMode = null;
 	private GuiTextField url = null;
+
+    private static final String YT_REGEX1 = "^https?://(?:www\\.)?youtube\\.com/watch\\?v=([a-zA-Z0-9_\\-]+)$";
+    private static final String YT_REGEX2 = "^https?://(?:www\\.)?youtu\\.be/([a-zA-Z0-9_\\-]+)$";
+    private static final String YT_REGEX3 = "^https?://(?:www\\.)?youtube\\.com/embed/([a-zA-Z0-9_\\-]+)(\\?.+)?$";
 	
 	@Override
 	public void initGui() {
+        ExampleMod.INSTANCE.hudBrowser = null;
+
 		if(browser == null) {
 			//Grab the API and make sure it isn't null.
 			API api = MCEFApi.getAPI();
@@ -32,7 +38,7 @@ public class BrowserScreen extends GuiScreen {
 				return;
 			
 			//Create a browser and resize it to fit the screen
-			browser = api.createBrowser("mod://mcef/home.html");
+			browser = api.createBrowser("mod://mcef/home.html", false);
 		}
 		
 		//Resize the browser if window size changed
@@ -46,10 +52,11 @@ public class BrowserScreen extends GuiScreen {
 		if(url == null) {
 			buttonList.add(back = (new GuiButton(0, 0, 0, 20, 20, "<")));
 			buttonList.add(fwd = (new GuiButton(1, 20, 0, 20, 20, ">")));
-			buttonList.add(go = (new GuiButton(2, width - 40, 0, 20, 20, "Go")));
+			buttonList.add(go = (new GuiButton(2, width - 60, 0, 20, 20, "Go")));
 			buttonList.add(min = (new GuiButton(3, width - 20, 0, 20, 20, "_")));
+            buttonList.add(vidMode = (new GuiButton(4, width - 40, 0, 20, 20, "YT")));
 			
-			url = new GuiTextField(1234, fontRendererObj, 40, 0, width - 80, 20);
+			url = new GuiTextField(5, fontRendererObj, 40, 0, width - 100, 20);
 			url.setMaxStringLength(65535);
 			url.setText("mod://mcef/home.html");
 		} else {
@@ -57,13 +64,15 @@ public class BrowserScreen extends GuiScreen {
 			buttonList.add(fwd);
 			buttonList.add(go);
 			buttonList.add(min);
+            buttonList.add(vidMode);
 			
 			//Handle resizing
-			go.xPosition = width - 40;
+            vidMode.xPosition = width - 40;
+			go.xPosition = width - 60;
 			min.xPosition = width - 20;
 			
 			String old = url.getText();
-			url = new GuiTextField(1234, fontRendererObj, 40, 0, width - 80, 20);
+			url = new GuiTextField(5, fontRendererObj, 40, 0, width - 100, 20);
 			url.setMaxStringLength(65535);
 			url.setText(old);
 		}
@@ -153,14 +162,13 @@ public class BrowserScreen extends GuiScreen {
 			if(pressed) { //Forward events to GUI.
 				int x = sx * width / mc.displayWidth;
 				int y = height - (sy * height / mc.displayHeight) - 1;
-				
-				try {
-					mouseClicked(x, y, btn);
-				} catch(IOException e) {
-					Log.error("Uh?!?");
-					e.printStackTrace();
-				}
-				
+
+                try {
+                    mouseClicked(x, y, btn);
+                } catch(IOException wtf) {
+                    wtf.printStackTrace();
+                }
+
 				url.mouseClicked(x, y, btn);
 			}
 		}
@@ -187,7 +195,23 @@ public class BrowserScreen extends GuiScreen {
 		else if(src.id == 3) {
 			ExampleMod.INSTANCE.setBackup(this);
 			mc.displayGuiScreen(null);
-		}
+		} else if(src.id == 4) {
+            String loc = browser.getURL();
+            String vId = null;
+            boolean redo = false;
+
+            if(loc.matches(YT_REGEX1))
+                vId = loc.replaceFirst(YT_REGEX1, "$1");
+            else if(loc.matches(YT_REGEX2))
+                vId = loc.replaceFirst(YT_REGEX2, "$1");
+            else if(loc.matches(YT_REGEX3))
+                redo = true;
+
+            if(vId != null || redo) {
+                ExampleMod.INSTANCE.setBackup(this);
+                mc.displayGuiScreen(new ScreenCfg(browser, vId));
+            }
+        }
 	}
 
 }

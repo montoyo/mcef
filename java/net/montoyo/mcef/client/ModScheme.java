@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLConnection;
 
+import net.montoyo.mcef.utilities.Log;
 import org.cef.callback.CefCallback;
 import org.cef.handler.CefResourceHandlerAdapter;
 import org.cef.misc.IntRef;
@@ -26,15 +27,33 @@ public class ModScheme extends CefResourceHandlerAdapter {
 		
 		String mod = removeSlashes(url.substring(0, pos));
 		String loc = removeSlashes(url.substring(pos + 1));
-		
-		if(mod.length() <= 0 || loc.length() <= 0 || mod.charAt(0) == '.' || loc.charAt(0) == '.')
-			return false;
+
+		if(mod.length() <= 0 || loc.length() <= 0 || mod.charAt(0) == '.' || loc.charAt(0) == '.') {
+            Log.warning("Invalid URL " + req.getURL());
+            return false;
+        }
 		
 		is = ModScheme.class.getResourceAsStream("/assets/" + mod.toLowerCase() + "/html/" + loc.toLowerCase());
-		if(is == null)
-			return false; //Mhhhhh... 404?
-		
-		contentType = URLConnection.guessContentTypeFromName(loc);
+		if(is == null) {
+            Log.warning("Resource " + req.getURL() + " NOT found!");
+            return false; //Mhhhhh... 404?
+        }
+
+        contentType = null;
+        pos = loc.lastIndexOf('.');
+        if(pos >= 0 && pos < loc.length() - 2) {
+            String ext = loc.substring(pos + 1);
+
+            if(ext.equalsIgnoreCase("html"))
+                contentType = "text/html";
+            else if(ext.equalsIgnoreCase("css"))
+                contentType = "text/css";
+            else if(ext.equalsIgnoreCase("js"))
+                contentType = "text/javascript";
+            else if(ext.equalsIgnoreCase("png"))
+                contentType = "image/png";
+        }
+
 		cb.Continue();
 		return true;
 	}
@@ -48,8 +67,11 @@ public class ModScheme extends CefResourceHandlerAdapter {
 	
 	@Override
 	public void getResponseHeaders(CefResponse rep, IntRef response_length, StringRef redirectUrl) {
-		rep.setMimeType(contentType);
+        if(contentType != null)
+		    rep.setMimeType(contentType);
+
 		rep.setStatus(200);
+        rep.setStatusText("OK");
 		response_length.set(-1);
 	}
 	
