@@ -1,2 +1,2 @@
-- Modified parts are marked with comments starting from //montoyo: 
-- Do not forget to remove the JAWT.lib from the linkers options
+- Replace JCEF's native files by these before compiling.
+- Do not forget to remove the JAWT.lib from the linkers options.

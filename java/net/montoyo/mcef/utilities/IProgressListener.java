@@ -19,4 +19,9 @@ public interface IProgressListener {
 	 */
 	public void onTaskChanged(String name);
 
+	/**
+	 * Call this when everything is finished.
+	 */
+	public void onProgressEnd();
+
 }

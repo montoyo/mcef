@@ -137,7 +137,7 @@ public abstract class CefRequest {
 
     /**
      * Removes a qualifier from the enum.
-     * @param flag The qualifier to be removed.
+     * @param The qualifier to be removed.
      */
     public void removeQualifier(TransitionFlags flag) {
       value &= ~flag.getValue();

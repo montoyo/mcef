@@ -42,7 +42,6 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
 		
 		//Register key binding and listen to the FML event bus for ticks.
 		ClientRegistry.registerKeyBinding(key);
-		FMLCommonHandler.instance().bus().register(this);
         MinecraftForge.EVENT_BUS.register(this);
 		
 		//Grab the API and make sure it isn't null.
@@ -151,7 +150,7 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
 	}
 
     @SubscribeEvent
-    public void onDrawHUD(RenderGameOverlayEvent ev) {
+    public void onDrawHUD(RenderGameOverlayEvent.Post ev) {
         if(hudBrowser != null)
             hudBrowser.drawScreen(0, 0, 0.f);
     }

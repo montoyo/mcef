@@ -23,7 +23,6 @@ import org.cef.browser.CefBrowser;
 import org.cef.browser.CefBrowserFactory;
 import org.cef.browser.CefMessageRouter;
 import org.cef.browser.CefRequestContext;
-import org.cef.callback.CefAllowCertificateErrorCallback;
 import org.cef.callback.CefAuthCallback;
 import org.cef.callback.CefBeforeDownloadCallback;
 import org.cef.callback.CefContextMenuParams;
@@ -34,7 +33,7 @@ import org.cef.callback.CefFileDialogCallback;
 import org.cef.callback.CefGeolocationCallback;
 import org.cef.callback.CefJSDialogCallback;
 import org.cef.callback.CefMenuModel;
-import org.cef.callback.CefQuotaCallback;
+import org.cef.callback.CefRequestCallback;
 import org.cef.handler.CefClientHandler;
 import org.cef.handler.CefContextMenuHandler;
 import org.cef.handler.CefDialogHandler;
@@ -297,11 +296,14 @@ public class CefClient extends CefClientHandler implements CefContextMenuHandler
   public boolean onFileDialog(CefBrowser browser,
                               FileDialogMode mode,
                               String title,
-                              String defaultFileName,
-                              Vector<String> acceptTypes,
+                              String defaultFilePath,
+                              Vector<String> acceptFilters,
+                              int selectedAcceptFilter,
                               CefFileDialogCallback callback) {
-    if (dialogHandler_ != null && browser != null)
-      return dialogHandler_.onFileDialog(browser, mode, title, defaultFileName, acceptTypes, callback);
+    if (dialogHandler_ != null && browser != null) {
+      return dialogHandler_.onFileDialog(browser, mode, title, defaultFilePath,
+                                         acceptFilters, selectedAcceptFilter, callback);
+    }
     return false;
   }
 
@@ -497,10 +499,11 @@ public class CefClient extends CefClientHandler implements CefContextMenuHandler
   }
 
   @Override
-  public boolean onRequestGeolocationPermission(CefBrowser browser,
-                                             String requesting_url,
-                                             int request_id,
-                                             CefGeolocationCallback callback) {
+  public boolean onRequestGeolocationPermission(
+      CefBrowser browser,
+      String requesting_url,
+      int request_id,
+      CefGeolocationCallback callback) {
     if (geolocationHandler_ != null && browser != null) {
       return geolocationHandler_.onRequestGeolocationPermission(browser,
           requesting_url, request_id, callback);
@@ -510,12 +513,9 @@ public class CefClient extends CefClientHandler implements CefContextMenuHandler
 
   @Override
   public void onCancelGeolocationPermission(CefBrowser browser,
-                                            String requesting_url,
                                             int request_id) {
-    if (geolocationHandler_ != null && browser != null) {
-      geolocationHandler_.onCancelGeolocationPermission(browser, requesting_url,
-          request_id);
-    }
+    if (geolocationHandler_ != null && browser != null)
+      geolocationHandler_.onCancelGeolocationPermission(browser, request_id);
   }
 
 
@@ -534,7 +534,6 @@ public class CefClient extends CefClientHandler implements CefContextMenuHandler
   @Override
   public boolean onJSDialog(CefBrowser browser,
                             String origin_url,
-                            String accept_lang,
                             JSDialogType dialog_type,
                             String message_text,
                             String default_prompt_text,
@@ -543,7 +542,6 @@ public class CefClient extends CefClientHandler implements CefContextMenuHandler
     if (jsDialogHandler_ != null && browser != null)
       return jsDialogHandler_.onJSDialog(browser,
                                          origin_url,
-                                         accept_lang,
                                          dialog_type,
                                          message_text,
                                          default_prompt_text,
@@ -641,13 +639,6 @@ public class CefClient extends CefClientHandler implements CefContextMenuHandler
     }
     if (lifeSpanHandler_ != null)
       lifeSpanHandler_.onAfterCreated(browser);
-  }
-
-  @Override
-  public boolean runModal(CefBrowser browser) {
-    if (lifeSpanHandler_ != null && browser != null)
-      return lifeSpanHandler_.runModal(browser);
-    return false;
   }
 
   @Override
@@ -890,10 +881,10 @@ public class CefClient extends CefClientHandler implements CefContextMenuHandler
 
   @Override
   public void onResourceRedirect(CefBrowser browser,
-                                 String old_url,
+                                 CefRequest request,
                                  StringRef new_url) {
     if (requestHandler_ != null && browser != null)
-      requestHandler_.onResourceRedirect(browser, old_url, new_url);
+      requestHandler_.onResourceRedirect(browser, request, new_url);
   }
 
   @Override
@@ -913,7 +904,7 @@ public class CefClient extends CefClientHandler implements CefContextMenuHandler
   public boolean onQuotaRequest(CefBrowser browser,
                                 String origin_url,
                                 long new_size,
-                                CefQuotaCallback callback) {
+                                CefRequestCallback callback) {
     if (requestHandler_ != null && browser != null)
       return requestHandler_.onQuotaRequest(browser, origin_url, new_size, callback);
     return false;
@@ -928,21 +919,12 @@ public class CefClient extends CefClientHandler implements CefContextMenuHandler
   }
 
   @Override
-  public boolean onCertificateError(ErrorCode cert_error,
+  public boolean onCertificateError(CefBrowser browser,
+                                    ErrorCode cert_error,
                                     String request_url,
-                                    CefAllowCertificateErrorCallback callback) {
+                                    CefRequestCallback callback) {
     if (requestHandler_ != null)
-      return requestHandler_.onCertificateError(cert_error, request_url, callback);
-    return false;
-  }
-
-  @Override
-  public boolean onBeforePluginLoad(CefBrowser browser,
-                                    String url,
-                                    String policyUrl,
-                                    CefWebPluginInfo info) {
-    if (requestHandler_ != null)
-      return requestHandler_.onBeforePluginLoad(browser, url, policyUrl, info);
+      return requestHandler_.onCertificateError(browser, cert_error, request_url, callback);
     return false;
   }
 

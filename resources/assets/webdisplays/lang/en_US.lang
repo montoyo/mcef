@@ -1,0 +1,7 @@
+tile.webdisplays.screen.name=Web Screen
+tile.webdisplays.webentity.wdwebcore.name=Web Core
+tile.webdisplays.webentity.wdcreativerouter.name=Creative Router
+tile.webdisplays.ethernet.name=Ethernet Cable
+tile.webdisplays.lasercut.name=Laser Cutter
+tile.webdisplays.portal.name=WAN Portal
+item.webdisplays.endpointdbg.name=Endpoint Debugger

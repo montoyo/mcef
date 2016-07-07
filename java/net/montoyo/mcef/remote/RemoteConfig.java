@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import net.minecraft.client.Minecraft;
+import net.montoyo.mcef.setup.FileListing;
 import org.cef.OS;
 
 import net.montoyo.mcef.MCEF;
@@ -154,8 +155,15 @@ public class RemoteConfig {
 		for(Entry<String, JsonElement> e: files) {
 			if(e.getValue() == null || !e.getValue().isJsonPrimitive())
 				continue;
-			
-			resources.add(new Resource(e.getKey(), e.getValue().getAsString()));
+
+			String key = e.getKey();
+			if(key.length() >= 2 && key.charAt(0) == '@') {
+				Resource eRes = new Resource(key.substring(1), e.getValue().getAsString());
+				eRes.setShouldExtract();
+
+				resources.add(eRes);
+			} else
+				resources.add(new Resource(key, e.getValue().getAsString()));
 		}
 		
 		JsonElement ext = vData.get("extract");
@@ -232,6 +240,32 @@ public class RemoteConfig {
 			return "New MCEF version available. Current: " + cur + ", latest: " + cfg + '.';
 		
 		return null;
+	}
+
+    /**
+     * Writes in a text file all files used by MCEF for uninstall purposes.
+     *
+     * @param configDir Directory where "mcefFiles.lst" should be located.
+     * @return true if everything went file.
+     */
+	public boolean updateFileListing(File configDir) {
+        if(resources.isEmpty())
+            return true;
+
+        FileListing fl = new FileListing(configDir);
+        if(!fl.load())
+            Log.warning("Could not load file listing; trying to overwrite...");
+
+        for(Resource r: resources)
+            fl.addFile(r.getFileName());
+
+        boolean allOk = true;
+        for(String r: extract) {
+            if(!fl.addZip(Resource.getLocationOf(r).getAbsolutePath()))
+                allOk = false;
+        }
+
+        return fl.save() && allOk;
 	}
 
 }

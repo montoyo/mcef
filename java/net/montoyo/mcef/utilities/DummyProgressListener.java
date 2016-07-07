@@ -16,4 +16,8 @@ public class DummyProgressListener implements IProgressListener {
 	public void onTaskChanged(String name) {
 	}
 
+	@Override
+	public void onProgressEnd() {
+	}
+
 }

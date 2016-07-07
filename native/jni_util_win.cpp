@@ -6,6 +6,5 @@
 #include <assert.h>
 
 HWND GetHwndOfCanvas(jobject canvas, JNIEnv *env) {
-	//montoyo: remove all this outdated JAWT things
-  return NULL;
+	return nullptr;
 }

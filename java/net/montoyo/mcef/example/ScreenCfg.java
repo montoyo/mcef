@@ -2,7 +2,8 @@ package net.montoyo.mcef.example;
 
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.MCEFApi;
 import org.lwjgl.input.Keyboard;
@@ -90,24 +91,23 @@ public class ScreenCfg extends GuiScreen {
 
     @Override
     public void drawScreen(int i1, int i2, float f) {
-        GL11.glPushAttrib(GL11.GL_DEPTH_BUFFER_BIT);
         GL11.glDisable(GL11.GL_DEPTH_TEST);
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
         browser.draw(unscaleX(x), unscaleY(height + y), unscaleX(width + x), unscaleY(y));
 
         if(drawSquare) {
             Tessellator t = Tessellator.getInstance();
-            WorldRenderer wr = t.getWorldRenderer();
+            VertexBuffer vb = t.getBuffer();
 
-            wr.startDrawing(GL11.GL_LINE_LOOP);
-            wr.setColorOpaque(255, 255, 255);
-            wr.addVertex(unscaleX(x + width), unscaleY(y + height), .0d);
-            wr.addVertex(unscaleX(x + width + 10), unscaleY(y + height), .0d);
-            wr.addVertex(unscaleX(x + width + 10), unscaleY(y + height + 10), .0d);
-            wr.addVertex(unscaleX(x + width), unscaleY(y + height + 10), .0d);
+            vb.begin(GL11.GL_LINE_LOOP, DefaultVertexFormats.POSITION_COLOR);
+            vb.pos(unscaleX(x + width), unscaleY(y + height), 0.0).color(255, 255, 255, 255).endVertex();
+            vb.pos(unscaleX(x + width + 10), unscaleY(y + height), 0.0).color(255, 255, 255, 255).endVertex();
+            vb.pos(unscaleX(x + width + 10), unscaleY(y + height + 10), 0.0).color(255, 255, 255, 255).endVertex();
+            vb.pos(unscaleX(x + width), unscaleY(y + height + 10), 0.0).color(255, 255, 255, 255).endVertex();
             t.draw();
         }
 
-        GL11.glPopAttrib();
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
     }
 
     public double unscaleX(int x) {

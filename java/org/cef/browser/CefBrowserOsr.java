@@ -31,109 +31,109 @@ import org.cef.handler.CefRenderHandler;
 
 /**
  * This class represents an off-screen rendered browser.
- * The visibility of this class is "package". To create a new 
+ * The visibility of this class is "package". To create a new
  * CefBrowser instance, please use CefBrowserFactory.
  */
 public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBrowser {
-  private CefRenderer renderer_;
-  private Rectangle browser_rect_ = new Rectangle(0, 0, 1, 1);  // Work around CEF issue #1437.
-  private CefClientHandler clientHandler_;
-  private String url_;
-  private boolean isTransparent_;
-  private CefRequestContext context_;
-  private CefBrowserOsr parent_ = null;
-  private CefBrowserOsr devTools_ = null;
+    private CefRenderer renderer_;
+    private Rectangle browser_rect_ = new Rectangle(0, 0, 1, 1);  // Work around CEF issue #1437.
+    private CefClientHandler clientHandler_;
+    private String url_;
+    private boolean isTransparent_;
+    private CefRequestContext context_;
+    private CefBrowserOsr parent_ = null;
+    private CefBrowserOsr devTools_ = null;
     private DummyComponent dc_ = new DummyComponent();
 
     public static boolean CLEANUP = true;
     private int tex = 0;
 
-  CefBrowserOsr(CefClientHandler clientHandler,
-                String url,
-                boolean transparent,
-                CefRequestContext context) {
-    this(clientHandler, url, transparent, context, null, null);
-  }
+    CefBrowserOsr(CefClientHandler clientHandler,
+                  String url,
+                  boolean transparent,
+                  CefRequestContext context) {
+        this(clientHandler, url, transparent, context, null, null);
+    }
 
-  private CefBrowserOsr(CefClientHandler clientHandler,
-                        String url,
-                        boolean transparent,
-                        CefRequestContext context,
-                        CefBrowserOsr parent,
-                        Point inspectAt) {
-    super();
-    isTransparent_ = transparent;
-    renderer_ = new CefRenderer(transparent);
-    clientHandler_ = clientHandler;
-    url_ = url;
-    context_ = context;
-    parent_ = parent;
-    createGLCanvas();
-  }
+    private CefBrowserOsr(CefClientHandler clientHandler,
+                          String url,
+                          boolean transparent,
+                          CefRequestContext context,
+                          CefBrowserOsr parent,
+                          Point inspectAt) {
+        super();
+        isTransparent_ = transparent;
+        renderer_ = new CefRenderer(transparent);
+        clientHandler_ = clientHandler;
+        url_ = url;
+        context_ = context;
+        parent_ = parent;
+        createGLCanvas();
+    }
 
     @Override
     public int getTextureID() {
         return renderer_.texture_id_[0];
     }
 
-  @Override
-  public Component getUIComponent() {
-    return dc_;
-  }
-
-  @Override
-  public CefRenderHandler getRenderHandler() {
-    return this;
-  }
-
-  @Override
-  public synchronized void close() {
-    if (context_ != null)
-      context_.dispose();
-    if (parent_ != null) {
-      parent_.closeDevTools();
-      parent_.devTools_ = null;
-      parent_ = null;
+    @Override
+    public Component getUIComponent() {
+        return dc_;
     }
 
-      if(CLEANUP) {
-          ((ClientProxy) MCEF.PROXY).removeBrowser(this);
-          renderer_.cleanup();
-      }
-
-      synchronized(queue) {
-          while(queue.size() > 0) {
-              PaintData del = queue.pop();
-
-              //Fix "out of memory errors" on 32bits JVMs...
-              try {
-                  destroyDirectByteBuffer(del.buffer);
-              } catch(Throwable t) {
-                  //t.printStackTrace();
-              }
-          }
-      }
-
-      super.close();
-  }
-
-  @Override
-  public synchronized CefBrowser getDevTools() {
-    return getDevTools(null);
-  }
-
-  @Override
-  public synchronized CefBrowser getDevTools(Point inspectAt) {
-    if (devTools_ == null) {
-      devTools_ = new CefBrowserOsr(clientHandler_,
-                                    url_,
-                                    isTransparent_,
-                                    context_,
-                                    this,
-                                    inspectAt);
+    @Override
+    public CefRenderHandler getRenderHandler() {
+        return this;
     }
-    return devTools_;
-  }
+
+    @Override
+    public synchronized void close() {
+        if (context_ != null)
+            context_.dispose();
+        if (parent_ != null) {
+            parent_.closeDevTools();
+            parent_.devTools_ = null;
+            parent_ = null;
+        }
+
+        if (CLEANUP) {
+            ((ClientProxy) MCEF.PROXY).removeBrowser(this);
+            renderer_.cleanup();
+        }
+
+        synchronized (queue) {
+            while (queue.size() > 0) {
+                PaintData del = queue.pop();
+
+                //Fix "out of memory errors" on 32bits JVMs...
+                try {
+                    destroyDirectByteBuffer(del.buffer);
+                } catch (Throwable t) {
+                    //t.printStackTrace();
+                }
+            }
+        }
+
+        super.close();
+    }
+
+    @Override
+    public synchronized CefBrowser getDevTools() {
+        return getDevTools(null);
+    }
+
+    @Override
+    public synchronized CefBrowser getDevTools(Point inspectAt) {
+        if (devTools_ == null) {
+            devTools_ = new CefBrowserOsr(clientHandler_,
+                    url_,
+                    isTransparent_,
+                    context_,
+                    this,
+                    inspectAt);
+        }
+        return devTools_;
+    }
 
     @Override
     public void resize(int width, int height) {
@@ -148,28 +148,28 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         renderer_.render(x1, y1, x2, y2);
     }
 
-  @SuppressWarnings("serial")
-  private void createGLCanvas() {
-      createBrowser(clientHandler_, 0, url_, isTransparent_, null, context_);
-  }
+    @SuppressWarnings("serial")
+    private void createGLCanvas() {
+        createBrowser(clientHandler_, 0, url_, isTransparent_, null, context_);
+    }
 
-  @Override
-  public Rectangle getViewRect(CefBrowser browser) {
-    return browser_rect_;
-  }
+    @Override
+    public Rectangle getViewRect(CefBrowser browser) {
+        return browser_rect_;
+    }
 
-  @Override
-  public Point getScreenPoint(CefBrowser browser, Point viewPoint) {
-    return viewPoint;
-  }
+    @Override
+    public Point getScreenPoint(CefBrowser browser, Point viewPoint) {
+        return viewPoint;
+    }
 
-  @Override
-  public void onPopupShow(CefBrowser browser, boolean show) {
-    if (!show) {
-      renderer_.clearPopupRects();
-      invalidate();
-     }
-  }
+    @Override
+    public void onPopupShow(CefBrowser browser, boolean show) {
+        if (!show) {
+            renderer_.clearPopupRects();
+            invalidate();
+        }
+    }
 
     private class PaintData {
         Rectangle[] dirtyRects;
@@ -196,17 +196,17 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         pd.width = width;
         pd.height = height;
 
-        synchronized(queue) {
-            if(queue.size() > 16) { //Wayyyy to much; Minecraft must be laggy...
+        synchronized (queue) {
+            if (queue.size() > 16) { //Wayyyy to much; Minecraft must be laggy...
                 Log.warning("Paint queue is big; is Minecraft laggy?");
 
-                while(queue.size() > 0) {
+                while (queue.size() > 0) {
                     PaintData del = queue.pop();
 
                     //Fix "out of memory errors" on 32bits JVMs...
                     try {
                         destroyDirectByteBuffer(del.buffer);
-                    } catch(Throwable t) {
+                    } catch (Throwable t) {
                         //t.printStackTrace();
                     }
                 }
@@ -217,15 +217,15 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
     }
 
     public void mcefUpdate() {
-        synchronized(queue) {
-            while(queue.size() > 0) {
+        synchronized (queue) {
+            while (queue.size() > 0) {
                 PaintData pd = queue.pop();
                 renderer_.onPaint(false, pd.dirtyRects, pd.buffer, pd.width, pd.height);
 
                 //Fix "out of memory errors" on 32bits JVMs...
                 try {
                     destroyDirectByteBuffer(pd.buffer);
-                } catch(Throwable t) {
+                } catch (Throwable t) {
                     //t.printStackTrace();
                 }
             }
@@ -250,10 +250,10 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 
     }
 
-  @Override
-  public void onPopupSize(CefBrowser browser, Rectangle size) {
-    renderer_.onPopupSize(size);
-  }
+    @Override
+    public void onPopupSize(CefBrowser browser, Rectangle size) {
+        renderer_.onPopupSize(size);
+    }
 
     @Override
     public void injectMouseMove(int x, int y, int mods, boolean left) {
@@ -291,24 +291,24 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         sendMouseWheelEvent(ev);
     }
 
-  @Override
-  public void onCursorChange(CefBrowser browser, int cursorType) {
-  }
+    @Override
+    public void onCursorChange(CefBrowser browser, int cursorType) {
+    }
 
-  @Override
-  public boolean startDragging(CefBrowser browser,
-                               CefDragData dragData,
-                               int mask,
-                               int x,
-                               int y) {
-    // TODO(JCEF) Prepared for DnD support using OSR mode.
-    return false;
-  }
+    @Override
+    public boolean startDragging(CefBrowser browser,
+                                 CefDragData dragData,
+                                 int mask,
+                                 int x,
+                                 int y) {
+        // TODO(JCEF) Prepared for DnD support using OSR mode.
+        return false;
+    }
 
-  @Override
-  public void updateDragCursor(CefBrowser browser, int operation) {
-    // TODO(JCEF) Prepared for DnD support using OSR mode.
-  }
+    @Override
+    public void updateDragCursor(CefBrowser browser, int operation) {
+        // TODO(JCEF) Prepared for DnD support using OSR mode.
+    }
 
     @Override
     public void runJS(String script, String frame) {
@@ -320,4 +320,8 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         getSource(new StringVisitor(isv));
     }
 
+    @Override
+    public boolean isPageLoading() {
+        return isLoading();
+    }
 }

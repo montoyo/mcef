@@ -2,8 +2,6 @@
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 
-// Modified by montoyo for MCEF
-
 package org.cef;
 
 import java.io.File;
@@ -25,9 +23,6 @@ import org.cef.handler.CefAppHandlerAdapter;
  * Exposes static methods for managing the global CEF context.
  */
 public class CefApp extends CefAppHandlerAdapter {
-
-    //montoyo: Added this field to force him to use a defined location.
-    public String myLoc = null;
 
   public final class CefVersion {
     public final int JCEF_COMMIT_NUMBER;
@@ -153,19 +148,21 @@ public class CefApp extends CefAppHandlerAdapter {
     if (settings != null)
       settings_ = settings.clone();
 
-      //montoyo: not needed.
+    //montoyo: Modified for MCEF
     /*if (OS.isWindows()) {
       System.loadLibrary("jawt");
       System.loadLibrary("libcef");
     } else if (OS.isLinux()) {
       System.loadLibrary("cef");
     }*/
-
-
     System.loadLibrary("jcef");
     if (appHandler_ == null) {
       appHandler_ = this;
     }
+
+    // Perform native pre-initialization.
+    if (!N_PreInitialize())
+      throw new IllegalStateException("Failed to pre-initialize native code");
 
     // On Mac we're registering a shutdown hook to shutdown the native CEF
     // part. This is useful if it is missed to call CefApp.disopse() before
@@ -340,7 +337,14 @@ public class CefApp extends CefAppHandlerAdapter {
     switch (getState()) {
       case NEW:
         setState(CefAppState.INITIALIZING);
-        context.start();
+
+        //montoyo: Modified for MCEF
+        /*
+          context.setDaemon(true);
+          context.start();
+        }*/
+
+        initialize();
         // FALL THRU
 
       case INITIALIZING:
@@ -464,14 +468,14 @@ public class CefApp extends CefAppHandlerAdapter {
    * termination process is interrupted until CefApp calls continueTerminate().
    */
   final protected void handleBeforeTerminate() {
-      SwingUtilities.invokeLater(new Runnable() {
-          @Override
-          public void run() {
-              CefAppHandler handler =
-                      (CefAppHandler) ((appHandler_ == null) ? this : appHandler_);
-              if(!handler.onBeforeTerminate()) {
-                  executeDefaultShutdown_ = true;
-                  dispose();
+    SwingUtilities.invokeLater(new Runnable() {
+      @Override
+      public void run() {
+        CefAppHandler handler =
+            (CefAppHandler) ((appHandler_ == null) ? this : appHandler_);
+        if (!handler.onBeforeTerminate()) {
+          executeDefaultShutdown_ = true;
+          dispose();
         }
       }
     });
@@ -482,13 +486,6 @@ public class CefApp extends CefAppHandlerAdapter {
    * @return true on success
    */
   private final void initialize() {
-      try {
-          //montoyo: This will fix the mess done by FML in class loaders
-          N_SetClassLoader(getClass().getClassLoader());
-      } catch(Throwable t) {
-          t.printStackTrace();
-      }
-
     try {
       Runnable r = new Runnable() {
         @Override
@@ -526,10 +523,9 @@ public class CefApp extends CefAppHandlerAdapter {
             setState(CefAppState.INITIALIZED);
         }
       };
-      if (SwingUtilities.isEventDispatchThread())
-        r.run();
-      else
-        SwingUtilities.invokeAndWait(r);
+
+      //montoyo: Modified for MCEF
+      r.run();
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -538,49 +534,41 @@ public class CefApp extends CefAppHandlerAdapter {
   /**
    * Shut down the context.
    */
-  private final void shutdown() {
+  //montoyo: modified for MCEF
+  public final void shutdown() {
+    System.out.println("  shutdown on " + Thread.currentThread());
+
+    // Shutdown message loop
     try {
-      SwingUtilities.invokeLater(new Runnable() {
-        @Override
-        public void run() {
-          System.out.println("  shutdown on " + Thread.currentThread());
-
-          // Shutdown message loop
-          try {
-            lock.lock();
-            cefShutdown.signal();
-          } finally {
-            lock.unlock();
-          }
-
-          // Wait for termination of message loop
-          try {
-            context.join();
-          } catch (InterruptedException e) { }
-
-          // Shutdown native CEF
-          N_Shutdown();
-          System.out.println("shutdown complete");
-
-          if (executeDefaultShutdown_) {
-            continueTerminate();
-          }
-          setState(CefAppState.TERMINATED);
-          CefApp.self = null;
-        }
-      });
-    } catch (Exception e) {
-      e.printStackTrace();
+      lock.lock();
+      cefShutdown.signal();
+    } finally {
+      lock.unlock();
     }
+
+    // Wait for termination of message loop
+    try {
+      context.join();
+    } catch (InterruptedException e) { }
+
+    // Shutdown native CEF
+    N_Shutdown();
+    System.out.println("shutdown complete");
+
+    if (executeDefaultShutdown_) {
+      continueTerminate();
+    }
+    setState(CefAppState.TERMINATED);
+    CefApp.self = null;
   }
 
   private final void continueTerminate() {
-    new Thread("JCEF Terminate") {
+    /*new Thread("JCEF Terminate") {
       @Override
-      public void run() {
+      public void run() {*/
         N_ContinueDefaultTerminate();
-      }
-    }.start();
+      /*}
+    }.start();*/
   }
 
   /**
@@ -605,9 +593,6 @@ public class CefApp extends CefAppHandlerAdapter {
    * @return The path to the jcef library
    */
   private final String getJcefLibPath() {
-      if(myLoc != null) //montoyo: path overriding
-          return myLoc;
-
     String library_path = System.getProperty("java.library.path");
     String[] paths = library_path.split(System.getProperty("path.separator"));
     for (String path : paths) {
@@ -626,10 +611,13 @@ public class CefApp extends CefAppHandlerAdapter {
     return library_path;
   }
 
-    private final native void N_SetClassLoader(ClassLoader cl); //montoyo: function to fix classloaders.
+  private final native boolean N_PreInitialize();
   private final native boolean N_Initialize(String pathToJavaDLL,
       CefAppHandler appHandler, CefSettings settings);
-  private final native void N_Shutdown();
+
+  //montoyo: modified for MCEF
+  public final native void N_Shutdown();
+
   private final native void N_DoMessageLoopWork();
   private final native CefVersion N_GetVersion();
   private final native boolean N_RegisterSchemeHandlerFactory(String schemeName,

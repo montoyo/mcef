@@ -12,6 +12,7 @@ public class SizedInputStream extends InputStream {
 	
 	private InputStream source;
 	private long length;
+	private long lenCnt;
 	
 	/**
 	 * Constructs a new sized input stream.
@@ -22,6 +23,7 @@ public class SizedInputStream extends InputStream {
 	public SizedInputStream(InputStream is, long len) {
 		source = is;
 		length = len;
+        lenCnt = 0;
 	}
 	
 	/**
@@ -34,22 +36,38 @@ public class SizedInputStream extends InputStream {
 
 	@Override
 	public int read() throws IOException {
-		return source.read();
+        int data = source.read();
+		if(data >= 0)
+			lenCnt++;
+
+		return data;
 	}
 	
 	@Override
 	public int read(byte[] data) throws IOException {
-		return source.read(data);
+        int ret = source.read(data);
+		if(ret > 0)
+			lenCnt += ret;
+
+		return ret;
 	}
 	
 	@Override
 	public int read(byte[] data, int off, int len) throws IOException {
-		return source.read(data, off, len);
+		int ret = source.read(data, off, len);
+		if(ret > 0)
+			lenCnt += ret;
+
+		return ret;
 	}
 	
 	@Override
 	public long skip(long s) throws IOException {
-		return source.skip(s);
+		long ret = source.skip(s);
+		if(ret > 0)
+			lenCnt += ret;
+
+		return ret;
 	}
 	
 	@Override
@@ -71,6 +89,13 @@ public class SizedInputStream extends InputStream {
 	public synchronized void reset() throws IOException {
 		source.reset();
 	}
+
+    public long resetLengthCounter() {
+        long cpy = lenCnt;
+        lenCnt = 0;
+
+        return cpy;
+    }
 	
 	@Override
 	public boolean markSupported() {

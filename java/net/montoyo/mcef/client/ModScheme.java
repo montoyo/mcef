@@ -1,10 +1,16 @@
 package net.montoyo.mcef.client;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.montoyo.mcef.utilities.Log;
+import net.montoyo.mcef.utilities.Util;
 import org.cef.callback.CefCallback;
 import org.cef.handler.CefResourceHandlerAdapter;
 import org.cef.misc.IntRef;
@@ -13,9 +19,50 @@ import org.cef.network.CefRequest;
 import org.cef.network.CefResponse;
 
 public class ModScheme extends CefResourceHandlerAdapter {
-	
+
+	private static HashMap<String, String> mimeTypeMap;
 	private String contentType = null;
 	private InputStream is = null;
+
+    public static void loadMimeTypeMapping() {
+        Pattern p = Pattern.compile("^(\\S+)\\s+(\\S+)\\s*(\\S*)\\s*(\\S*)$");
+        String line = "";
+        int cLine = 0;
+        mimeTypeMap = new HashMap<String, String>();
+
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(ModScheme.class.getResourceAsStream("/assets/mcef/mime.types")));
+
+            while(true) {
+                cLine++;
+                line = br.readLine();
+                if(line == null)
+                    break;
+
+                line = line.trim();
+                if(!line.startsWith("#")) {
+                    Matcher m = p.matcher(line);
+                    if(!m.matches())
+                        continue;
+
+                    mimeTypeMap.put(m.group(2), m.group(1));
+                    if(m.groupCount() >= 4 && !m.group(3).isEmpty()) {
+                        mimeTypeMap.put(m.group(3), m.group(1));
+
+                        if(m.groupCount() >= 5 && !m.group(4).isEmpty())
+                            mimeTypeMap.put(m.group(4), m.group(1));
+                    }
+                }
+            }
+
+            Util.close(br);
+        } catch(Throwable e) {
+            Log.error("[Mime Types] Error while parsing \"%s\" at line %d:", line, cLine);
+            e.printStackTrace();
+        }
+
+        Log.info("Loaded %d mime types", mimeTypeMap.size());
+    }
 	
 	@Override
 	public synchronized boolean processRequest(CefRequest req, CefCallback cb) {
@@ -42,15 +89,17 @@ public class ModScheme extends CefResourceHandlerAdapter {
         contentType = null;
         pos = loc.lastIndexOf('.');
         if(pos >= 0 && pos < loc.length() - 2) {
-            String ext = loc.substring(pos + 1);
+            String ext = loc.substring(pos + 1).toLowerCase();
 
-            if(ext.equalsIgnoreCase("html"))
+            if(mimeTypeMap != null && mimeTypeMap.containsKey(ext))
+                contentType = mimeTypeMap.get(ext);
+            else if(ext.equals("html"))
                 contentType = "text/html";
-            else if(ext.equalsIgnoreCase("css"))
+            else if(ext.equals("css"))
                 contentType = "text/css";
-            else if(ext.equalsIgnoreCase("js"))
+            else if(ext.equals("js"))
                 contentType = "text/javascript";
-            else if(ext.equalsIgnoreCase("png"))
+            else if(ext.equals("png"))
                 contentType = "image/png";
         }
 

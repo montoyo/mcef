@@ -18,7 +18,12 @@ public class BaseProxy implements API {
 		return null;
 	}
 
-	@Override
+    @Override
+    public IBrowser createBrowser(String url) {
+        return createBrowser(url, false);
+    }
+
+    @Override
 	public void registerDisplayHandler(IDisplayHandler idh) {
 		Log.warning("A mod called API.registerDisplayHandler() from server!");
 	}
@@ -36,6 +41,10 @@ public class BaseProxy implements API {
 	@Override
 	public void registerJSQueryHandler(IJSQueryHandler iqh) {
 		Log.warning("A mod called API.registerJSQueryHandler() from server!");
+	}
+
+	public void onShutdown() {
+
 	}
 
 }

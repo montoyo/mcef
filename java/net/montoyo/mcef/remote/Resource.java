@@ -17,6 +17,7 @@ public class Resource {
 	
 	private String name;
 	private String sum;
+	private boolean shouldExtract = false;
 	
 	/**
 	 * Constructs a remote resource from its filename and its SHA-1 checksum.
@@ -57,7 +58,11 @@ public class Resource {
 	 * @return true if the operation was successful.
 	 */
 	public boolean download(IProgressListener ipl, String platform) {
-		return Util.download(MCEF.VERSION + '/' + platform + '/' + name, new File(ClientProxy.ROOT, name), ipl);
+        String end = "";
+        if(shouldExtract)
+            end += ".gz";
+
+		return Util.download(MCEF.VERSION + '/' + platform + '/' + name + end, new File(ClientProxy.ROOT, name), shouldExtract, ipl);
 	}
 	
 	/**
@@ -70,6 +75,14 @@ public class Resource {
 		Util.secure(ipl).onTaskChanged("Extracting " + name);
 		return Util.extract(new File(ClientProxy.ROOT, name), new File(ClientProxy.ROOT));
 	}
+
+	/**
+	 * Mark the resource as a GZip archive that should be extracted.
+	 */
+	public void setShouldExtract() {
+		shouldExtract = true;
+		name = name.substring(0, name.length() - 3);
+	}
 	
 	/**
 	 * Gets the filename of this resource.
@@ -77,6 +90,16 @@ public class Resource {
 	 */
 	public String getFileName() {
 		return name;
+	}
+
+	/**
+	 * Returns the File corresponding to the specified resource.
+	 *
+	 * @param resName Name of the resource.
+	 * @return The File containing the location of the specified resource.
+     */
+	public static File getLocationOf(String resName) {
+		return new File(ClientProxy.ROOT, resName);
 	}
 
 }

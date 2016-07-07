@@ -72,4 +72,9 @@ public class VirtualBrowser implements IBrowser {
 		isv.visit("https://www.youtube.com/watch?v=VX5gXHcbJAk");
 	}
 
+	@Override
+	public boolean isPageLoading() {
+		return true;
+	}
+
 }

@@ -1,14 +1,11 @@
 package net.montoyo.mcef.utilities;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -146,18 +143,32 @@ public class Util {
 	 * 
 	 * @param res The filename of the resource relative to the mirror root.
 	 * @param dst The destination file.
+	 * @param gzip Also extract the content using GZipInputStream.
 	 * @param ph The progress handler. May be null.
 	 * @return true if the download was successful.
 	 */
-	public static boolean download(String res, File dst, IProgressListener ph) {
+	public static boolean download(String res, File dst, boolean gzip, IProgressListener ph) {
 		String err = "Couldn't download " + dst.getName() + "!";
 		
 		ph = secure(ph);
 		ph.onTaskChanged("Downloading " + dst.getName());
 		
-		SizedInputStream is = openStream(res, err);
-		if(is == null)
+		SizedInputStream sis = openStream(res, err);
+		if(sis == null)
 			return false;
+
+        InputStream is;
+        if(gzip) {
+            try {
+                is = new GZIPInputStream(sis);
+            } catch(IOException e) {
+                Log.error("Couldn't create GZIPInputStream: IOException.");
+                e.printStackTrace();
+                close(sis);
+                return false;
+            }
+        } else
+            is = sis;
 		
 		delete(dst);
 		mkdirs(dst);
@@ -174,14 +185,14 @@ public class Util {
 		
 		int read;
 		byte[] data = new byte[65536];
-		double total = (double) is.getContentLength();
+		double total = (double) sis.getContentLength();
 		double cur = .0d;
 		
 		try {
 			while((read = is.read(data)) > 0) {
 				fos.write(data, 0, read);
 				
-				cur += (double) read;
+				cur += (double) sis.resetLengthCounter();
 				ph.onProgressed(cur / total * 100.d);
 			}
 			
@@ -194,6 +205,18 @@ public class Util {
 			close(is);
 			close(fos);
 		}
+	}
+
+	/**
+	 * Same as {@link #download(String, File, boolean, IProgressListener) download}, but with gzip set to false.
+	 *
+	 * @param res
+	 * @param dst
+	 * @param ph
+     * @return
+     */
+	public static boolean download(String res, File dst, IProgressListener ph) {
+		return download(res, dst, false, ph);
 	}
 	
 	/**

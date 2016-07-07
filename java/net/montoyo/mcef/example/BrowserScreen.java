@@ -1,5 +1,7 @@
 package net.montoyo.mcef.example;
 
+import net.montoyo.mcef.MCEF;
+import net.montoyo.mcef.utilities.Log;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -10,8 +12,6 @@ import net.minecraft.client.gui.GuiTextField;
 import net.montoyo.mcef.api.API;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.MCEFApi;
-
-import java.io.IOException;
 
 public class BrowserScreen extends GuiScreen {
 	
@@ -38,7 +38,7 @@ public class BrowserScreen extends GuiScreen {
 				return;
 			
 			//Create a browser and resize it to fit the screen
-			browser = api.createBrowser("mod://mcef/home.html", false);
+			browser = api.createBrowser(MCEF.HOME_PAGE, false);
 		}
 		
 		//Resize the browser if window size changed
@@ -55,6 +55,7 @@ public class BrowserScreen extends GuiScreen {
 			buttonList.add(go = (new GuiButton(2, width - 60, 0, 20, 20, "Go")));
 			buttonList.add(min = (new GuiButton(3, width - 20, 0, 20, 20, "_")));
             buttonList.add(vidMode = (new GuiButton(4, width - 40, 0, 20, 20, "YT")));
+            vidMode.enabled = false;
 			
 			url = new GuiTextField(5, fontRendererObj, 40, 0, width - 100, 20);
 			url.setMaxStringLength(65535);
@@ -140,7 +141,7 @@ public class BrowserScreen extends GuiScreen {
 			//Forward event to text box.
 			if(!pressed && focused && num == Keyboard.KEY_RETURN)
 				actionPerformed(go);
-			else
+			else if(pressed)
 				url.textboxKeyTyped(key, num);
 		}
 		
@@ -163,11 +164,11 @@ public class BrowserScreen extends GuiScreen {
 				int x = sx * width / mc.displayWidth;
 				int y = height - (sy * height / mc.displayHeight) - 1;
 
-                try {
-                    mouseClicked(x, y, btn);
-                } catch(IOException wtf) {
-                    wtf.printStackTrace();
-                }
+				try {
+					mouseClicked(x, y, btn);
+				} catch(Throwable t) {
+					t.printStackTrace();
+				}
 
 				url.mouseClicked(x, y, btn);
 			}
@@ -176,8 +177,10 @@ public class BrowserScreen extends GuiScreen {
 	
 	//Called by ExampleMod when the current browser's URL changes.
 	public void onUrlChanged(IBrowser b, String nurl) {
-		if(b == browser && url != null)
-			url.setText(nurl);
+		if(b == browser && url != null) {
+            url.setText(nurl);
+            vidMode.enabled = nurl.matches(YT_REGEX1) || nurl.matches(YT_REGEX2) || nurl.matches(YT_REGEX3);
+        }
 	}
 	
 	//Handle button clicks

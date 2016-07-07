@@ -10,8 +10,9 @@ import java.awt.Rectangle;
 import java.nio.ByteBuffer;
 
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldRenderer;
 
+import net.minecraft.client.renderer.VertexBuffer;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import org.lwjgl.opengl.EXTBgra;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -38,7 +39,7 @@ class CefRenderer {
         glEnable(GL_TEXTURE_2D);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         texture_id_[0] = glGenTextures();
-        assert(texture_id_[0] != 0);
+        assert (texture_id_[0] != 0);
 
         glBindTexture(GL_TEXTURE_2D, texture_id_[0]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -57,23 +58,17 @@ class CefRenderer {
             return;
 
         Tessellator t = Tessellator.getInstance();
-        WorldRenderer wr = t.getWorldRenderer();
-
-        int bound = glGetInteger(GL_TEXTURE_BINDING_2D);
+        VertexBuffer vb = t.getBuffer();
         glBindTexture(GL_TEXTURE_2D, texture_id_[0]);
 
-        wr.startDrawingQuads();
-        //t.disableColor(); //Doesn't work?
-        wr.setColorOpaque(255, 255, 255);
-
-        //                 X   Y  Z          U    V
-        wr.addVertexWithUV(x1, y1, 0, 0, 1.f);
-        wr.addVertexWithUV(x2, y1, 0, 1.f, 1.f);
-        wr.addVertexWithUV(x2, y2, 0, 1.f, 0);
-        wr.addVertexWithUV(x1, y2, 0, 0, 0);
+        vb.begin(GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
+        vb.pos(x1, y1, 0.0).tex(0.0, 1.0).color(255, 255, 255, 255).endVertex();
+        vb.pos(x2, y1, 0.0).tex(1.f, 1.f).color(255, 255, 255, 255).endVertex();
+        vb.pos(x2, y2, 0.0).tex(1.f, 0.0).color(255, 255, 255, 255).endVertex();
+        vb.pos(x1, y2, 0.0).tex(0.0, 0.0).color(255, 255, 255, 255).endVertex();
         t.draw();
 
-        glBindTexture(GL_TEXTURE_2D, bound);
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     protected void onPopupSize(Rectangle rect) {
@@ -122,7 +117,7 @@ class CefRenderer {
         // Enable 2D textures.
         glEnable(GL_TEXTURE_2D);
 
-        assert(texture_id_[0] != 0);
+        assert (texture_id_[0] != 0);
         glBindTexture(GL_TEXTURE_2D, texture_id_[0]);
 
         if (!popup) {

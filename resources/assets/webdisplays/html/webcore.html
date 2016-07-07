@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<link href="css/webdisplays.css" type="text/css" rel="stylesheet">
+	<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+	<div>
+		<div id="wdContent">
+			<p class="wdTitle">Web Core</p>
+			<div class="alert alert-warning" role="alert">
+				<span class="glyphicon glyphicon-warning-sign" aria-hidden="true"></span>
+				<strong>Warning!</strong> No ethernet link!</a>
+			</div>
+			<ul class="nav nav-tabs">
+				<li role="presentation" class="active"><a href="#">Basics</a></li>
+				<li role="presentation"><a href="#">Rights</a></li>
+				<li role="presentation"><a href="#">Upgrades</a></li>
+			</ul>
+			
+			<div class="wdTabContent">
+				<div class="wdLeft">
+					Side configuration:
+					<table class="wdMatrix">
+						<tr>
+							<td>
+							</td>
+							<td>
+								<button type="button" class="btn btn-default wdSide" id="wdSideTop">
+									<img src="images/empty.png" />
+								</button>
+							</td>
+							<td>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<button type="button" class="btn btn-default wdSide" id="wdSideLeft">
+									<img src="images/empty.png" />
+								</button>
+							</td>
+							<td>
+							</td>
+							<td>
+								<button type="button" class="btn btn-default wdSide" id="wdSideRight">
+									<img src="images/ethernet.png" />
+								</button>
+							</td>
+						</tr>
+						<tr>
+							<td>
+							</td>
+							<td>
+								<button type="button" class="btn btn-default wdSide" id="wdSideBot">
+									<img src="images/projector.png" />
+								</button>
+							</td>
+							<td>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="wdRight">
+					<p class="wdLabel">URL:</p>
+					<div class="input-group">
+						<input type="text" class="form-control" id="urlField" />
+						<span class="input-group-btn">
+							<button class="btn btn-default" type="button" id="btnGo">
+								<span class="glyphicon glyphicon-circle-arrow-right" aria-hidden="true"></span>
+							</button>
+						</span>
+					</div>
+					<p class="wdLabel">Resolution:</p>
+					<div class="input-group">
+						<span class="input-group-btn">
+							<button class="btn btn-default" type="button" id="resMinus">-</button>
+						</span>
+						<input type="text" class="form-control" value="1080" id="resolution" />
+						<span class="input-group-btn">
+							<button class="btn btn-default" type="button" id="resPlus">+</button>
+							<button class="btn btn-default" type="button" id="resSet">
+								<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+							</button>
+						</span>
+					</div>
+					<div class="wdClear"></div>
+				</div>
+				<div class="wdClear"></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Bootstrap; keep at bottom -->
+	<script src="js/jquery.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/webdisplays.js"></script>
+	<script type="text/javascript">
+		function getSideId(side) {
+			if(side == 0)
+				return "wdSideBot";
+			else if(side == 1)
+				return "wdSideRight";
+			else if(side == 2)
+				return "wdSideTop";
+			else if(side == 3)
+				return "wdSideLeft";
+		}
+		
+		function getSideFromId(id) {
+			if(id == "wdSideBot")
+				return 0;
+			else if(id == "wdSideRight")
+				return 1;
+			else if(id == "wdSideTop")
+				return 2;
+			else if(id == "wdSideLeft")
+				return 3;
+		}
+		
+		function setSide(side, val) {
+			var obj = $("#" + getSideId(side) + " img");
+			if(val == 0)
+				obj.attr("src", "images/empty.png");
+			else if(val == 1)
+				obj.attr("src", "images/projector.png");
+			else if(val == 2)
+				obj.attr("src", "images/ethernet.png");
+		}
+		
+		function getSide(id) {
+			var src = $("#" + id + " img").attr("src");
+			
+			if(src == "images/empty.png")
+				return 0;
+			else if(src == "images/projector.png")
+				return 1;
+			else if(src == "images/ethernet.png")
+				return 2;
+		}
+		
+		function setResolution(res) {
+			$("#resolution").val(res);
+		}
+		
+		function setUrl(url) {
+			$("#urlField").val(url);
+		}
+	
+		wdCenter();
+		
+		$(".wdSide").click(function(ev) {
+			var elem = $(ev.target);
+			if(elem.is("img"))
+				elem = elem.parent();
+			
+			var src = elem.attr("id");
+			var cur = $("#" + src + " img").attr("src");
+			
+			if(cur == "images/empty.png")
+				cur = "images/projector.png";
+			else if(cur == "images/projector.png")
+				cur = "images/ethernet.png";
+			else if(cur == "images/ethernet.png")
+				cur = "images/empty.png";
+				
+			$("#" + src + " img").attr("src", cur);
+			wdQuery("setSide", getSideFromId(src), getSide(src));
+		});
+		
+		$("#btnGo").click(function() {
+			wdQuery("setUrl", $("#urlField").val());
+		});
+		
+		$("#resSet").click(function() {
+			var res = parseInt($("#resolution").val());
+			
+			if(res > 1080) {
+				res = 1080;
+				setResolution(1080);
+			} else if(res < 1) {
+				res = 1;
+				setResolution(1);
+			}
+			
+			wdQuery("setResolution", res);
+		});
+		
+		$("#resPlus").click(function() {
+			var res = parseInt($("#resolution").val()) + 1;
+			
+			if(res <= 1080)
+				$("#resolution").val(res);
+		});
+		
+		$("#resMinus").click(function() {
+			var res = parseInt($("#resolution").val()) - 1;
+		
+			if(res > 0)
+				$("#resolution").val(res);
+		});
+		
+		wdQuery("onLoad");
+	</script>
+</body>
+</html>

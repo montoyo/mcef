@@ -10,6 +10,14 @@ public interface API {
 	 * @return The created web view, or null if this is run on server.
 	 */
 	public IBrowser createBrowser(String url, boolean transp);
+
+	/**
+	 * Same as {@link #createBrowser(String, boolean) createBrowser} but with transp set to false.
+	 *
+	 * @param url The URL to start from.
+	 * @return The created web view, or null if this is run on server.
+	 */
+	public IBrowser createBrowser(String url);
 	
 	/**
 	 * Registers a display handler.
@@ -28,7 +36,7 @@ public interface API {
 	/**
 	 * Call this to know if MCEF is in virtual mode.
 	 * MCEF switches in virtual mode if something failed to load.
-	 * When in virtual mode, createBrowser() will generate fake browsers that does nothing.
+	 * When in virtual mode, {@link #createBrowser(String, boolean) createBrowser} will generate fake browsers that does nothing.
 	 * 
 	 * @return true if MCEF is in virtual mode.
 	 */

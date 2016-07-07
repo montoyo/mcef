@@ -70,5 +70,10 @@ public class UpdateFrame extends JFrame implements IProgressListener {
 		Log.info("Task changed to \"%s\"", name);
 		label.setText(name);
 	}
-	
+
+	@Override
+	public void onProgressEnd() {
+        dispose();
+	}
+
 }

@@ -92,7 +92,7 @@ public interface IBrowser {
 	 * Runs JavaScript code on the web view.
 	 * 
 	 * @param script The script to run.
-	 * @param frame The URL of the frame to run the script on. Let this empty for the default frame.
+	 * @param frame The URL of the frame to run the script on. Let this EMPTY (!= null) for the default frame.
 	 */
 	public void runJS(String script, String frame);
 	
@@ -125,5 +125,12 @@ public interface IBrowser {
 	 * @param isv An object that handles strings.
 	 */
 	public void visitSource(IStringVisitor isv);
+
+    /**
+     * Checks if the page is currently being loaded.
+     *
+     * @return true if the page is still being loaded, false otherwise.
+     */
+	public boolean isPageLoading();
 
 }
