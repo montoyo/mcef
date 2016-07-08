@@ -14,7 +14,8 @@ import net.montoyo.mcef.utilities.Util;
  *
  */
 public class Resource {
-	
+
+	private String platform;
 	private String name;
 	private String sum;
 	private boolean shouldExtract = false;
@@ -23,11 +24,13 @@ public class Resource {
 	 * Constructs a remote resource from its filename and its SHA-1 checksum.
 	 * 
 	 * @param name The filename of the resource.
+     * @param platform The platform the resource was made for.
 	 * @param sum The SHA-1 hash of the file.
 	 */
-	public Resource(String name, String sum) {
+	public Resource(String name, String sum, String platform) {
 		this.name = name;
 		this.sum = sum.trim();
+        this.platform = platform;
 	}
 	
 	/**
@@ -54,10 +57,9 @@ public class Resource {
 	 * Downloads the resource from the current mirror.
 	 * 
 	 * @param ipl Progress listener. May be null.
-	 * @param platform The platform
 	 * @return true if the operation was successful.
 	 */
-	public boolean download(IProgressListener ipl, String platform) {
+	public boolean download(IProgressListener ipl) {
         String end = "";
         if(shouldExtract)
             end += ".gz";

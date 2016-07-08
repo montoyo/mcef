@@ -141,8 +141,9 @@ public class RemoteConfig {
 			ClientProxy.VIRTUAL = true;
 			return;
 		}
-		
-		JsonElement res = cat.getAsJsonObject().get(PLATFORM);
+
+        JsonObject catObj = cat.getAsJsonObject();
+		JsonElement res = catObj.get(PLATFORM);
 		if(res == null || !res.isJsonObject()) {
 			Log.error("Your platform isn't supported by MCEF yet. Entering virtual mode.");
 			ClientProxy.VIRTUAL = true;
@@ -150,21 +151,11 @@ public class RemoteConfig {
 		}
 		
 		resources.clear();
-		Set<Entry<String, JsonElement>> files = res.getAsJsonObject().entrySet();
-		
-		for(Entry<String, JsonElement> e: files) {
-			if(e.getValue() == null || !e.getValue().isJsonPrimitive())
-				continue;
+		addResources(res.getAsJsonObject(), PLATFORM);
 
-			String key = e.getKey();
-			if(key.length() >= 2 && key.charAt(0) == '@') {
-				Resource eRes = new Resource(key.substring(1), e.getValue().getAsString());
-				eRes.setShouldExtract();
-
-				resources.add(eRes);
-			} else
-				resources.add(new Resource(key, e.getValue().getAsString()));
-		}
+        res = catObj.get("shared");
+        if(res != null && res.isJsonObject())
+            addResources(res.getAsJsonObject(), "shared");
 		
 		JsonElement ext = vData.get("extract");
 		if(ext != null && ext.isJsonArray()) {
@@ -184,6 +175,24 @@ public class RemoteConfig {
                 version = cVer.getAsString();
 		}
 	}
+
+    private void addResources(JsonObject res, String pform) {
+        Set<Entry<String, JsonElement>> files = res.entrySet();
+
+        for(Entry<String, JsonElement> e: files) {
+            if(e.getValue() == null || !e.getValue().isJsonPrimitive())
+                continue;
+
+            String key = e.getKey();
+            if(key.length() >= 2 && key.charAt(0) == '@') {
+                Resource eRes = new Resource(key.substring(1), e.getValue().getAsString(), pform);
+                eRes.setShouldExtract();
+
+                resources.add(eRes);
+            } else
+                resources.add(new Resource(key, e.getValue().getAsString(), pform));
+        }
+    }
 	
 	/**
 	 * Detects missing files, download them, and if needed, extracts them.
@@ -205,7 +214,7 @@ public class RemoteConfig {
 			Log.info(Mirror.getCurrent().getMirrorString());
 			
 			for(Resource r: resources) {
-				if(!r.download(ipl, PLATFORM))
+				if(!r.download(ipl))
 					return false;
 			}
 			
@@ -246,9 +255,10 @@ public class RemoteConfig {
      * Writes in a text file all files used by MCEF for uninstall purposes.
      *
      * @param configDir Directory where "mcefFiles.lst" should be located.
+     * @param zipOnly Only care about extractable resources.
      * @return true if everything went file.
      */
-	public boolean updateFileListing(File configDir) {
+	public boolean updateFileListing(File configDir, boolean zipOnly) {
         if(resources.isEmpty())
             return true;
 
@@ -256,13 +266,19 @@ public class RemoteConfig {
         if(!fl.load())
             Log.warning("Could not load file listing; trying to overwrite...");
 
-        for(Resource r: resources)
-            fl.addFile(r.getFileName());
+        if(!zipOnly) {
+            for(Resource r: resources)
+                fl.addFile(r.getFileName());
+        }
 
         boolean allOk = true;
         for(String r: extract) {
-            if(!fl.addZip(Resource.getLocationOf(r).getAbsolutePath()))
-                allOk = false;
+			File rf = Resource.getLocationOf(r);
+
+            if(rf.exists()) {
+                if(!fl.addZip(rf.getAbsolutePath()))
+                    allOk = false;
+            }
         }
 
         return fl.save() && allOk;

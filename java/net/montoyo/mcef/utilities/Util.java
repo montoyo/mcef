@@ -1,6 +1,8 @@
 package net.montoyo.mcef.utilities;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.security.MessageDigest;
@@ -317,7 +319,24 @@ public class Util {
 			}
 			
 			try {
-				long len = conn.getContentLengthLong();
+				long len = -1;
+                boolean failed = true;
+
+                //Java 6 support
+                try {
+                    Method m = HttpURLConnection.class.getMethod("getContentLengthLong");
+                    len = (Long) m.invoke(conn);
+                    failed = false;
+                } catch(NoSuchMethodException me) {
+                } catch(IllegalAccessException ae) {
+                } catch(InvocationTargetException te) {
+                    if(te.getTargetException() instanceof IOException)
+                        throw (IOException) te.getTargetException();
+                }
+
+                if(failed)
+                    len = (long) conn.getContentLength();
+
 				return new SizedInputStream(conn.getInputStream(), len);
 			} catch(IOException e) {
 				int rc;

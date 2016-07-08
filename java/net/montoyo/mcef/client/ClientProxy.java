@@ -67,6 +67,8 @@ public class ClientProxy extends BaseProxy {
 		if(ROOT.endsWith("/"))
 			ROOT = ROOT.substring(0, ROOT.length() - 1);
 
+        File fileListing = new File(new File(ROOT), "config");
+
         IProgressListener ipl;
 		RemoteConfig cfg = new RemoteConfig();
         if(MCEF.USE_FORGE_SPLASH && enableForgeSplash)
@@ -75,7 +77,7 @@ public class ClientProxy extends BaseProxy {
             ipl = new UpdateFrame();
 		
 		cfg.load();
-        if(!cfg.updateFileListing(new File(new File(ROOT), "config")))
+        if(!cfg.updateFileListing(fileListing, false))
             Log.warning("There was a problem while establishing file list. Uninstall may not delete all files.");
 
 		if(!cfg.downloadMissing(ipl)) {
@@ -83,6 +85,9 @@ public class ClientProxy extends BaseProxy {
 			VIRTUAL = true;
 			return;
 		}
+
+        if(!cfg.updateFileListing(fileListing, true))
+            Log.warning("There was a problem while updating file list. Uninstall may not delete all files.");
 		
 		updateStr = cfg.getUpdateString();
         ipl.onProgressEnd();
