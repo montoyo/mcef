@@ -88,7 +88,7 @@ public interface CefBrowser {
   /**
    * Returns the unique browser identifier.
    * @return The browser identifier
-	 */
+     */
   public int getIdentifier();
 
   /**

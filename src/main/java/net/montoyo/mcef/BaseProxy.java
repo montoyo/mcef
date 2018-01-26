@@ -7,16 +7,16 @@ import net.montoyo.mcef.api.IJSQueryHandler;
 import net.montoyo.mcef.utilities.Log;
 
 public class BaseProxy implements API {
-	
-	public void onInit() {
-		Log.info("MCEF is running on server. Nothing to do.");
-	}
+    
+    public void onInit() {
+        Log.info("MCEF is running on server. Nothing to do.");
+    }
 
-	@Override
-	public IBrowser createBrowser(String url, boolean transparent) {
-		Log.warning("A mod called API.createBrowser() from server! Returning null...");
-		return null;
-	}
+    @Override
+    public IBrowser createBrowser(String url, boolean transparent) {
+        Log.warning("A mod called API.createBrowser() from server! Returning null...");
+        return null;
+    }
 
     @Override
     public IBrowser createBrowser(String url) {
@@ -24,27 +24,27 @@ public class BaseProxy implements API {
     }
 
     @Override
-	public void registerDisplayHandler(IDisplayHandler idh) {
-		Log.warning("A mod called API.registerDisplayHandler() from server!");
-	}
+    public void registerDisplayHandler(IDisplayHandler idh) {
+        Log.warning("A mod called API.registerDisplayHandler() from server!");
+    }
 
-	@Override
-	public boolean isVirtual() {
-		return true;
-	}
+    @Override
+    public boolean isVirtual() {
+        return true;
+    }
 
-	@Override
-	public void openExampleBrowser(String url) {
-		Log.warning("A mod called API.openExampleBrowser() from server! URL: %s", url);
-	}
+    @Override
+    public void openExampleBrowser(String url) {
+        Log.warning("A mod called API.openExampleBrowser() from server! URL: %s", url);
+    }
 
-	@Override
-	public void registerJSQueryHandler(IJSQueryHandler iqh) {
-		Log.warning("A mod called API.registerJSQueryHandler() from server!");
-	}
+    @Override
+    public void registerJSQueryHandler(IJSQueryHandler iqh) {
+        Log.warning("A mod called API.registerJSQueryHandler() from server!");
+    }
 
-	public void onShutdown() {
+    public void onShutdown() {
 
-	}
+    }
 
 }

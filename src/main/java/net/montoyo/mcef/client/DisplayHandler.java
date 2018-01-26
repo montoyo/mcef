@@ -9,33 +9,33 @@ import org.cef.handler.CefDisplayHandler;
 import java.util.ArrayList;
 
 public class DisplayHandler implements CefDisplayHandler {
-	
-	private final ArrayList<IDisplayHandler> list = new ArrayList<>();
-	private final ArrayList<EventData> queue = new ArrayList<>();
+    
+    private final ArrayList<IDisplayHandler> list = new ArrayList<>();
+    private final ArrayList<EventData> queue = new ArrayList<>();
 
-	private enum EventType {
+    private enum EventType {
 
-	    ADDRESS_CHANGE,
+        ADDRESS_CHANGE,
         TITLE_CHANGE,
         TOOLTIP,
         STATUS_MESSAGE;
 
     }
 
-	private static final class EventData {
+    private static final class EventData {
 
-	    private final CefBrowser browser;
-	    private final String data;
-	    private final EventType type;
+        private final CefBrowser browser;
+        private final String data;
+        private final EventType type;
 
-	    private EventData(CefBrowser b, String d, EventType t) {
-	        browser = b;
-	        data = d;
-	        type = t;
+        private EventData(CefBrowser b, String d, EventType t) {
+            browser = b;
+            data = d;
+            type = t;
         }
 
         private void execute(IDisplayHandler idh) {
-	        switch(type) {
+            switch(type) {
                 case ADDRESS_CHANGE:
                     idh.onAddressChange((CefBrowserOsr) browser, data);
                     break;
@@ -56,48 +56,48 @@ public class DisplayHandler implements CefDisplayHandler {
 
     }
 
-	@Override
-	public void onAddressChange(CefBrowser browser, String url) {
-		synchronized(queue) {
+    @Override
+    public void onAddressChange(CefBrowser browser, String url) {
+        synchronized(queue) {
             queue.add(new EventData(browser, url, EventType.ADDRESS_CHANGE));
         }
-	}
+    }
 
-	@Override
-	public void onTitleChange(CefBrowser browser, String title) {
+    @Override
+    public void onTitleChange(CefBrowser browser, String title) {
         synchronized(queue) {
             queue.add(new EventData(browser, title, EventType.TITLE_CHANGE));
         }
-	}
+    }
 
-	@Override
-	public boolean onTooltip(CefBrowser browser, String text) {
+    @Override
+    public boolean onTooltip(CefBrowser browser, String text) {
         synchronized(queue) {
             queue.add(new EventData(browser, text, EventType.TOOLTIP));
         }
 
         return false;
-	}
+    }
 
-	@Override
-	public void onStatusMessage(CefBrowser browser, String value) {
+    @Override
+    public void onStatusMessage(CefBrowser browser, String value) {
         synchronized(queue) {
             queue.add(new EventData(browser, value, EventType.STATUS_MESSAGE));
         }
-	}
+    }
 
-	@Override
-	public boolean onConsoleMessage(CefBrowser browser, String message, String source, int line) {
-	    return false;
-	}
+    @Override
+    public boolean onConsoleMessage(CefBrowser browser, String message, String source, int line) {
+        return false;
+    }
 
-	public void addHandler(IDisplayHandler h) {
-	    list.add(h);
+    public void addHandler(IDisplayHandler h) {
+        list.add(h);
     }
 
     public void update() {
-	    synchronized(queue) {
-	        while(!queue.isEmpty()) {
+        synchronized(queue) {
+            while(!queue.isEmpty()) {
                 EventData ed = queue.remove(0);
 
                 for(IDisplayHandler idh : list)

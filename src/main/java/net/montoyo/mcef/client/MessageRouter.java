@@ -8,21 +8,21 @@ import org.cef.callback.CefQueryCallback;
 import org.cef.handler.CefMessageRouterHandlerAdapter;
 
 public class MessageRouter extends CefMessageRouterHandlerAdapter {
-	
-	private IJSQueryHandler handler;
-	
-	public MessageRouter(IJSQueryHandler h) {
-		handler = h;
-	}
-	
-	@Override
-	public boolean onQuery(CefBrowser browser, long query_id, String request, boolean persistent, CefQueryCallback callback) {
-		return handler.handleQuery((CefBrowserOsr) browser, query_id, request, persistent, new QueryCallback(callback));
-	}
-	
-	@Override
-	public void onQueryCanceled(CefBrowser browser, long query_id) {
-		handler.cancelQuery((CefBrowserOsr) browser, query_id);
-	}
+    
+    private IJSQueryHandler handler;
+    
+    public MessageRouter(IJSQueryHandler h) {
+        handler = h;
+    }
+    
+    @Override
+    public boolean onQuery(CefBrowser browser, long query_id, String request, boolean persistent, CefQueryCallback callback) {
+        return handler.handleQuery((CefBrowserOsr) browser, query_id, request, persistent, new QueryCallback(callback));
+    }
+    
+    @Override
+    public void onQueryCanceled(CefBrowser browser, long query_id) {
+        handler.cancelQuery((CefBrowserOsr) browser, query_id);
+    }
 
 }
