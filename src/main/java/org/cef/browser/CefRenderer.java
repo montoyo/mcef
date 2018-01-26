@@ -9,9 +9,9 @@ package org.cef.browser;
 import java.awt.Rectangle;
 import java.nio.ByteBuffer;
 
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import org.lwjgl.opengl.EXTBgra;
 
@@ -42,8 +42,8 @@ class CefRenderer {
         assert (texture_id_[0] != 0);
 
         glBindTexture(GL_TEXTURE_2D, texture_id_[0]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
         glBindTexture(GL_TEXTURE_2D, 0);
     }
@@ -58,7 +58,7 @@ class CefRenderer {
             return;
 
         Tessellator t = Tessellator.getInstance();
-        VertexBuffer vb = t.getBuffer();
+        BufferBuilder vb = t.getBuffer();
         glBindTexture(GL_TEXTURE_2D, texture_id_[0]);
 
         vb.begin(GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
@@ -176,6 +176,7 @@ class CefRenderer {
 
         // Disable 2D textures.
         // glDisable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, 0);
 
         if (transparent_) {
             // Disable alpha blending.
