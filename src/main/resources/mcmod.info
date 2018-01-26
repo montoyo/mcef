@@ -1,15 +1,16 @@
 [
-{
-  "modid": "MCEF",
-  "name": "Minecraft Chromium Embedded Framework",
-  "description": "API required for mods that uses Chromium in Minecraft",
-  "version": "${version}",
-  "mcversion": "${mcversion}",
-  "updateUrl": "",
-  "authors": [ "montoyo" ],
-  "credits": "MCEF is based on JCEF https://bitbucket.org/chromiumembedded/java-cef/ under BSD.",
-  "parent": "",
-  "screenshots": [],
-  "dependencies": []
-}
+  {
+    "modid": "MCEF",
+    "name": "Minecraft Chromium Embedded Framework",
+    "description": "API required for mods that uses Chromium in Minecraft",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "https://github.com/montoyo/mcef",
+    "updateUrl": "",
+    "authorList": [ "montoyo" ],
+    "credits": "MCEF is based on JCEF https://bitbucket.org/chromiumembedded/java-cef/ under BSD.",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
 ]
