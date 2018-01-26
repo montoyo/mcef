@@ -5,7 +5,7 @@ public interface IBrowser {
 	/**
 	 * Destroys the web view.
 	 */
-	public void close();
+	void close();
 	
 	/**
 	 * Resizes the web view.
@@ -13,7 +13,7 @@ public interface IBrowser {
 	 * @param width The new width in pixels.
 	 * @param height The new height in pixels.
 	 */
-	public void resize(int width, int height);
+	void resize(int width, int height);
 	
 	/**
 	 * Renders the web view into Minecraft.
@@ -23,13 +23,13 @@ public interface IBrowser {
 	 * @param x2 The second X coord of the rectangle to render the web view on (right).
 	 * @param y2 The second Y coord of the rectangle to render the web view on (bottom).
 	 */
-	public void draw(double x1, double y1, double x2, double y2);
-	
+	void draw(double x1, double y1, double x2, double y2);
+
 	/**
 	 * Gets the OpenGL texture ID of the web view.
 	 * @return the OpenGL texture ID of the web view.
 	 */
-	public int getTextureID();
+	int getTextureID();
 	
 	/**
 	 * Simulates a mouse move.
@@ -39,7 +39,7 @@ public interface IBrowser {
 	 * @param mods The key modifiers (shift, ctrl, alt)
 	 * @param left true if the mouse is out of (left) the web view.
 	 */
-	public void injectMouseMove(int x, int y, int mods, boolean left);
+	void injectMouseMove(int x, int y, int mods, boolean left);
 	
 	/**
 	 * Simulates a mouse click.
@@ -51,7 +51,7 @@ public interface IBrowser {
 	 * @param pressed true if the button is pressed, false if it is released.
 	 * @param ccnt The click count. You probably want this to be 1.
 	 */
-	public void injectMouseButton(int x, int y, int mods, int btn, boolean pressed, int ccnt);
+	void injectMouseButton(int x, int y, int mods, int btn, boolean pressed, int ccnt);
 	
 	/**
 	 * Simulates a keyboard type.
@@ -59,7 +59,7 @@ public interface IBrowser {
 	 * @param c The typed character.
 	 * @param mods The key modifiers (shift, ctrl, alt)
 	 */
-	public void injectKeyTyped(char c, int mods);
+	void injectKeyTyped(char c, int mods);
 	
 	/**
 	 * Simulates a key press.
@@ -67,7 +67,7 @@ public interface IBrowser {
 	 * @param c The pressed key's character.
 	 * @param mods The key modifiers (shift, ctrl, alt)
 	 */
-	public void injectKeyPressed(char c, int mods);
+	void injectKeyPressed(char c, int mods);
 	
 	/**
 	 * Simulates a key release.
@@ -75,7 +75,7 @@ public interface IBrowser {
 	 * @param c The released key's character.
 	 * @param mods The key modifiers (shift, ctrl, alt)
 	 */
-	public void injectKeyReleased(char c, int mods);
+	void injectKeyReleased(char c, int mods);
 	
 	/**
 	 * Simulates a mouse wheel.
@@ -86,7 +86,7 @@ public interface IBrowser {
 	 * @param amount The amount to scroll.
 	 * @param rot The number of "clicks" by which the mouse wheel was rotated.
 	 */
-	public void injectMouseWheel(int x, int y, int mods, int amount, int rot);
+	void injectMouseWheel(int x, int y, int mods, int amount, int rot);
 	
 	/**
 	 * Runs JavaScript code on the web view.
@@ -94,29 +94,29 @@ public interface IBrowser {
 	 * @param script The script to run.
 	 * @param frame The URL of the frame to run the script on. Let this EMPTY (!= null) for the default frame.
 	 */
-	public void runJS(String script, String frame);
+	void runJS(String script, String frame);
 	
 	/**
 	 * Changes the current page's address.
 	 * @param url The URL to load.
 	 */
-	public void loadURL(String url);
+	void loadURL(String url);
 	
 	/**
 	 * Returns to the previous address.
 	 */
-	public void goBack();
+	void goBack();
 	
 	/**
 	 * Undoes {@link #goBack()}
 	 */
-	public void goForward();
+	void goForward();
 	
 	/**
 	 * Retrieves the current browser's location.
 	 * @return The current browser's URL.
 	 */
-	public String getURL();
+	String getURL();
 	
 	/**
 	 * Asynchronously retrieves the current page's source code.
@@ -124,13 +124,13 @@ public interface IBrowser {
 	 * 
 	 * @param isv An object that handles strings.
 	 */
-	public void visitSource(IStringVisitor isv);
+	void visitSource(IStringVisitor isv);
 
     /**
      * Checks if the page is currently being loaded.
      *
      * @return true if the page is still being loaded, false otherwise.
      */
-	public boolean isPageLoading();
+	boolean isPageLoading();
 
 }

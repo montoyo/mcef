@@ -10,11 +10,11 @@ import java.util.Map;
 @IFMLLoadingPlugin.Name(value = "ShutdownPatcher")
 @IFMLLoadingPlugin.TransformerExclusions(value = "net.montoyo.mcef.")
 @IFMLLoadingPlugin.SortingIndex(value = 90007531) //It has to run after the searge-name transformation
+@IFMLLoadingPlugin.MCVersion("1.12.2")
 public class ShutdownPatcher implements IFMLLoadingPlugin, IClassTransformer {
 
     private static boolean PATCH_OK = false;
-    private static final String OBF_RUN_METHOD = "func_99999_d"; //The "searge-obfuscated" name of the Minecraft.run() method
-    private static final String OBF_RUNNING_FIELD = "field_71425_J"; //The "searge-obfuscated" name of the Minecraft.running field
+    private static final String OBF_SHUTDOWN_METHOD = "func_71405_e"; //The "searge-obfuscated" name of the Minecraft.shutdownMinecraftApplet() method
 
     public static boolean didPatchSucceed() {
         return PATCH_OK;
@@ -67,38 +67,19 @@ public class ShutdownPatcher implements IFMLLoadingPlugin, IClassTransformer {
         return cls; //Abort class transforming
     }
 
-    private static class RunVisitor extends MethodVisitor {
+    private static class ShutdownMCAppletVisitor extends MethodVisitor {
 
-        private boolean patched;
-        private final boolean envObf;
-
-        public RunVisitor(MethodVisitor mv, boolean obf) {
+        public ShutdownMCAppletVisitor(MethodVisitor mv) {
             super(Opcodes.ASM5, mv);
-
-            patched = false;
-            envObf = obf;
         }
 
         @Override
-        public void visitFrame(int type, int numLocals, Object[] locals, int numStack, Object[] stack) {
-            mv.visitFrame(type, numLocals, locals, numStack, stack);
-
-            if(!patched && type == Opcodes.F_SAME && numLocals == 0 && numStack == 0) {
-                //Here we patch!
-                mv.visitVarInsn(Opcodes.ALOAD, 0);
-                mv.visitFieldInsn(Opcodes.GETFIELD, "net/minecraft/client/Minecraft", envObf ? OBF_RUNNING_FIELD : "running", "Z");
-
-                Label patchEnd = new Label();
-                mv.visitJumpInsn(Opcodes.IFNE, patchEnd);
-                mv.visitMethodInsn(Opcodes.INVOKESTATIC, "net/montoyo/mcef/MCEF", "onMinecraftShutdown", "()V", false);
-                mv.visitLabel(patchEnd);
-
-                patched = true;
-                PATCH_OK = true;
-                Log.info("Target section has been patched.");
-            }
+        public void visitCode() {
+            mv.visitCode();
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC, "net/montoyo/mcef/MCEF", "onMinecraftShutdown", "()V", false);
+            PATCH_OK = true;
+            Log.info("Target section has been patched.");
         }
-
     }
 
     private static class McVisitor extends ClassVisitor {
@@ -113,10 +94,10 @@ public class ShutdownPatcher implements IFMLLoadingPlugin, IClassTransformer {
         @Override
         public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
             MethodVisitor mv = cv.visitMethod(access, name, desc, signature, exceptions);
-            if(access == Opcodes.ACC_PUBLIC && desc.equals("()V")) { //void run()
-                if((envObf && name.equals(OBF_RUN_METHOD)) || name.equals("run")) {
-                    Log.info("run() method found; transforming...");
-                    return new RunVisitor(mv, envObf);
+            if(access == Opcodes.ACC_PUBLIC && desc.equals("()V")) { //void shutdownMinecraftApplet()
+                if((envObf && name.equals(OBF_SHUTDOWN_METHOD)) || name.equals("shutdownMinecraftApplet")) {
+                    Log.info("shutdownMinecraftApplet() method found; transforming...");
+                    return new ShutdownMCAppletVisitor(mv);
                 }
             }
 

@@ -7,7 +7,7 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
-@Mod(modid = "MCEF", name = "MCEF", version = MCEF.VERSION)
+@Mod(modid = "mcef", name = "MCEF", version = MCEF.VERSION)
 public class MCEF {
 	
 	public static final String VERSION = "0.8";
@@ -18,7 +18,7 @@ public class MCEF {
 	public static String FORCE_MIRROR = null;
 	public static String HOME_PAGE;
 	
-	@Mod.Instance(value = "net.montoyo.mcef.MCEF")
+	@Mod.Instance(owner = "mcef") //value = "net.montoyo.mcef.MCEF"
 	public static MCEF INSTANCE;
 	
 	@SidedProxy(serverSide = "net.montoyo.mcef.BaseProxy", clientSide = "net.montoyo.mcef.client.ClientProxy")

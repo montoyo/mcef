@@ -1,7 +1,6 @@
 package net.montoyo.mcef.example;
 
 import net.montoyo.mcef.MCEF;
-import net.montoyo.mcef.utilities.Log;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -57,7 +56,7 @@ public class BrowserScreen extends GuiScreen {
             buttonList.add(vidMode = (new GuiButton(4, width - 40, 0, 20, 20, "YT")));
             vidMode.enabled = false;
 			
-			url = new GuiTextField(5, fontRendererObj, 40, 0, width - 100, 20);
+			url = new GuiTextField(5, fontRenderer, 40, 0, width - 100, 20);
 			url.setMaxStringLength(65535);
 			url.setText("mod://mcef/home.html");
 		} else {
@@ -68,12 +67,12 @@ public class BrowserScreen extends GuiScreen {
             buttonList.add(vidMode);
 			
 			//Handle resizing
-            vidMode.xPosition = width - 40;
-			go.xPosition = width - 60;
-			min.xPosition = width - 20;
+            vidMode.x = width - 40;
+			go.x = width - 60;
+			min.x = width - 20;
 			
 			String old = url.getText();
-			url = new GuiTextField(5, fontRendererObj, 40, 0, width - 100, 20);
+			url = new GuiTextField(5, fontRenderer, 40, 0, width - 100, 20);
 			url.setMaxStringLength(65535);
 			url.setText(old);
 		}

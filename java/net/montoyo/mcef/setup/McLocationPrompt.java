@@ -1,7 +1,5 @@
 package net.montoyo.mcef.setup;
 
-import oracle.jrockit.jfr.JFR;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;

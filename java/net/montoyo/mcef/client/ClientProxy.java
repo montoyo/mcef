@@ -20,7 +20,6 @@ import org.cef.browser.CefBrowserOsr;
 import org.cef.browser.CefMessageRouter;
 import org.cef.browser.CefMessageRouter.CefMessageRouterConfig;
 
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.PlayerEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
@@ -45,9 +44,10 @@ public class ClientProxy extends BaseProxy {
 	private CefClient cefClient;
 	private CefMessageRouter cefRouter;
 	private boolean firstRouter = true;
-	private ArrayList<CefBrowserOsr> browsers = new ArrayList<CefBrowserOsr>();
+	private final ArrayList<CefBrowserOsr> browsers = new ArrayList<CefBrowserOsr>();
 	private String updateStr;
-	private Minecraft mc = Minecraft.getMinecraft();
+	private final Minecraft mc = Minecraft.getMinecraft();
+	private final DisplayHandler displayHandler = new DisplayHandler();
 	
 	@Override
 	public void onInit() {
@@ -148,6 +148,7 @@ public class ClientProxy extends BaseProxy {
 		Log.info(cefApp.getVersion().toString());
 		cefRouter = CefMessageRouter.create(new CefMessageRouterConfig("mcefQuery", "mcefCancel"));
 		cefClient.addMessageRouter(cefRouter);
+		cefClient.addDisplayHandler(displayHandler);
 
         if(!ShutdownPatcher.didPatchSucceed()) {
             Log.warning("ShutdownPatcher failed to patch Minecraft.run() method; starting ShutdownThread...");
@@ -177,8 +178,7 @@ public class ClientProxy extends BaseProxy {
 	
 	@Override
 	public void registerDisplayHandler(IDisplayHandler idh) {
-		if(!VIRTUAL)
-			cefClient.addDisplayHandler(new DisplayHandler(idh));
+		displayHandler.addHandler(idh);
 	}
 	
 	@Override
@@ -194,6 +194,8 @@ public class ClientProxy extends BaseProxy {
 	
 	@Override
 	public void registerJSQueryHandler(IJSQueryHandler iqh) {
+	    //TODO: Make sure this is not a trap, like it was for .addDisplayHandler()
+
 		if(!VIRTUAL)
 			cefRouter.addHandler(new MessageRouter(iqh), firstRouter); //SwingUtilities.invokeLater() ?
 		
@@ -208,7 +210,8 @@ public class ClientProxy extends BaseProxy {
 			
 			for(CefBrowserOsr b: browsers)
 				b.mcefUpdate();
-			
+
+			displayHandler.update();
 			mc.mcProfiler.endSection();
 		}
 	}
@@ -224,7 +227,7 @@ public class ClientProxy extends BaseProxy {
 		TextComponentString cct = new TextComponentString(updateStr);
 		cct.setStyle(cs);
 		
-		ev.player.addChatComponentMessage(cct);
+		ev.player.sendMessage(cct);
 	}
 	
 	public void removeBrowser(CefBrowserOsr b) {

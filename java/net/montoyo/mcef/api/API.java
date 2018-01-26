@@ -9,7 +9,7 @@ public interface API {
      * @param transp True is the web view can be transparent
 	 * @return The created web view, or null if this is run on server.
 	 */
-	public IBrowser createBrowser(String url, boolean transp);
+	IBrowser createBrowser(String url, boolean transp);
 
 	/**
 	 * Same as {@link #createBrowser(String, boolean) createBrowser} but with transp set to false.
@@ -17,21 +17,21 @@ public interface API {
 	 * @param url The URL to start from.
 	 * @return The created web view, or null if this is run on server.
 	 */
-	public IBrowser createBrowser(String url);
+	IBrowser createBrowser(String url);
 	
 	/**
 	 * Registers a display handler.
 	 * @param idh The display handler to register.
 	 * @see IDisplayHandler
 	 */
-	public void registerDisplayHandler(IDisplayHandler idh);
+	void registerDisplayHandler(IDisplayHandler idh);
 	
 	/**
 	 * Registers a JavaScript query handler.
 	 * @param iqh The JavaScript query handler to register.
 	 * @see IJSQueryHandler
 	 */
-	public void registerJSQueryHandler(IJSQueryHandler iqh);
+	void registerJSQueryHandler(IJSQueryHandler iqh);
 	
 	/**
 	 * Call this to know if MCEF is in virtual mode.
@@ -40,13 +40,13 @@ public interface API {
 	 * 
 	 * @return true if MCEF is in virtual mode.
 	 */
-	public boolean isVirtual();
+	boolean isVirtual();
 	
 	/**
 	 * Opens the example browser UI.
 	 * @param url The URL to load.
 	 * @see net.montoyo.mcef.example.ExampleMod
 	 */
-	public void openExampleBrowser(String url);
+	void openExampleBrowser(String url);
 
 }

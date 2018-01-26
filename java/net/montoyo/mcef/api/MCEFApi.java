@@ -19,11 +19,11 @@ public class MCEFApi {
 	}
 	
 	/**
-	 * Checks is MCEF was loaded by forge.
+	 * Checks if MCEF was loaded by forge.
 	 * @return true if it is loaded. false otherwise.
 	 */
 	public static boolean isMCEFLoaded() {
-		return Loader.isModLoaded("MCEF");
+		return Loader.isModLoaded("mcef");
 	}
 
 }

@@ -1,11 +1,10 @@
 package net.montoyo.mcef.example;
 
 import net.minecraft.client.gui.GuiScreen;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.montoyo.mcef.api.IBrowser;
-import net.montoyo.mcef.api.MCEFApi;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
@@ -97,7 +96,7 @@ public class ScreenCfg extends GuiScreen {
 
         if(drawSquare) {
             Tessellator t = Tessellator.getInstance();
-            VertexBuffer vb = t.getBuffer();
+            BufferBuilder vb = t.getBuffer();
 
             vb.begin(GL11.GL_LINE_LOOP, DefaultVertexFormats.POSITION_COLOR);
             vb.pos(unscaleX(x + width), unscaleY(y + height), 0.0).color(255, 255, 255, 255).endVertex();
