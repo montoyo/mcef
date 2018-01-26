@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link href="http://fonts.googleapis.com/css?family=Roboto+Slab:400,700" rel="stylesheet" type="text/css">
+<style type="text/css">
+body {
+	font-family: "Roboto Slab", serif;
+	background-color: #405FFF;
+	color: white;
+	margin: 0;
+	padding: 5px;
+}
+
+a {
+	text-decoration: none;
+	color: white;
+	font-weight: 700;
+	padding: 10px;
+	border: 1px solid white;
+	font-size: 16pt;
+	border-radius: 5px;
+}
+
+a:hover {
+	background-color: white;
+	color: #405FFF;
+}
+
+#pic {
+	margin: 0;
+	padding: 0;
+	float: right;
+}
+</style>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript">
+$(function() {
+	window.mcefQuery({
+		"request": "username",
+		"persistent": false,
+		"onSuccess": function(msg) {
+			$("#username").html(msg);
+			$("#pic").html("<img src=\"https://minotar.net/avatar/" + msg + "/70.png\" />");
+		},
+		
+		"onFailure": function(err, msg) {
+		}
+	});
+});
+</script>
+</head>
+<body>
+Hello, <span id="username">?</span>!&nbsp;<div id="pic"></div><br /><br /><br /><br />
+<center><a href="http://google.com">Google!</a>&nbsp;&nbsp;<a href="http://youtube.com">YouTube!</a></center>
+</body>
+</html>

@@ -1,7 +1,7 @@
 # MCEF
 Minecraft Chromium Embedded Framework (MCEF) is an API to allow Minecraft Modders to add custom web browsers into Minecraft.
 The project was initialy made for WebDisplays (www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1291044-web-displays-browse-on-the-internet-in-minecraft).
-It is based on JCEF (https://code.google.com/p/javachromiumembedded/), which is based on CEF (https://code.google.com/p/chromiumembedded/) which is based on chromium (http://www.chromium.org).
+It is based on JCEF (https://code.google.com/p/javachromiumembedded/), which is based on CEF (https://bitbucket.org/chromiumembedded/java-cef) which is based on chromium (http://www.chromium.org).
 
 # Features
 - 2D & 3D web view rendering (not only in GUIs)
