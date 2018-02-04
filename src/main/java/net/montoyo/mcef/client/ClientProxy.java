@@ -1,8 +1,13 @@
 package net.montoyo.mcef.client;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentString;
@@ -10,8 +15,10 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.SplashProgress;
 import net.montoyo.mcef.ShutdownPatcher;
+import net.montoyo.mcef.api.IScheme;
 import net.montoyo.mcef.utilities.ForgeProgressListener;
 import net.montoyo.mcef.utilities.IProgressListener;
+import net.montoyo.mcef.utilities.Util;
 import org.cef.CefApp;
 import org.cef.CefClient;
 import org.cef.CefSettings;
@@ -46,7 +53,16 @@ public class ClientProxy extends BaseProxy {
     private String updateStr;
     private final Minecraft mc = Minecraft.getMinecraft();
     private final DisplayHandler displayHandler = new DisplayHandler();
-    
+    private final HashMap<String, String> mimeTypeMap = new HashMap<>();
+    private final AppHandler appHandler = new AppHandler();
+    private ExampleMod exampleMod;
+
+    @Override
+    public void onPreInit() {
+        exampleMod = new ExampleMod();
+        exampleMod.onPreInit(); //Do it even if example mod is disabled because it registers the "mod://" scheme
+    }
+
     @Override
     public void onInit() {
         boolean enableForgeSplash = false;
@@ -132,8 +148,8 @@ public class ClientProxy extends BaseProxy {
             cefApp = CefApp.getInstance(settings);
             //cefApp.myLoc = ROOT.replace('/', File.separatorChar);
 
-            ModScheme.loadMimeTypeMapping();
-            CefApp.addAppHandler(new AppHandler());
+            loadMimeTypeMapping();
+            CefApp.addAppHandler(appHandler);
             cefClient = cefApp.createClient();
         } catch(Throwable t) {
             Log.error("Going in virtual mode; couldn't initialize CEF.");
@@ -155,7 +171,7 @@ public class ClientProxy extends BaseProxy {
 
         MinecraftForge.EVENT_BUS.register(this);
         if(MCEF.ENABLE_EXAMPLE)
-            (new ExampleMod()).onInit();
+            exampleMod.onInit();
         
         Log.info("MCEF loaded successfuly.");
     }
@@ -187,7 +203,7 @@ public class ClientProxy extends BaseProxy {
     @Override
     public void openExampleBrowser(String url) {
         if(MCEF.ENABLE_EXAMPLE)
-            ExampleMod.INSTANCE.showScreen(url);
+            exampleMod.showScreen(url);
     }
     
     @Override
@@ -195,7 +211,17 @@ public class ClientProxy extends BaseProxy {
         if(!VIRTUAL)
             cefRouter.addHandler(new MessageRouter(iqh), false);
     }
-    
+
+    @Override
+    public void registerScheme(String name, Class<? extends IScheme> schemeClass, boolean std, boolean local, boolean displayIsolated) {
+        appHandler.registerScheme(name, schemeClass, std, local, displayIsolated);
+    }
+
+    @Override
+    public boolean isSchemeRegistered(String name) {
+        return appHandler.isSchemeRegistered(name);
+    }
+
     @SubscribeEvent
     public void onTick(TickEvent.RenderTickEvent ev) {
         if(ev.phase == TickEvent.Phase.START) {
@@ -254,4 +280,86 @@ public class ClientProxy extends BaseProxy {
         cefApp.N_Shutdown();
     }
 
+    public void loadMimeTypeMapping() {
+        Pattern p = Pattern.compile("^(\\S+)\\s+(\\S+)\\s*(\\S*)\\s*(\\S*)$");
+        String line = "";
+        int cLine = 0;
+        mimeTypeMap.clear();
+
+        try {
+            BufferedReader br = new BufferedReader(new InputStreamReader(ClientProxy.class.getResourceAsStream("/assets/mcef/mime.types")));
+
+            while(true) {
+                cLine++;
+                line = br.readLine();
+                if(line == null)
+                    break;
+
+                line = line.trim();
+                if(!line.startsWith("#")) {
+                    Matcher m = p.matcher(line);
+                    if(!m.matches())
+                        continue;
+
+                    mimeTypeMap.put(m.group(2), m.group(1));
+                    if(m.groupCount() >= 4 && !m.group(3).isEmpty()) {
+                        mimeTypeMap.put(m.group(3), m.group(1));
+
+                        if(m.groupCount() >= 5 && !m.group(4).isEmpty())
+                            mimeTypeMap.put(m.group(4), m.group(1));
+                    }
+                }
+            }
+
+            Util.close(br);
+        } catch(Throwable e) {
+            Log.error("[Mime Types] Error while parsing \"%s\" at line %d:", line, cLine);
+            e.printStackTrace();
+        }
+
+        Log.info("Loaded %d mime types", mimeTypeMap.size());
+    }
+
+    @Override
+    public String mimeTypeFromExtension(String ext) {
+        ext = ext.toLowerCase();
+        String ret = mimeTypeMap.get(ext);
+        if(ret != null)
+            return ret;
+
+        //If the mimeTypeMap couldn't be loaded, fall back to common things
+        switch(ext) {
+            case "htm":
+            case "html":
+                return "text/html";
+
+            case "css":
+                return "text/css";
+
+            case "js":
+                return "text/javascript";
+
+            case "png":
+                return "image/png";
+
+            case "jpg":
+            case "jpeg":
+                return "image/jpeg";
+
+            case "gif":
+                return "image/gif";
+
+            case "svg":
+                return "image/svg+xml";
+
+            case "xml":
+                return "text/xml";
+
+            case "txt":
+                return "text/plain";
+
+            default:
+                return null;
+        }
+    }
 }

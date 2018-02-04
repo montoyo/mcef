@@ -40,6 +40,8 @@ public class MCEF {
         ENABLE_EXAMPLE = cfg.getBoolean("enable", "exampleBrowser", true, "Set this to false if you don't want to enable the F10 browser.");
         HOME_PAGE = cfg.getString("home", "exampleBrowser", "mod://mcef/home.html", "The home page of the F10 browser.");
         cfg.save();
+
+        PROXY.onPreInit();
     }
     
     @Mod.EventHandler

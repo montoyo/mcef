@@ -49,4 +49,34 @@ public interface API {
      */
     void openExampleBrowser(String url);
 
+    /**
+     * Returns a mime type from a file extension,
+     * or null, if there is no mapping for this extension.
+     *
+     * @param ext File extension, without the '.'
+     * @return A mime type corresponding to this extension, or null if none could be found.
+     */
+    String mimeTypeFromExtension(String ext);
+
+    /**
+     * Registers a scheme (custom URLs).
+     * This has to be done in preInit, init happens too late.
+     *
+     * @param name The name of the scheme
+     * @param schemeClass The class that will be instantiated for request
+     * @param std Whether the scheme has standards URLs, like "protocol://host/path". Non standard is just "procotol:"
+     * @param local If the scheme is local, some special security rules are applied, just like the "file:///" scheme.
+     * @param displayIsolated iframes (and such things) from an external scheme cannot access pages from this scheme.
+     * @see org.cef.callback.CefSchemeRegistrar
+     */
+    void registerScheme(String name, Class<? extends IScheme> schemeClass, boolean std, boolean local, boolean displayIsolated);
+
+    /**
+     * Checks whether the scheme with name 'name' is already registered.
+     *
+     * @param name The name of the scheme
+     * @return true if it is registered, false otherwise.
+     */
+    boolean isSchemeRegistered(String name);
+
 }

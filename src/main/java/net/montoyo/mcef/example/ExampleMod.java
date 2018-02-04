@@ -37,6 +37,16 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
     private KeyBinding key = new KeyBinding("Open Browser", Keyboard.KEY_F10, "key.categories.misc");
     private Minecraft mc = Minecraft.getMinecraft();
     private BrowserScreen backup = null;
+    private API api;
+
+    public void onPreInit() {
+        //Grab the API and make sure it isn't null.
+        api = MCEFApi.getAPI();
+        if(api == null)
+            return;
+
+        api.registerScheme("mod", ModScheme.class, true, false, false);
+    }
     
     public void onInit() {
         INSTANCE = this;
@@ -44,15 +54,12 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
         //Register key binding and listen to the FML event bus for ticks.
         ClientRegistry.registerKeyBinding(key);
         MinecraftForge.EVENT_BUS.register(this);
-        
-        //Grab the API and make sure it isn't null.
-        API api = MCEFApi.getAPI();
-        if(api == null)
-            return;
-        
-        //Register this class to handle onAddressChange and onQuery events
-        api.registerDisplayHandler(this);
-        api.registerJSQueryHandler(this);
+
+        if(api != null) {
+            //Register this class to handle onAddressChange and onQuery events
+            api.registerDisplayHandler(this);
+            api.registerJSQueryHandler(this);
+        }
     }
     
     public void setBackup(BrowserScreen bu) {
