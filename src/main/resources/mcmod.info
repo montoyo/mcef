@@ -1,6 +1,6 @@
 [
   {
-    "modid": "MCEF",
+    "modid": "mcef",
     "name": "Minecraft Chromium Embedded Framework",
     "description": "API required for mods that uses Chromium in Minecraft",
     "version": "${version}",

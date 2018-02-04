@@ -12,12 +12,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import java.util.LinkedList;
 
-import com.google.common.base.Preconditions;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IStringVisitor;
@@ -28,6 +24,7 @@ import org.cef.DummyComponent;
 import org.cef.callback.CefDragData;
 import org.cef.handler.CefClientHandler;
 import org.cef.handler.CefRenderHandler;
+import org.lwjgl.BufferUtils;
 
 /**
  * This class represents an off-screen rendered browser.
@@ -46,7 +43,6 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
     private DummyComponent dc_ = new DummyComponent();
 
     public static boolean CLEANUP = true;
-    private int tex = 0;
 
     CefBrowserOsr(CefClientHandler clientHandler,
                   String url,
@@ -96,22 +92,9 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
             parent_ = null;
         }
 
-        if (CLEANUP) {
+        if(CLEANUP) {
             ((ClientProxy) MCEF.PROXY).removeBrowser(this);
             renderer_.cleanup();
-        }
-
-        synchronized (queue) {
-            while (queue.size() > 0) {
-                PaintData del = queue.pop();
-
-                //Fix "out of memory errors" on 32bits JVMs...
-                try {
-                    destroyDirectByteBuffer(del.buffer);
-                } catch (Throwable t) {
-                    //t.printStackTrace();
-                }
-            }
         }
 
         super.close();
@@ -171,83 +154,56 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         }
     }
 
-    private class PaintData {
-        Rectangle[] dirtyRects;
-        ByteBuffer buffer;
-        int width;
-        int height;
+    private static class PaintData {
+        private ByteBuffer buffer;
+        private int width;
+        private int height;
+        private Rectangle[] dirtyRects;
+        private boolean hasFrame;
+        private boolean fullReRender;
     }
 
-    private LinkedList<PaintData> queue = new LinkedList<PaintData>();
+    private final PaintData paintData = new PaintData();
 
     @Override
     public void onPaint(CefBrowser browser, boolean popup, Rectangle[] dirtyRects, ByteBuffer buffer, int width, int height) {
+        if(popup)
+            return;
 
-        ByteBuffer clone = ByteBuffer.allocateDirect(buffer.capacity());
-        buffer.rewind();
-        clone.put(buffer);
-        buffer.rewind();
-        clone.flip();
-        clone.clear();
+        final int size = (width * height) << 2;
 
-        PaintData pd = new PaintData();
-        pd.dirtyRects = dirtyRects;
-        pd.buffer = clone;
-        pd.width = width;
-        pd.height = height;
+        synchronized(paintData) {
+            if(buffer.limit() > size)
+                Log.warning("Skipping MCEF browser frame, data is too heavy"); //TODO: Don't spam
+            else {
+                if(paintData.hasFrame) //The previous frame was not uploaded to GL texture, so we skip it and render this on instead
+                    paintData.fullReRender = true;
 
-        synchronized (queue) {
-            if (queue.size() > 16) { //Wayyyy to much; Minecraft must be laggy...
-                Log.warning("Paint queue is big; is Minecraft laggy?");
+                if(paintData.buffer == null || size != paintData.buffer.capacity()) //This only happens when the browser gets resized
+                    paintData.buffer = BufferUtils.createByteBuffer(size);
 
-                while (queue.size() > 0) {
-                    PaintData del = queue.pop();
+                paintData.buffer.position(0);
+                paintData.buffer.limit(buffer.limit());
+                buffer.position(0);
+                paintData.buffer.put(buffer);
+                paintData.buffer.position(0);
 
-                    //Fix "out of memory errors" on 32bits JVMs...
-                    try {
-                        destroyDirectByteBuffer(del.buffer);
-                    } catch (Throwable t) {
-                        //t.printStackTrace();
-                    }
-                }
+                paintData.width = width;
+                paintData.height = height;
+                paintData.dirtyRects = dirtyRects;
+                paintData.hasFrame = true;
             }
-
-            queue.addLast(pd);
         }
     }
 
     public void mcefUpdate() {
-        synchronized (queue) {
-            while (queue.size() > 0) {
-                PaintData pd = queue.pop();
-                renderer_.onPaint(false, pd.dirtyRects, pd.buffer, pd.width, pd.height);
-
-                //Fix "out of memory errors" on 32bits JVMs...
-                try {
-                    destroyDirectByteBuffer(pd.buffer);
-                } catch (Throwable t) {
-                    //t.printStackTrace();
-                }
+        synchronized(paintData) {
+            if(paintData.hasFrame) {
+                renderer_.onPaint(false, paintData.dirtyRects, paintData.buffer, paintData.width, paintData.height, paintData.fullReRender);
+                paintData.hasFrame = false;
+                paintData.fullReRender = false;
             }
         }
-    }
-
-    //Stolen from http://stackoverflow.com/questions/1854398/how-to-garbage-collect-a-direct-buffer-java
-    //Thanks to Li Pi
-    public static void destroyDirectByteBuffer(ByteBuffer toBeDestroyed)
-            throws IllegalArgumentException, IllegalAccessException,
-            InvocationTargetException, SecurityException, NoSuchMethodException {
-
-        Preconditions.checkArgument(toBeDestroyed.isDirect(),
-                "toBeDestroyed isn't direct!");
-
-        Method cleanerMethod = toBeDestroyed.getClass().getMethod("cleaner");
-        cleanerMethod.setAccessible(true);
-        Object cleaner = cleanerMethod.invoke(toBeDestroyed);
-        Method cleanMethod = cleaner.getClass().getMethod("clean");
-        cleanMethod.setAccessible(true);
-        cleanMethod.invoke(cleaner);
-
     }
 
     @Override
