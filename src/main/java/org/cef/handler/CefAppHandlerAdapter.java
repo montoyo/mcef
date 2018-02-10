@@ -16,7 +16,15 @@ import org.cef.callback.CefSchemeRegistrar;
 public abstract class CefAppHandlerAdapter implements CefAppHandler {
   private String [] args_;
 
-  public CefAppHandlerAdapter(String [] args) {
+  public CefAppHandlerAdapter() {
+  }
+
+  public CefAppHandlerAdapter(String[] args) {
+    args_ = args;
+  }
+
+  /* Modified by montoyo for MCEF */
+  public void setArgs(String[] args) {
     args_ = args;
   }
 

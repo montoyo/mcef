@@ -14,6 +14,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 version = "1.12.2-0.9"
 group = "net.montoyo.mcef"
 archivesBaseName = "mcef"
+def enableSigning = false
 
 sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 compileJava {
@@ -21,7 +22,7 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.1.2555"
+    version = "1.12.2-14.23.2.2611"
     runDir = "run"
     
     // the mappings can be changed at any time, and must be in the following format.
@@ -33,22 +34,100 @@ minecraft {
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
-jar {
-    manifest {
-        attributes 'FMLCorePlugin': 'net.montoyo.mcef.ShutdownPatcher'
-        attributes 'FMLCorePluginContainsMod': 'true'
-    }
-}
-
 //MCEF: Generate unobfuscated JAR that can be added to the 'libs' folder
 task apiJar(type: Jar) {
     from sourceSets.main.output
     classifier = 'api'
 	
 	manifest {
-        attributes 'FMLCorePlugin': 'net.montoyo.mcef.ShutdownPatcher'
+        attributes 'FMLCorePlugin': 'net.montoyo.mcef.coremod.ShutdownPatcher'
         attributes 'FMLCorePluginContainsMod': 'true'
     }
+}
+
+//Generate coremod JAR
+import groovy.swing.SwingBuilder
+
+task coremodJar(type: Jar) {
+    from(sourceSets.main.output) {
+        include 'net/montoyo/mcef/coremod/**'
+    }
+
+    manifest {
+        attributes 'FMLCorePlugin': 'net.montoyo.mcef.coremod.ShutdownPatcher'
+    }
+
+    classifier = 'coremod'
+
+    doLast {
+        if(enableSigning) {
+            def keyAlias = ''
+            def keyFile = ''
+            def keyPswd = ''
+            def dstDir = new File(coremodJar.destinationDir, 'signed')
+            dstDir.mkdirs()
+
+            new SwingBuilder().edt {
+                dialog(modal: true,
+                        title: 'Signing details required',
+                        alwaysOnTop: true,
+                        resizable: false,
+                        locationRelativeTo: null,
+                        pack: true,
+                        show: true) {
+                    vbox {
+                        label(text: 'Key File:')
+                        input1 = textField()
+                        label(text: 'Key Alias:')
+                        input2 = textField()
+                        label(text: 'Key Password:')
+                        input3 = passwordField()
+                        button(defaultButton: true, text: 'Sign', actionPerformed: {
+                            keyFile = input1.text
+                            keyAlias = input2.text
+                            keyPswd = new String(input3.password)
+                            dispose()
+                        })
+                    }
+                }
+            }
+
+            ant.signjar(
+                    jar: coremodJar.archivePath.absolutePath,
+                    destDir: dstDir.absolutePath,
+                    alias: keyAlias,
+                    storetype: 'jks',
+                    keystore: keyFile,
+                    storepass: keyPswd,
+                    verbose: true,
+                    preservelastmodified: 'true'
+            )
+        }
+    }
+}
+
+reobf {
+    coremodJar { mappingType = 'SEARGE' }
+}
+
+jar {
+    exclude 'net/montoyo/mcef/coremod/**'
+
+    File signedCoremod
+    if(enableSigning)
+        signedCoremod = new File(new File(coremodJar.destinationDir, 'signed'), coremodJar.archivePath.name)
+    else
+        signedCoremod = coremodJar.archivePath
+
+    from(signedCoremod.absolutePath) {
+        include '*'
+    }
+
+    manifest {
+        attributes 'ContainedDeps': coremodJar.archivePath.name
+    }
+
+    dependsOn reobfCoremodJar
 }
 
 artifacts {

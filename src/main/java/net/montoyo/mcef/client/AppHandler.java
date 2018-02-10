@@ -35,10 +35,6 @@ public class AppHandler extends CefAppHandlerAdapter {
 
     private final HashMap<String, SchemeData> schemeMap = new HashMap<>();
 
-    public AppHandler() {
-        super(new String[] {});
-    }
-
     public void registerScheme(String name, Class<? extends IScheme> cls, boolean std, boolean local, boolean dispIsolated) {
         schemeMap.put(name, new SchemeData(cls, std, local, dispIsolated));
     }

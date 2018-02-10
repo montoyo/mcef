@@ -2,6 +2,7 @@ package net.montoyo.mcef.client;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.client.SplashProgress;
-import net.montoyo.mcef.ShutdownPatcher;
+import net.montoyo.mcef.coremod.ShutdownPatcher;
 import net.montoyo.mcef.api.IScheme;
 import net.montoyo.mcef.utilities.ForgeProgressListener;
 import net.montoyo.mcef.utilities.IProgressListener;
@@ -49,7 +50,7 @@ public class ClientProxy extends BaseProxy {
     private CefApp cefApp;
     private CefClient cefClient;
     private CefMessageRouter cefRouter;
-    private final ArrayList<CefBrowserOsr> browsers = new ArrayList<CefBrowserOsr>();
+    private final ArrayList<CefBrowserOsr> browsers = new ArrayList<>();
     private String updateStr;
     private final Minecraft mc = Minecraft.getMinecraft();
     private final DisplayHandler displayHandler = new DisplayHandler();
@@ -65,6 +66,12 @@ public class ClientProxy extends BaseProxy {
 
     @Override
     public void onInit() {
+        if(MCEF.DISABLE_GPU_RENDERING) {
+            Log.info("GPU rendering is disabled because the new launcher sucks.");
+            appHandler.setArgs(new String[] { "--disable-gpu" });
+        } else
+            appHandler.setArgs(new String[0]);
+
         boolean enableForgeSplash = false;
         try {
             Field f = SplashProgress.class.getDeclaredField("enabled");
@@ -118,8 +125,8 @@ public class ClientProxy extends BaseProxy {
             String[] paths = (String[]) pathsField.get(null);
             String[] newList = new String[paths.length + 1];
             
-            System.arraycopy(paths, 0, newList, 0, paths.length);
-            newList[paths.length] = ROOT.replace('/', File.separatorChar);
+            System.arraycopy(paths, 0, newList, 1, paths.length);
+            newList[0] = ROOT.replace('/', File.separatorChar);
             pathsField.set(null, newList);
         } catch(Exception e) {
             Log.error("Failed to do it! Entering virtual mode...");
@@ -145,6 +152,28 @@ public class ClientProxy extends BaseProxy {
         //settings.log_severity = CefSettings.LogSeverity.LOGSEVERITY_VERBOSE;
         
         try {
+            if(OS.isWindows()) {
+                //FIXME: Fix for windows cuz it's loading the wrong dependencies
+                ArrayList<String> libs = new ArrayList<>();
+                libs.add(System.getProperty("sun.arch.data.model").equals("64") ? "d3dcompiler_47.dll" : "d3dcompiler_43.dll");
+                libs.add("libGLESv2.dll");
+                libs.add("libEGL.dll");
+                libs.add("libcef.dll");
+                libs.add("jcef.dll");
+
+                for(String lib: libs) {
+                    File f = new File(ROOT, lib);
+                    try {
+                        f = f.getCanonicalFile();
+                    } catch(IOException ex) {
+                        f = f.getAbsoluteFile();
+                    }
+
+                    System.load(f.getPath());
+                }
+            } else
+                System.loadLibrary("jcef");
+
             cefApp = CefApp.getInstance(settings);
             //cefApp.myLoc = ROOT.replace('/', File.separatorChar);
 

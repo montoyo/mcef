@@ -1,8 +1,7 @@
 package net.montoyo.mcef.utilities;
 
 import org.apache.logging.log4j.Level;
-
-import net.minecraftforge.fml.common.FMLLog;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * A set of functions to log messages into the MCEF log channel.
@@ -12,15 +11,15 @@ import net.minecraftforge.fml.common.FMLLog;
 public class Log {
     
     public static void info(String what, Object ... data) {
-        FMLLog.log("MCEF", Level.INFO, what, data);
+        LogManager.getLogger("MCEF").log(Level.INFO, String.format(what, data));
     }
     
     public static void warning(String what, Object ... data) {
-        FMLLog.log("MCEF", Level.WARN, what, data);
+        LogManager.getLogger("MCEF").log(Level.WARN, String.format(what, data));
     }
     
     public static void error(String what, Object ... data) {
-        FMLLog.log("MCEF", Level.ERROR, what, data);
+        LogManager.getLogger("MCEF").log(Level.ERROR, String.format(what, data));
     }
 
 }

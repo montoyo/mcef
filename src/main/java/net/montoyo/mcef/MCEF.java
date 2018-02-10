@@ -17,6 +17,7 @@ public class MCEF {
     public static boolean USE_FORGE_SPLASH;
     public static String FORCE_MIRROR = null;
     public static String HOME_PAGE;
+    public static boolean DISABLE_GPU_RENDERING;
     
     @Mod.Instance(owner = "mcef")
     public static MCEF INSTANCE;
@@ -39,6 +40,7 @@ public class MCEF {
 
         ENABLE_EXAMPLE = cfg.getBoolean("enable", "exampleBrowser", true, "Set this to false if you don't want to enable the F10 browser.");
         HOME_PAGE = cfg.getString("home", "exampleBrowser", "mod://mcef/home.html", "The home page of the F10 browser.");
+        DISABLE_GPU_RENDERING = cfg.getBoolean("disableGPURendering", "main", true, "The new launcher breaks CEF GPU rendering. Re-enabling it may work with a different launcher like MultiMC.");
         cfg.save();
 
         PROXY.onPreInit();
