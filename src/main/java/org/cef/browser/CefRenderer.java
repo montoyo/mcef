@@ -8,18 +8,29 @@ package org.cef.browser;
 
 import java.awt.Rectangle;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.utilities.Log;
 import org.lwjgl.opengl.EXTBgra;
 
 import static org.lwjgl.opengl.GL11.*;
 
-class CefRenderer {
+public class CefRenderer {
+
+    //montoyo: debug tool
+    private static final ArrayList<Integer> GL_TEXTURES = new ArrayList<>();
+    public static void dumpVRAMLeak() {
+        Log.info(">>>>> MCEF: Beginning VRAM leak report");
+        GL_TEXTURES.forEach(tex -> Log.warning(">>>>> MCEF: This texture has not been freed: " + tex));
+        Log.info(">>>>> MCEF: End of VRAM leak report");
+    }
+
     private boolean transparent_;
     public int[] texture_id_ = new int[1];
     private int view_width_ = 0;
@@ -41,6 +52,9 @@ class CefRenderer {
         GlStateManager.enableTexture2D();
         texture_id_[0] = glGenTextures();
 
+        if(MCEF.CHECK_VRAM_LEAK)
+            GL_TEXTURES.add(texture_id_[0]);
+
         GlStateManager.bindTexture(texture_id_[0]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -49,8 +63,12 @@ class CefRenderer {
     }
 
     protected void cleanup() {
-        if(texture_id_[0] != 0)
+        if(texture_id_[0] != 0) {
+            if(MCEF.CHECK_VRAM_LEAK)
+                GL_TEXTURES.remove((Object) texture_id_[0]);
+
             glDeleteTextures(texture_id_[0]);
+        }
     }
 
     public void render(double x1, double y1, double x2, double y2) {

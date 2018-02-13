@@ -71,21 +71,14 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
     }
     
     public void showScreen(String url) {
-        BrowserScreen scr;
-        
         if(mc.currentScreen instanceof BrowserScreen)
-            scr = (BrowserScreen) mc.currentScreen;
-        else {
-            if(hasBackup())
-                scr = backup;
-            else
-                scr = new BrowserScreen();
-            
-            mc.displayGuiScreen(scr);
+            ((BrowserScreen) mc.currentScreen).loadURL(url);
+        else if(hasBackup()) {
+            mc.displayGuiScreen(backup);
+            backup.loadURL(url);
             backup = null;
-        }
-        
-        scr.loadURL(url);
+        } else
+            mc.displayGuiScreen(new BrowserScreen(url));
     }
     
     public IBrowser getBrowser() {

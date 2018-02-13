@@ -41,6 +41,7 @@ import net.montoyo.mcef.example.ExampleMod;
 import net.montoyo.mcef.remote.RemoteConfig;
 import net.montoyo.mcef.utilities.Log;
 import net.montoyo.mcef.virtual.VirtualBrowser;
+import org.cef.browser.CefRenderer;
 
 public class ClientProxy extends BaseProxy {
     
@@ -300,6 +301,9 @@ public class ClientProxy extends BaseProxy {
 
         browsers.clear();
         cefClient.dispose();
+
+        if(MCEF.CHECK_VRAM_LEAK)
+            CefRenderer.dumpVRAMLeak();
 
         try {
             //Yea sometimes, this is needed for some reasons.

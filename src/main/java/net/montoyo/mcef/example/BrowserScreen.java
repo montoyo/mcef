@@ -1,5 +1,6 @@
 package net.montoyo.mcef.example;
 
+import net.minecraft.client.renderer.GlStateManager;
 import net.montoyo.mcef.MCEF;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.input.Keyboard;
@@ -21,10 +22,19 @@ public class BrowserScreen extends GuiScreen {
     private GuiButton min = null;
     private GuiButton vidMode = null;
     private GuiTextField url = null;
+    private String urlToLoad = null;
 
     private static final String YT_REGEX1 = "^https?://(?:www\\.)?youtube\\.com/watch\\?v=([a-zA-Z0-9_\\-]+)$";
     private static final String YT_REGEX2 = "^https?://(?:www\\.)?youtu\\.be/([a-zA-Z0-9_\\-]+)$";
     private static final String YT_REGEX3 = "^https?://(?:www\\.)?youtube\\.com/embed/([a-zA-Z0-9_\\-]+)(\\?.+)?$";
+
+    public BrowserScreen() {
+        urlToLoad = MCEF.HOME_PAGE;
+    }
+
+    public BrowserScreen(String url) {
+        urlToLoad = (url == null) ? MCEF.HOME_PAGE : url;
+    }
     
     @Override
     public void initGui() {
@@ -37,7 +47,8 @@ public class BrowserScreen extends GuiScreen {
                 return;
             
             //Create a browser and resize it to fit the screen
-            browser = api.createBrowser(MCEF.HOME_PAGE, false);
+            browser = api.createBrowser((urlToLoad == null) ? MCEF.HOME_PAGE : urlToLoad, false);
+            urlToLoad = null;
         }
         
         //Resize the browser if window size changed
@@ -58,7 +69,7 @@ public class BrowserScreen extends GuiScreen {
             
             url = new GuiTextField(5, fontRenderer, 40, 0, width - 100, 20);
             url.setMaxStringLength(65535);
-            url.setText("mod://mcef/home.html");
+            //url.setText("mod://mcef/home.html");
         } else {
             buttonList.add(back);
             buttonList.add(fwd);
@@ -84,9 +95,20 @@ public class BrowserScreen extends GuiScreen {
     }
     
     public void loadURL(String url) {
-        browser.loadURL(url);
+        if(browser == null)
+            urlToLoad = url;
+        else
+            browser.loadURL(url);
     }
-    
+
+    @Override
+    public void updateScreen() {
+        if(urlToLoad != null && browser != null) {
+            browser.loadURL(urlToLoad);
+            urlToLoad = null;
+        }
+    }
+
     @Override
     public void drawScreen(int i1, int i2, float f) {
         //Render the URL box first because it overflows a bit
@@ -97,9 +119,11 @@ public class BrowserScreen extends GuiScreen {
         
         //Renders the browser if itsn't null
         if(browser != null) {
-            GL11.glDisable(GL11.GL_DEPTH_TEST);
+            GlStateManager.disableDepth();
+            GlStateManager.enableTexture2D();
+            GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
             browser.draw(.0d, height, width, 20.d); //Don't forget to flip Y axis.
-            GL11.glEnable(GL11.GL_DEPTH_TEST);
+            GlStateManager.enableDepth();
         }
     }
     
@@ -149,11 +173,14 @@ public class BrowserScreen extends GuiScreen {
             boolean pressed = Mouse.getEventButtonState();
             int sx = Mouse.getEventX();
             int sy = Mouse.getEventY();
+            int wheel = Mouse.getEventDWheel();
             
             if(browser != null) { //Inject events into browser. TODO: Handle mods & leaving.
                 int y = mc.displayHeight - sy - scaleY(20); //Don't forget to flip Y axis.
-                
-                if(btn == -1)
+
+                if(wheel != 0)
+                    browser.injectMouseWheel(sx, y, 0, 1, wheel);
+                else if(btn == -1)
                     browser.injectMouseMove(sx, y, 0, y < 0);
                 else
                     browser.injectMouseButton(sx, y, 0, btn + 1, pressed, 1);

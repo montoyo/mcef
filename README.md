@@ -32,4 +32,4 @@ To understand how it works, you may look at the net.montoyo.mcef.example package
 * How to use the mod:// scheme
 
 # For forkers
-Don't forget to add "-Dfml.coreMods.load=net.montoyo.mcef.ShutdownPatcher" to the VM options, otherwise the Java process will hang forever!
+Don't forget to add "-Dfml.coreMods.load=net.montoyo.mcef.coremod.ShutdownPatcher" to the VM options, otherwise the Java process will hang forever!
