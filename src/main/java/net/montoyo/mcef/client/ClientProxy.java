@@ -99,6 +99,8 @@ public class ClientProxy extends BaseProxy {
             ipl = new UpdateFrame();
         
         cfg.load();
+        File[] resourceArray = cfg.getResourceArray();
+
         if(!cfg.updateFileListing(fileListing, false))
             Log.warning("There was a problem while establishing file list. Uninstall may not delete all files.");
 
@@ -138,6 +140,12 @@ public class ClientProxy extends BaseProxy {
         }
         
         Log.info("Done without errors.");
+
+        if(OS.isLinux()) {
+            Log.info("Applying linux patch...");
+            LinuxPatch.doPatch(resourceArray);
+        }
+
         String exeSuffix;
         if(OS.isWindows())
             exeSuffix = ".exe";
@@ -153,27 +161,29 @@ public class ClientProxy extends BaseProxy {
         //settings.log_severity = CefSettings.LogSeverity.LOGSEVERITY_VERBOSE;
         
         try {
+            ArrayList<String> libs = new ArrayList<>();
+
             if(OS.isWindows()) {
-                //FIXME: Fix for windows cuz it's loading the wrong dependencies
-                ArrayList<String> libs = new ArrayList<>();
                 libs.add(System.getProperty("sun.arch.data.model").equals("64") ? "d3dcompiler_47.dll" : "d3dcompiler_43.dll");
                 libs.add("libGLESv2.dll");
                 libs.add("libEGL.dll");
                 libs.add("libcef.dll");
                 libs.add("jcef.dll");
+            } else {
+                libs.add("libcef.so");
+                libs.add("libjcef.so");
+            }
 
-                for(String lib: libs) {
-                    File f = new File(ROOT, lib);
-                    try {
-                        f = f.getCanonicalFile();
-                    } catch(IOException ex) {
-                        f = f.getAbsoluteFile();
-                    }
-
-                    System.load(f.getPath());
+            for(String lib: libs) {
+                File f = new File(ROOT, lib);
+                try {
+                    f = f.getCanonicalFile();
+                } catch(IOException ex) {
+                    f = f.getAbsoluteFile();
                 }
-            } else
-                System.loadLibrary("jcef");
+
+                System.load(f.getPath());
+            }
 
             cefApp = CefApp.getInstance(settings);
             //cefApp.myLoc = ROOT.replace('/', File.separatorChar);

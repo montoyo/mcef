@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-@Deprecated
 public class LinuxPatch {
 
     private static String[] getBinDirs() {
@@ -17,7 +16,7 @@ public class LinuxPatch {
     }
 
     private static String[] getPatchFiles() {
-        return new String[] { "icudtl.dat", "natives_blob.bin", "snapshot_blob.bin" };
+        return new String[] { "icudtl.dat", "natives_blob.bin", "snapshot_blob.bin", "v8_context_snapshot.bin" };
     }
 
     private static String getExeLocation(String exe) {
@@ -61,18 +60,26 @@ public class LinuxPatch {
         Util.close(bw);
     }
 
+    public static boolean chmodX(File p) {
+        try {
+            return Runtime.getRuntime().exec(new String[] { "chmod", "+x", p.getAbsolutePath() }).waitFor() == 0;
+        } catch(IOException | InterruptedException ex) {
+            return false;
+        }
+    }
+
     public static boolean runScript() {
         String cmd = getGksudoLocation();
         if(cmd == null)
             return false;
 
         try {
-            if(Runtime.getRuntime().exec(new String[] { "chmod", "+x", getScriptFile().getAbsolutePath() }).exitValue() != 0) {
+            if(!chmodX(getScriptFile())) {
                 Log.error("chmod failed!");
                 return false;
             }
 
-            if(Runtime.getRuntime().exec(new String[] { cmd, getScriptFile().getAbsolutePath() }).exitValue() != 0) {
+            if(Runtime.getRuntime().exec(new String[] { cmd, getScriptFile().getAbsolutePath() }).waitFor() != 0) {
                 Log.error("gksudo failed!");
                 return false;
             }
@@ -88,7 +95,7 @@ public class LinuxPatch {
             }
 
             return true;
-        } catch(IOException e) {
+        } catch(IOException | InterruptedException e) {
             e.printStackTrace();
             return false;
         }
@@ -106,7 +113,12 @@ public class LinuxPatch {
         return true;
     }
 
-    public static boolean doPatch() {
+    public static boolean doPatch(File[] resourceArray) {
+        for(File f: resourceArray) {
+            if(f.exists() && !chmodX(f))
+                Log.warning("Couldn't give execution access to %s", f.getAbsolutePath());
+        }
+
         if(isPatched())
             return true;
 

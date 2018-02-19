@@ -284,4 +284,8 @@ public class RemoteConfig {
         return fl.save() && allOk;
     }
 
+    public File[] getResourceArray() {
+        return resources.stream().map(r -> Resource.getLocationOf(r.getFileName())).toArray(File[]::new);
+    }
+
 }
