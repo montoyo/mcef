@@ -2,8 +2,10 @@ package net.montoyo.mcef.client;
 
 import net.montoyo.mcef.api.IDisplayHandler;
 
+import org.cef.CefSettings;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefBrowserOsr;
+import org.cef.browser.CefFrame;
 import org.cef.handler.CefDisplayHandler;
 
 import java.util.ArrayList;
@@ -57,7 +59,7 @@ public class DisplayHandler implements CefDisplayHandler {
     }
 
     @Override
-    public void onAddressChange(CefBrowser browser, String url) {
+    public void onAddressChange(CefBrowser browser, CefFrame frame, String url) {
         synchronized(queue) {
             queue.add(new EventData(browser, url, EventType.ADDRESS_CHANGE));
         }
@@ -87,7 +89,8 @@ public class DisplayHandler implements CefDisplayHandler {
     }
 
     @Override
-    public boolean onConsoleMessage(CefBrowser browser, String message, String source, int line) {
+    public boolean onConsoleMessage(CefBrowser browser, CefSettings.LogSeverity level,
+                                    String message, String source, int line) {
         return false;
     }
 

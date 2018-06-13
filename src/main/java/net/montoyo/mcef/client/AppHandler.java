@@ -6,6 +6,7 @@ import net.montoyo.mcef.utilities.Log;
 
 import org.cef.CefApp;
 import org.cef.browser.CefBrowser;
+import org.cef.browser.CefFrame;
 import org.cef.callback.CefSchemeHandlerFactory;
 import org.cef.callback.CefSchemeRegistrar;
 import org.cef.handler.CefAppHandlerAdapter;
@@ -23,20 +24,28 @@ public class AppHandler extends CefAppHandlerAdapter {
         private boolean std;
         private boolean local;
         private boolean dispIsolated;
+        private boolean isSecure;
+        private boolean isCorsEnabled;
+        private boolean isCspBypassing;
 
-        private SchemeData(Class<? extends IScheme> cls, boolean std, boolean local, boolean dispIsolated) {
+        private SchemeData(Class<? extends IScheme> cls, boolean std, boolean local, boolean dispIsolated,
+                           boolean isSecure, boolean isCorsEnabled, boolean isCspBypassing) {
             this.cls = cls;
             this.std = std;
             this.local = local;
             this.dispIsolated = dispIsolated;
+            this.isSecure = isSecure;
+            this.isCorsEnabled = isCorsEnabled;
+            this.isCspBypassing = isCspBypassing;
         }
 
     }
 
     private final HashMap<String, SchemeData> schemeMap = new HashMap<>();
 
-    public void registerScheme(String name, Class<? extends IScheme> cls, boolean std, boolean local, boolean dispIsolated) {
-        schemeMap.put(name, new SchemeData(cls, std, local, dispIsolated));
+    public void registerScheme(String name, Class<? extends IScheme> cls, boolean std, boolean local, boolean dispIsolated,
+                               boolean isSecure, boolean isCorsEnabled, boolean isCspBypassing) {
+        schemeMap.put(name, new SchemeData(cls, std, local, dispIsolated, isSecure, isCorsEnabled, isCspBypassing));
     }
 
     public boolean isSchemeRegistered(String name) {
@@ -48,7 +57,10 @@ public class AppHandler extends CefAppHandlerAdapter {
         int cnt = 0;
 
         for(Map.Entry<String, SchemeData> entry : schemeMap.entrySet()) {
-            if(reg.addCustomScheme(entry.getKey(), entry.getValue().std, entry.getValue().local, entry.getValue().dispIsolated))
+            if(reg.addCustomScheme(
+                    entry.getKey(), entry.getValue().std, entry.getValue().local, entry.getValue().dispIsolated,
+                    entry.getValue().isSecure, entry.getValue().isCorsEnabled, entry.getValue().isCspBypassing
+            ))
                 cnt++;
             else
                 Log.error("Could not register scheme %s", entry.getKey());
@@ -74,7 +86,7 @@ public class AppHandler extends CefAppHandlerAdapter {
         }
 
         @Override
-        public CefResourceHandler create(CefBrowser browser, String schemeName, CefRequest request) {
+        public CefResourceHandler create(CefBrowser browser, CefFrame frame, String schemeName, CefRequest request) {
             try {
                 return new SchemeResourceHandler(cls.newInstance());
             } catch(Throwable t) {

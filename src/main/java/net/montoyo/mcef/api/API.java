@@ -67,9 +67,20 @@ public interface API {
      * @param std Whether the scheme has standards URLs, like "protocol://host/path". Non standard is just "procotol:"
      * @param local If the scheme is local, some special security rules are applied, just like the "file:///" scheme.
      * @param displayIsolated iframes (and such things) from an external scheme cannot access pages from this scheme.
+     * @param isSecure If |isSecure| is true the scheme will be treated with the same security
+     * rules as those applied to "https" URLs. For example, loading this scheme
+     * from other secure schemes will not trigger mixed content warnings.
+     *
+     * @param isCorsEnabled If |isCorsEnabled| is true the scheme that can be sent CORS requests.
+     * This value should be true in most cases where |isStandard| is true.
+     *
+     * @param isCspBypassing If |isCspBypassing| is true the scheme can bypass Content-Security-Policy
+     * (CSP) checks. This value should be false in most cases where |isStandard|
+     * is true.
      * @see org.cef.callback.CefSchemeRegistrar
      */
-    void registerScheme(String name, Class<? extends IScheme> schemeClass, boolean std, boolean local, boolean displayIsolated);
+    void registerScheme(String name, Class<? extends IScheme> schemeClass, boolean std, boolean local, boolean displayIsolated,
+                        boolean isSecure, boolean isCorsEnabled, boolean isCspBypassing);
 
     /**
      * Checks whether the scheme with name 'name' is already registered.

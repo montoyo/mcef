@@ -253,8 +253,9 @@ public class ClientProxy extends BaseProxy {
     }
 
     @Override
-    public void registerScheme(String name, Class<? extends IScheme> schemeClass, boolean std, boolean local, boolean displayIsolated) {
-        appHandler.registerScheme(name, schemeClass, std, local, displayIsolated);
+    public void registerScheme(String name, Class<? extends IScheme> schemeClass, boolean std, boolean local, boolean displayIsolated,
+                               boolean isSecure, boolean isCorsEnabled, boolean isCspBypassing) {
+        appHandler.registerScheme(name, schemeClass, std, local, displayIsolated, isSecure, isCorsEnabled, isCspBypassing);
     }
 
     @Override

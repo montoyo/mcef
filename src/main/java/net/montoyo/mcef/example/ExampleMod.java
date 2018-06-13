@@ -45,7 +45,10 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
         if(api == null)
             return;
 
-        api.registerScheme("mod", ModScheme.class, true, false, false);
+        api.registerScheme("mod", ModScheme.class,
+                true, false, false,
+                true, true, false
+                );
     }
     
     public void onInit() {
