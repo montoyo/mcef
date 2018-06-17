@@ -45,7 +45,7 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
         if(api == null)
             return;
 
-        api.registerScheme("mod", ModScheme.class,
+        api.registerSchemeEx("mod", ModScheme.class,
                 true, false, false,
                 true, true, false
                 );

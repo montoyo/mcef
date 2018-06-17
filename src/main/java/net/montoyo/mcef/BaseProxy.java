@@ -50,7 +50,12 @@ public class BaseProxy implements API {
     }
 
     @Override
-    public void registerScheme(String name, Class<? extends IScheme> schemeClass, boolean std, boolean local, boolean displayIsolated,
+    public void registerScheme(String name, Class<? extends IScheme> schemeClass, boolean std, boolean local, boolean displayIsolated) {
+        registerSchemeEx(name, schemeClass, std, local, displayIsolated, true, true, false);
+    }
+
+    @Override
+    public void registerSchemeEx(String name, Class<? extends IScheme> schemeClass, boolean std, boolean local, boolean displayIsolated,
                                boolean isSecure, boolean isCorsEnabled, boolean isCspBypassing) {
         Log.warning("A mod called API.registerScheme() from server!");
     }

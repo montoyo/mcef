@@ -79,8 +79,10 @@ public interface API {
      * is true.
      * @see org.cef.callback.CefSchemeRegistrar
      */
-    void registerScheme(String name, Class<? extends IScheme> schemeClass, boolean std, boolean local, boolean displayIsolated,
-                        boolean isSecure, boolean isCorsEnabled, boolean isCspBypassing);
+    void registerScheme(String name, Class<? extends IScheme> schemeClass, boolean std, boolean local, boolean displayIsolated);
+
+    void registerSchemeEx(String name, Class<? extends IScheme> schemeClass, boolean std, boolean local, boolean displayIsolated,
+                          boolean isSecure, boolean isCorsEnabled, boolean isCspBypassing);
 
     /**
      * Checks whether the scheme with name 'name' is already registered.

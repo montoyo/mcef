@@ -253,7 +253,12 @@ public class ClientProxy extends BaseProxy {
     }
 
     @Override
-    public void registerScheme(String name, Class<? extends IScheme> schemeClass, boolean std, boolean local, boolean displayIsolated,
+    public void registerScheme(String name, Class<? extends IScheme> schemeClass, boolean std, boolean local, boolean displayIsolated) {
+        registerSchemeEx(name, schemeClass, std, local, displayIsolated, true, true, false);
+    }
+
+    @Override
+    public void registerSchemeEx(String name, Class<? extends IScheme> schemeClass, boolean std, boolean local, boolean displayIsolated,
                                boolean isSecure, boolean isCorsEnabled, boolean isCspBypassing) {
         appHandler.registerScheme(name, schemeClass, std, local, displayIsolated, isSecure, isCorsEnabled, isCspBypassing);
     }
@@ -321,6 +326,8 @@ public class ClientProxy extends BaseProxy {
             Thread.sleep(100);
         } catch(Throwable t) {}
 
+        // DOM: TODO: MCEF: we may need to call this from the other thread, getting this failed check and crash:
+        // [0617/001244.151:FATAL:context.cpp(129)] Check failed: thread_checker_.CalledOnValidThread()
         cefApp.N_Shutdown();
     }
 
