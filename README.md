@@ -1,3 +1,20 @@
+DONT USE THIS FORK
+DONT USE THIS FORK
+DONT USE THIS FORK
+DONT USE THIS FORK
+DONT USE THIS FORKDONT USE THIS FORKDONT USE THIS FORK
+DONT USE THIS FORK
+DONT USE THIS FORK
+DONT USE THIS FORKDONT USE THIS FORKDONT USE THIS FORK
+
+
+DONT USE THIS FORK
+
+
+DONT USE THIS FORK
+
+it's not ready yet.  WIP upgrading to latest JCEF/CEF library.  but not working yet.
+
 # MCEF
 Minecraft Chromium Embedded Framework (MCEF) is an API to allow Minecraft Modders to add custom web browsers into Minecraft.
 The project was initialy made for WebDisplays (www.minecraftforum.net/forums/mapping-and-modding/minecraft-mods/1291044-web-displays-browse-on-the-internet-in-minecraft).
