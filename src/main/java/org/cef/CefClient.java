@@ -662,7 +662,8 @@ public class CefClient extends CefClientHandler
     @Override
     public void onPaint(CefBrowser browser, boolean popup, Rectangle[] dirtyRects,
             ByteBuffer buffer, int width, int height) {
-        if (browser == null) return;
+        if (browser == null)
+            return;
 
         CefRenderHandler realHandler = browser.getRenderHandler();
         if (realHandler != null)
