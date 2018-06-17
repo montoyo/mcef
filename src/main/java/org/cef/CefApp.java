@@ -450,11 +450,10 @@ public class CefApp extends CefAppHandlerAdapter {
                 }
             };
 
-            //montoyo: Modified for MCEF
-            //HACK //if (SwingUtilities.isEventDispatchThread())
+            if (SwingUtilities.isEventDispatchThread())
                 r.run();
-            //HACK //else
-            //HACK //SwingUtilities.invokeAndWait(r);
+            else
+                SwingUtilities.invokeAndWait(r);
         } catch (Exception e) {
             e.printStackTrace();
         }
