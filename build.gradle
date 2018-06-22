@@ -11,7 +11,7 @@ apply plugin: 'net.minecraftforge.gradle.forge'
 //Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
 
-version = "1.12.2-0.9"
+version = "1.12.2-0.10"
 group = "net.montoyo.mcef"
 archivesBaseName = "mcef"
 def enableSigning = false
@@ -125,6 +125,7 @@ jar {
 
     manifest {
         attributes 'ContainedDeps': coremodJar.archivePath.name
+        attributes 'Main-Class': 'net.montoyo.mcef.setup.SetupUI'
     }
 
     dependsOn reobfCoremodJar
