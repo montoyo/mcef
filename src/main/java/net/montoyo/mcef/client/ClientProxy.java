@@ -167,9 +167,11 @@ public class ClientProxy extends BaseProxy {
                 libs.add(System.getProperty("sun.arch.data.model").equals("64") ? "d3dcompiler_47.dll" : "d3dcompiler_43.dll");
                 libs.add("libGLESv2.dll");
                 libs.add("libEGL.dll");
+                libs.add("chrome_elf.dll");
                 libs.add("libcef.dll");
                 libs.add("jcef.dll");
             } else {
+                libs.add("chrome_elf.so");
                 libs.add("libcef.so");
                 libs.add("libjcef.so");
             }
