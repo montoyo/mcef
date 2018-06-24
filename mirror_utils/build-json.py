@@ -1,6 +1,10 @@
 import os
 import json
 import hashlib
+import gzip
+import shutil
+import tempfile
+import pathlib
 
 # Quick script to build new config2.json for mirrors for new releases of CEF/JCEF
 # In the same folder as this script, make a folder called "dist/" and put the binaries there.
@@ -29,15 +33,33 @@ out = topdir+"config2.json"
 
 
 def get_sha1_hash(file):
-    BLOCKSIZE = 65536
-    hasher = hashlib.sha1()
     with open(file, 'rb') as afile:
-        buf = afile.read(BLOCKSIZE)
-        while len(buf) > 0:
-            hasher.update(buf)
-            buf = afile.read(BLOCKSIZE)
+        return get_sha1_hash_from_filehandle(afile)
+
+
+def get_sha1_hash_from_filehandle(filehandle):
+    hasher = hashlib.sha1()
+
+    BLOCKSIZE = 65536
+    buf = filehandle.read(BLOCKSIZE)
+    while len(buf) > 0:
+        hasher.update(buf)
+        buf = filehandle.read(BLOCKSIZE)
 
     return hasher.hexdigest()
+
+
+def get_hash_of_file_contents(full_path):
+    if ".gz" not in pathlib.Path(full_path).suffix:
+        return get_sha1_hash(full_path)
+
+    # need to hash the *unzipped* contents of the file, so, extract it to a temp file and hash
+    # the uncompressed data in it.
+    with gzip.open(full_path, 'rb') as f_zipped_in:
+        with tempfile.TemporaryFile() as f_unzipped_out:
+            shutil.copyfileobj(f_zipped_in, f_unzipped_out)
+            f_unzipped_out.seek(0)
+            return get_sha1_hash_from_filehandle(f_unzipped_out)
 
 
 def create_data_from_files(basedir):
@@ -53,7 +75,10 @@ def create_data_from_files(basedir):
         for file in os.listdir(basedir+dir):
             print("  " + file)
             key_name = ("@" if ".gz" in file else "") + file
-            out[dir][key_name] = get_sha1_hash(basedir+dir+'/'+file)
+
+            full_path = basedir+dir+'/'+file
+
+            out[dir][key_name] = get_hash_of_file_contents(full_path)
 
     return out
 
