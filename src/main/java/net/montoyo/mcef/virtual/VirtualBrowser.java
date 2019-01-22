@@ -41,6 +41,14 @@ public class VirtualBrowser implements IBrowser {
     @Override
     public void injectKeyReleased(char c, int mods) {
     }
+    
+    @Override
+    public void injectKeyPressedByKeyCode(int keyCode, int mods) {
+    }
+
+    @Override
+    public void injectKeyReleasedByKeyCode(int keyCode, int mods) {
+    }
 
     @Override
     public void injectMouseWheel(int x, int y, int mods, int amount, int rot) {
