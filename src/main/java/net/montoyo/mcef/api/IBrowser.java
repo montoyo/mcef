@@ -78,6 +78,22 @@ public interface IBrowser {
     void injectKeyReleased(char c, int mods);
     
     /**
+     * Simulates a key press.
+     * 
+     * @param int KeyCode of the pressed Key.
+     * @param mods The key modifiers (shift, ctrl, alt)
+     */
+    void injectKeyPressedByKeyCode(int keyCode, int mods);
+    
+    /**
+     * Simulates a key release.
+     * 
+     * @param int KeyCode of the pressed Key.
+     * @param mods The key modifiers (shift, ctrl, alt)
+     */
+    void injectKeyReleasedByKeyCode(int keyCode, int mods);
+    
+    /**
      * Simulates a mouse wheel.
      * 
      * @param x The X coord of the mouse.
