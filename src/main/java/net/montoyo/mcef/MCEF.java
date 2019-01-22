@@ -10,7 +10,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 @Mod(modid = "mcef", name = "MCEF", version = MCEF.VERSION)
 public class MCEF {
     
-    public static final String VERSION = "0.9";
+    public static final String VERSION = "0.10";
     public static boolean ENABLE_EXAMPLE;
     public static boolean SKIP_UPDATES;
     public static boolean WARN_UPDATES;
