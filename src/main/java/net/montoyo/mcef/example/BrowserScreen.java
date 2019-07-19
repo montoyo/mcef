@@ -150,13 +150,11 @@ public class BrowserScreen extends GuiScreen {
             int num = Keyboard.getEventKey();
             
             if(browser != null && !focused) { //Inject events into browser. TODO: Handle keyboard mods.
-                if(key != '.' && key != ';' && key != ',') { //Workaround
-                    if(pressed)
-                        browser.injectKeyPressed(key, 0);
-                    else
-                        browser.injectKeyReleased(key, 0);
-                }
-                
+                if(pressed)
+                    browser.injectKeyPressedByKeyCode(num, key, 0);
+                else
+                    browser.injectKeyReleasedByKeyCode(num, key, 0);
+
                 if(key != Keyboard.CHAR_NONE)
                     browser.injectKeyTyped(key, 0);
             }

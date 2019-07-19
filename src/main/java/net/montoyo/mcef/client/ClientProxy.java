@@ -167,6 +167,7 @@ public class ClientProxy extends BaseProxy {
                 libs.add(System.getProperty("sun.arch.data.model").equals("64") ? "d3dcompiler_47.dll" : "d3dcompiler_43.dll");
                 libs.add("libGLESv2.dll");
                 libs.add("libEGL.dll");
+                libs.add("chrome_elf.dll");
                 libs.add("libcef.dll");
                 libs.add("jcef.dll");
             } else {
@@ -185,6 +186,7 @@ public class ClientProxy extends BaseProxy {
                 System.load(f.getPath());
             }
 
+            CefApp.startup();
             cefApp = CefApp.getInstance(settings);
             //cefApp.myLoc = ROOT.replace('/', File.separatorChar);
 
@@ -226,6 +228,8 @@ public class ClientProxy extends BaseProxy {
             return new VirtualBrowser();
         
         CefBrowserOsr ret = (CefBrowserOsr) cefClient.createBrowser(url, true, transp);
+        ret.createImmediately();
+
         browsers.add(ret);
         return ret;
     }
@@ -253,8 +257,8 @@ public class ClientProxy extends BaseProxy {
     }
 
     @Override
-    public void registerScheme(String name, Class<? extends IScheme> schemeClass, boolean std, boolean local, boolean displayIsolated) {
-        appHandler.registerScheme(name, schemeClass, std, local, displayIsolated);
+    public void registerScheme(String name, Class<? extends IScheme> schemeClass, boolean std, boolean local, boolean displayIsolated, boolean secure, boolean corsEnabled, boolean cspBypassing, boolean fetchEnabled) {
+        appHandler.registerScheme(name, schemeClass, std, local, displayIsolated, secure, corsEnabled, cspBypassing, fetchEnabled);
     }
 
     @Override
@@ -266,7 +270,10 @@ public class ClientProxy extends BaseProxy {
     public void onTick(TickEvent.RenderTickEvent ev) {
         if(ev.phase == TickEvent.Phase.START) {
             mc.mcProfiler.startSection("MCEF");
-            
+
+            if(cefApp != null)
+                cefApp.N_DoMessageLoopWork();
+
             for(CefBrowserOsr b: browsers)
                 b.mcefUpdate();
 
@@ -317,7 +324,7 @@ public class ClientProxy extends BaseProxy {
 
         try {
             //Yea sometimes, this is needed for some reasons.
-            Thread.sleep(100);
+            Thread.sleep(250);
         } catch(Throwable t) {}
 
         cefApp.N_Shutdown();

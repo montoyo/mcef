@@ -10,7 +10,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 @Mod(modid = "mcef", name = "MCEF", version = MCEF.VERSION)
 public class MCEF {
     
-    public static final String VERSION = "0.10";
+    public static final String VERSION = "0.11";
     public static boolean ENABLE_EXAMPLE;
     public static boolean SKIP_UPDATES;
     public static boolean WARN_UPDATES;
@@ -35,7 +35,7 @@ public class MCEF {
         WARN_UPDATES = cfg.getBoolean("warnUpdates", "main", true, "Tells in the chat if a new version of MCEF is available.");
         USE_FORGE_SPLASH = cfg.getBoolean("useForgeSplash", "main", true, "Use Forge's splash screen to display resource download progress (may be unstable).");
 
-        String mirror = cfg.getString("forcedMirror", "main", "", "A URL that contains every MCEF resources; for instance http://montoyo.net/jcef.").trim();
+        String mirror = cfg.getString("forcedMirror", "main", "", "A URL that contains every MCEF resources; for instance https://montoyo.net/jcef.").trim();
         if(mirror.length() > 0)
             FORCE_MIRROR = mirror;
 

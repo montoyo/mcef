@@ -18,7 +18,7 @@ import net.montoyo.mcef.utilities.Log;
  */
 public enum Mirror {
     
-    MONTOYO("http://montoyo.net/jcef", "montoyo.net");
+    MONTOYO("https://montoyo.net/jcef", "montoyo.net");
 
     private static Mirror current = pickRandom();
     private final String url;
