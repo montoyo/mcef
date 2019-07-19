@@ -84,4 +84,13 @@ public interface API {
      */
     boolean isSchemeRegistered(String name);
 
+    /**
+     * If the hostname of the passed URL contains some illegal characters, it converts the hostname to punnycode.
+     * If it fails to parse the URL or if the specified URL contains a valid hostname, returns the input string.
+     *
+     * @param url The URL to transform
+     * @return The transformed URL
+     */
+    String punycode(String url);
+
 }

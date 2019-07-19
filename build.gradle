@@ -125,6 +125,7 @@ jar {
 
     manifest {
         attributes 'ContainedDeps': coremodJar.archivePath.name
+        attributes 'Main-Class': 'net.montoyo.mcef.setup.SetupUI'
     }
 
     dependsOn reobfCoremodJar

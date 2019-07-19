@@ -39,6 +39,10 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
     private BrowserScreen backup = null;
     private API api;
 
+    public API getAPI() {
+        return api;
+    }
+
     public void onPreInit() {
         //Grab the API and make sure it isn't null.
         api = MCEFApi.getAPI();
