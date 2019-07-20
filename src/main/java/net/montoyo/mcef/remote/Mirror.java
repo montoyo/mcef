@@ -18,16 +18,26 @@ import net.montoyo.mcef.utilities.Log;
  */
 public enum Mirror {
     
-    MONTOYO("https://montoyo.net/jcef", "montoyo.net");
+    MONTOYO_SECURE("https://montoyo.net/jcef", "montoyo.net (over HTTPS)", true),
+    MONTOYO_FALLBACK("http://montoyo.net/jcef", "montoyo.net (non-secure)");
 
-    private static Mirror current = pickRandom();
+    private static Mirror current = pickDefault();
     private final String url;
     private final String name;
+    private final boolean useLetsEncryptKeystore;
     private boolean broken;
     
+    Mirror(String url, String name, boolean useLetsEncryptKeystore) {
+        this.url = url;
+        this.name = name;
+        this.useLetsEncryptKeystore = useLetsEncryptKeystore;
+        broken = false;
+    }
+
     Mirror(String url, String name) {
         this.url = url;
         this.name = name;
+        this.useLetsEncryptKeystore = false;
         broken = false;
     }
     
@@ -45,7 +55,7 @@ public enum Mirror {
      */
     public String getMirrorString() {
         if(MCEF.FORCE_MIRROR == null)
-            return "Mirror kindly provided by " + name;
+            return "Selected mirror: " + name;
         else
             return "Mirror location was set to " + MCEF.FORCE_MIRROR;
     }
@@ -66,12 +76,9 @@ public enum Mirror {
         
         return ret;
     }
-    
-    private static Mirror pickRandom() {
-        Mirror[] lst = values();
-        int idx = (new Random()).nextInt(lst.length);
-        
-        return lst[idx];
+
+    private static Mirror pickDefault() {
+        return values()[0];
     }
     
     private static Mirror pickWorking() {
@@ -116,9 +123,13 @@ public enum Mirror {
             m.broken = false;
         
         if(current == null)
-            current = pickRandom();
+            current = pickDefault();
         
         return current;
+    }
+
+    public boolean usesLetsEncryptKeystore() {
+        return useLetsEncryptKeystore;
     }
 
 }

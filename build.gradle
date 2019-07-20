@@ -34,6 +34,18 @@ minecraft {
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
+//MCEF: update Let's Encrypt root certificate before building
+task importLetsEncryptCertificate {
+    def target = new File(sourceSets.main.resources.srcDirs.first(), "assets/mcef/letsencryptauthorityx3.crt")
+    if(target.exists())
+        target.delete()
+
+    new URL("https://letsencrypt.org/certs/letsencryptauthorityx3.pem.txt").withInputStream { i -> target.withOutputStream { it << i }}
+    println "updated let's encrypt root certificate"
+}
+
+processResources.dependsOn importLetsEncryptCertificate
+
 //MCEF: Generate unobfuscated JAR that can be added to the 'libs' folder
 task apiJar(type: Jar) {
     from sourceSets.main.output

@@ -64,7 +64,14 @@ public class Resource {
         if(shouldExtract)
             end += ".gz";
 
-        return Util.download(MCEF.VERSION + '/' + platform + '/' + name + end, new File(ClientProxy.ROOT, name), shouldExtract, ipl);
+        File dst = new File(ClientProxy.ROOT, name);
+        File parent = dst.getParentFile();
+
+        //ClientProxy.ROOT exists, but this.name might contain some subdirectories that we need to create...
+        if(!parent.exists() && !parent.mkdirs())
+            Log.warning("Couldn't create directory %s... ignoring this error, but this might cause some issues later...", parent.getAbsolutePath());
+
+        return Util.download(MCEF.VERSION + '/' + platform + '/' + name + end, dst, shouldExtract, ipl);
     }
     
     /**

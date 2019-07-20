@@ -7,6 +7,14 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManagerFactory;
+import java.security.KeyStore;
+import java.security.SecureRandom;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+
 @Mod(modid = "mcef", name = "MCEF", version = MCEF.VERSION)
 public class MCEF {
     
@@ -19,6 +27,7 @@ public class MCEF {
     public static String HOME_PAGE;
     public static boolean DISABLE_GPU_RENDERING;
     public static boolean CHECK_VRAM_LEAK;
+    public static SSLSocketFactory SSL_SOCKET_FACTORY;
     
     @Mod.Instance(owner = "mcef")
     public static MCEF INSTANCE;
@@ -45,6 +54,7 @@ public class MCEF {
         CHECK_VRAM_LEAK = cfg.getBoolean("checkForVRAMLeak", "debug", false, "Track allocated OpenGL textures to make sure there's no leak");
         cfg.save();
 
+        importLetsEncryptCertificate();
         PROXY.onPreInit();
     }
     
@@ -58,6 +68,30 @@ public class MCEF {
     public static void onMinecraftShutdown() {
         Log.info("Minecraft shutdown hook called!");
         PROXY.onShutdown();
+    }
+
+    //This is needed, otherwise for some reason HTTPS doesn't work
+    private static void importLetsEncryptCertificate() {
+        try {
+            CertificateFactory cf = CertificateFactory.getInstance("X.509");
+            Certificate cert = cf.generateCertificate(MCEF.class.getResourceAsStream("/assets/mcef/letsencryptauthorityx3.crt"));
+
+            KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
+            ks.load(null, null);
+            ks.setCertificateEntry("letsencrypt", cert);
+
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance("X509");
+            tmf.init(ks);
+
+            SSLContext sslCtx = SSLContext.getInstance("TLS");
+            sslCtx.init(null, tmf.getTrustManagers(), new SecureRandom());
+
+            SSL_SOCKET_FACTORY = sslCtx.getSocketFactory();
+            Log.info("Successfully loaded Let's Encrypt certificate");
+        } catch(Throwable t) {
+            Log.error("Could not import Let's Encrypt certificate!! HTTPS downloads WILL fail...");
+            t.printStackTrace();
+        }
     }
 
 }

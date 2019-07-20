@@ -11,7 +11,10 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.remote.Mirror;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class Util {
     
@@ -308,6 +311,9 @@ public class Util {
             
             try {
                 conn = Mirror.getCurrent().getResource(res);
+
+                if(conn instanceof HttpsURLConnection && Mirror.getCurrent().usesLetsEncryptKeystore() && MCEF.SSL_SOCKET_FACTORY != null)
+                    ((HttpsURLConnection) conn).setSSLSocketFactory(MCEF.SSL_SOCKET_FACTORY);
             } catch(MalformedURLException e) {
                 Log.error("%s Is the mirror list broken?", err);
                 e.printStackTrace();
@@ -345,6 +351,8 @@ public class Util {
                     rc = conn.getResponseCode();
                 } catch(IOException ie) {
                     Log.error("%s Couldn't even get the HTTP response code!", err);
+                    ie.printStackTrace();
+
                     return null;
                 }
                 
