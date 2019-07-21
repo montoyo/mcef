@@ -273,6 +273,13 @@ public class CefApp extends CefAppHandlerAdapter {
         });*/
     }
 
+    //montoyo: Added for MCEF
+    public static final void forceShutdownState() {
+        synchronized (state_) {
+            state_ = CefAppState.SHUTTING_DOWN;
+        }
+    }
+
     /**
      * To shutdown the system, it's important to call the dispose
      * method. Calling this method closes all client instances with
@@ -468,7 +475,7 @@ public class CefApp extends CefAppHandlerAdapter {
             System.out.println("shutdown on " + Thread.currentThread());
 
             // Shutdown native CEF.
-            N_Shutdown();
+            //N_Shutdown();
 
             setState(CefAppState.TERMINATED);
             CefApp.self = null;

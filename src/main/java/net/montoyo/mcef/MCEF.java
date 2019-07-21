@@ -25,7 +25,7 @@ public class MCEF {
     public static boolean USE_FORGE_SPLASH;
     public static String FORCE_MIRROR = null;
     public static String HOME_PAGE;
-    public static boolean DISABLE_GPU_RENDERING;
+    public static String[] CEF_ARGS = new String[0];
     public static boolean CHECK_VRAM_LEAK;
     public static SSLSocketFactory SSL_SOCKET_FACTORY;
     
@@ -50,7 +50,7 @@ public class MCEF {
 
         ENABLE_EXAMPLE = cfg.getBoolean("enable", "exampleBrowser", true, "Set this to false if you don't want to enable the F10 browser.");
         HOME_PAGE = cfg.getString("home", "exampleBrowser", "mod://mcef/home.html", "The home page of the F10 browser.");
-        DISABLE_GPU_RENDERING = cfg.getBoolean("disableGPURendering", "main", true, "The new launcher breaks CEF GPU rendering. Re-enabling it may work with a different launcher like MultiMC.");
+        CEF_ARGS = cfg.getString("cefArgs", "main", "--disable-gpu", "Command line arguments passed to CEF. For advanced users.").split("\\s+");
         CHECK_VRAM_LEAK = cfg.getBoolean("checkForVRAMLeak", "debug", false, "Track allocated OpenGL textures to make sure there's no leak");
         cfg.save();
 

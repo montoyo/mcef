@@ -196,7 +196,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
             renderer_.cleanup();
         }
 
-        super.close(false);
+        super.close(true); //true to ignore confirmation popups
     }
 
     @Override
@@ -219,7 +219,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 
     @Override
     public void injectMouseMove(int x, int y, int mods, boolean left) {
-        //FIXME: 'left' is not used as it causes bugs since MCEF 0.11
+        //FIXME: 'left' is not used as it causes bugs since MCEF 1.11
 
         MouseEvent ev = new MouseEvent(dc_, MouseEvent.MOUSE_MOVED, 0, mods, x, y, 0, false);
         lastMouseEvent = ev;

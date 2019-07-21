@@ -24,6 +24,7 @@ import org.cef.CefApp;
 import org.cef.CefClient;
 import org.cef.CefSettings;
 import org.cef.OS;
+import org.cef.browser.CefBrowser;
 import org.cef.browser.CefBrowserOsr;
 import org.cef.browser.CefMessageRouter;
 import org.cef.browser.CefMessageRouter.CefMessageRouterConfig;
@@ -42,6 +43,7 @@ import net.montoyo.mcef.remote.RemoteConfig;
 import net.montoyo.mcef.utilities.Log;
 import net.montoyo.mcef.virtual.VirtualBrowser;
 import org.cef.browser.CefRenderer;
+import org.cef.handler.CefLifeSpanHandlerAdapter;
 
 public class ClientProxy extends BaseProxy {
     
@@ -67,11 +69,7 @@ public class ClientProxy extends BaseProxy {
 
     @Override
     public void onInit() {
-        if(MCEF.DISABLE_GPU_RENDERING) {
-            Log.info("GPU rendering is disabled because the new launcher sucks.");
-            appHandler.setArgs(new String[] { "--disable-gpu" });
-        } else
-            appHandler.setArgs(new String[0]);
+        appHandler.setArgs(MCEF.CEF_ARGS);
 
         boolean enableForgeSplash = false;
         try {
@@ -205,6 +203,13 @@ public class ClientProxy extends BaseProxy {
         cefRouter = CefMessageRouter.create(new CefMessageRouterConfig("mcefQuery", "mcefCancel"));
         cefClient.addMessageRouter(cefRouter);
         cefClient.addDisplayHandler(displayHandler);
+        cefClient.addLifeSpanHandler(new CefLifeSpanHandlerAdapter() {
+            @Override
+            public boolean doClose(CefBrowser browser) {
+                browser.close(true);
+                return false;
+            }
+        });
 
         if(!ShutdownPatcher.didPatchSucceed()) {
             Log.warning("ShutdownPatcher failed to patch Minecraft.run() method; starting ShutdownThread...");
@@ -228,6 +233,7 @@ public class ClientProxy extends BaseProxy {
             return new VirtualBrowser();
         
         CefBrowserOsr ret = (CefBrowserOsr) cefClient.createBrowser(url, true, transp);
+        ret.setCloseAllowed();
         ret.createImmediately();
 
         browsers.add(ret);
@@ -305,6 +311,14 @@ public class ClientProxy extends BaseProxy {
         return createBrowser(url, false);
     }
 
+    private void runMessageLoopFor(long ms) {
+        final long start = System.currentTimeMillis();
+
+        do {
+            cefApp.N_DoMessageLoopWork();
+        } while(System.currentTimeMillis() - start < ms);
+    }
+
     @Override
     public void onShutdown() {
         if(VIRTUAL)
@@ -317,17 +331,14 @@ public class ClientProxy extends BaseProxy {
             b.close();
 
         browsers.clear();
-        cefClient.dispose();
 
         if(MCEF.CHECK_VRAM_LEAK)
             CefRenderer.dumpVRAMLeak();
 
-        try {
-            //Yea sometimes, this is needed for some reasons.
-            Thread.sleep(250);
-        } catch(Throwable t) {}
-
-        cefApp.N_Shutdown();
+        runMessageLoopFor(100);
+        CefApp.forceShutdownState();
+        cefClient.dispose();
+        //cefApp.N_Shutdown(); //So this is disabled, as it doesn't seem to cause any hang and with it minecraft think it crashes...
     }
 
     public void loadMimeTypeMapping() {
