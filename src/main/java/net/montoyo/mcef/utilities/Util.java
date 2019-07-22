@@ -13,6 +13,7 @@ import java.util.zip.ZipInputStream;
 
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.remote.Mirror;
+import net.montoyo.mcef.remote.MirrorManager;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -306,13 +307,14 @@ public class Util {
      * @return The opened input stream.
      */
     public static SizedInputStream openStream(String res, String err) {
-        while(Mirror.getCurrent() != null) {
+        do {
             HttpURLConnection conn;
             
             try {
-                conn = Mirror.getCurrent().getResource(res);
+                Mirror m = MirrorManager.INSTANCE.getCurrent();
+                conn = m.getResource(res);
 
-                if(conn instanceof HttpsURLConnection && Mirror.getCurrent().usesLetsEncryptKeystore() && MCEF.SSL_SOCKET_FACTORY != null)
+                if(conn instanceof HttpsURLConnection && m.usesLetsEncryptCertificate() && MCEF.SSL_SOCKET_FACTORY != null)
                     ((HttpsURLConnection) conn).setSSLSocketFactory(MCEF.SSL_SOCKET_FACTORY);
             } catch(MalformedURLException e) {
                 Log.error("%s Is the mirror list broken?", err);
@@ -358,9 +360,7 @@ public class Util {
                 
                 Log.error("%s HTTP response is %d; trying with another mirror.", err, rc);
             }
-            
-            Mirror.markAsBroken();
-        }
+        } while(MirrorManager.INSTANCE.markCurrentMirrorAsBroken());
         
         Log.error("%s All mirrors seems broken.", err);
         return null;

@@ -4,132 +4,114 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Random;
-
-import net.montoyo.mcef.MCEF;
-import net.montoyo.mcef.utilities.Log;
 
 /**
- * An enumeration of mirror website where JCEF resources (library & packages) can be downloaded.
- * A random mirror is selected at the beginning. If it is marked as broken, another mirror is chosen.
- * 
- * @author montoyo
+ * An object representing an HTTP(S) mirror to download the resources from.
  *
+ * @author montoyo
+ * @see {@link net.montoyo.mcef.remote.MirrorManager}
  */
-public enum Mirror {
-    
-    MONTOYO_SECURE("https://montoyo.net/jcef", "montoyo.net (over HTTPS)", true),
-    MONTOYO_FALLBACK("http://montoyo.net/jcef", "montoyo.net (non-secure)");
+public final class Mirror {
 
-    private static Mirror current = pickDefault();
-    private final String url;
+    /**
+     * Whether the mirror is HTTPS or not
+     */
+    public static final int FLAG_SECURE = 1;
+
+    /**
+     * Whether the embedded Let's Encrypt certificate should be used to establish a secure connection to this host
+     */
+    public static final int FLAG_LETSENCRYPT = 2;
+
+    /**
+     * Whether this mirror has been forced by the user in the MCEF configuration file
+     */
+    public static final int FLAG_FORCED = 4;
+
     private final String name;
-    private final boolean useLetsEncryptKeystore;
-    private boolean broken;
-    
-    Mirror(String url, String name, boolean useLetsEncryptKeystore) {
-        this.url = url;
+    private final String url;
+    private final int flags;
+
+    /**
+     * Constructs a Mirror from its name, URL, and flags.
+     *
+     * @param name The name of the mirror
+     * @param url The corresponding URL
+     * @param flags Its flags
+     */
+    public Mirror(String name, String url, int flags) {
         this.name = name;
-        this.useLetsEncryptKeystore = useLetsEncryptKeystore;
-        broken = false;
+        this.url = url;
+        this.flags = flags;
     }
 
-    Mirror(String url, String name) {
-        this.url = url;
-        this.name = name;
-        this.useLetsEncryptKeystore = false;
-        broken = false;
-    }
-    
     /**
-     * Checks if a mirror is broken or not.
-     * @return true if the mirror is broken.
+     * @return The name of the mirror
      */
-    public boolean isBroken() {
-        return broken;
+    public String getName() {
+        return name;
     }
-    
+
     /**
-     * Returns a "thanks" string.
-     * @return The "thanks" string.
+     * @return The URL of the mirror
      */
-    public String getMirrorString() {
-        if(MCEF.FORCE_MIRROR == null)
-            return "Selected mirror: " + name;
-        else
-            return "Mirror location was set to " + MCEF.FORCE_MIRROR;
+    public String getURL() {
+        return url;
     }
-    
+
+    /**
+     * @return The flags of this mirror
+     */
+    public int getFlags() {
+        return flags;
+    }
+
+    /**
+     * @return Whether the secure flag is set
+     * @see #FLAG_SECURE
+     */
+    public boolean isSecure() {
+        return (flags & FLAG_SECURE) != 0;
+    }
+
+    /**
+     * @return Whether the Let's Encrypt flag is set
+     * @see #FLAG_LETSENCRYPT
+     */
+    public boolean usesLetsEncryptCertificate() {
+        return (flags & FLAG_LETSENCRYPT) != 0;
+    }
+
+    /**
+     * @return Whether this mirror has been forced by the user
+     * @see #FLAG_FORCED
+     */
+    public boolean isForced() {
+        return (flags & FLAG_FORCED) != 0;
+    }
+
+    /**
+     * @return A string informing the user of which mirror was selected
+     */
+    public String getInformationString() {
+        return isForced() ? ("Mirror location forced by user to: " + url) : ("Selected mirror: " + name);
+    }
+
     /**
      * Opens a connection to the mirror's resource corresponding to the URL.
-     * 
+     *
      * @param name The URL of the resource, relative to the root of the mirror website.
      * @return A connection to this resource, with timeout set up.
      * @throws MalformedURLException if the mirror's URL is invalid or if name is invalid.
      * @throws IOException if an I/O exception occurs.
      */
     public HttpURLConnection getResource(String name) throws MalformedURLException, IOException {
-        HttpURLConnection ret = (HttpURLConnection) (new URL((MCEF.FORCE_MIRROR == null ? url : MCEF.FORCE_MIRROR) + '/' + name)).openConnection();
+        HttpURLConnection ret = (HttpURLConnection) (new URL(url + '/' + name)).openConnection();
         ret.setConnectTimeout(30000);
         ret.setReadTimeout(15000);
         ret.setRequestProperty("User-Agent", "MCEF");
-        
+
         return ret;
-    }
-
-    private static Mirror pickDefault() {
-        return values()[0];
-    }
-    
-    private static Mirror pickWorking() {
-        for(Mirror m: values()) {
-            if(!m.broken)
-                return m;
-        }
-        
-        return null;
-    }
-    
-    /**
-     * Marks the current mirror as broken.
-     * @return a new mirror that isn't broken, or null if there's none.
-     */
-    public static Mirror markAsBroken() {
-        current.broken = true;
-        
-        Mirror old = current;
-        current = pickWorking();
-        Log.info("Mirror %s marked as broken; using %s", old.url, (current == null) ? "NULL" : current.url);
-        
-        return current;
-    }
-    
-    /**
-     * Gets the current working mirror.
-     * @return The current non-broken mirror, or null if all mirrors are broken.
-     */
-    public static Mirror getCurrent() {
-        return current;
-    }
-    
-    /**
-     * Marks all mirrors as working (= not broken).
-     * If all mirrors were broken, it chooses a new random mirror.
-     * 
-     * @return The current (or new) mirror.
-     */
-    public static Mirror reset() {
-        for(Mirror m: values())
-            m.broken = false;
-        
-        if(current == null)
-            current = pickDefault();
-        
-        return current;
-    }
-
-    public boolean usesLetsEncryptKeystore() {
-        return useLetsEncryptKeystore;
     }
 
 }

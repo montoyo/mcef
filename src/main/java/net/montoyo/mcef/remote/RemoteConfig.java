@@ -72,8 +72,7 @@ public class RemoteConfig {
         File cfgFle = new File(ClientProxy.ROOT, "mcef2.json");
         
         boolean ok = Util.download("config2.json", newCfg, null);
-        Mirror.reset(); //We may reset mirrors state because config.json is a special case.
-        
+
         if(ok) {
             Util.delete(cfgFle);
             
@@ -211,8 +210,7 @@ public class RemoteConfig {
 
         if(resources.size() > 0) {
             Log.info("Found %d missing resources. Downloading...", resources.size());
-            Log.info(Mirror.getCurrent().getMirrorString());
-            
+
             for(Resource r: resources) {
                 if(!r.download(ipl))
                     return false;

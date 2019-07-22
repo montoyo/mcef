@@ -64,7 +64,7 @@ public interface IBrowser {
     /**
      * Simulates a key press.
      * 
-     * @param keyCode KeyCode of the pressed Key.
+     * @param keyCode LWJGL key code of the pressed key.
      * @param c The resulting character
      * @param mods The key modifiers (shift, ctrl, alt)
      */
@@ -73,7 +73,7 @@ public interface IBrowser {
     /**
      * Simulates a key release.
      * 
-     * @param keyCode KeyCode of the pressed Key.
+     * @param keyCode LWJGL key code of the pressed key.
      * @param c The resulting character
      * @param mods The key modifiers (shift, ctrl, alt)
      */

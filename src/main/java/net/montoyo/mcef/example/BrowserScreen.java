@@ -150,12 +150,12 @@ public class BrowserScreen extends GuiScreen {
             int num = Keyboard.getEventKey();
             
             if(browser != null && !focused) { //Inject events into browser
-                if(key < 32) {
-                    if(pressed)
-                        browser.injectKeyPressedByKeyCode(num, key, 0);
-                    else
-                        browser.injectKeyReleasedByKeyCode(num, key, 0);
-                } else
+                if(pressed)
+                    browser.injectKeyPressedByKeyCode(num, key, 0);
+                else
+                    browser.injectKeyReleasedByKeyCode(num, key, 0);
+
+                if(key != 0)
                     browser.injectKeyTyped(key, 0);
             }
             

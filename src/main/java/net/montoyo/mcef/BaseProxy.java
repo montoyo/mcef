@@ -164,10 +164,6 @@ public class BaseProxy implements API {
         return "xn--" + output.toString();
     }
 
-    private String extractDomainFromHostname(String hostname) {
-        return hostname; //TODO
-    }
-
     @Override
     public String punycode(String url) {
         int protoEnd = url.indexOf("://");

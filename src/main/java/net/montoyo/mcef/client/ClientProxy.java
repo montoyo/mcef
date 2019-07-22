@@ -338,7 +338,9 @@ public class ClientProxy extends BaseProxy {
         runMessageLoopFor(100);
         CefApp.forceShutdownState();
         cefClient.dispose();
-        //cefApp.N_Shutdown(); //So this is disabled, as it doesn't seem to cause any hang and with it minecraft think it crashes...
+
+        if(MCEF.SHUTDOWN_JCEF)
+            cefApp.N_Shutdown();
     }
 
     public void loadMimeTypeMapping() {

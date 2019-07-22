@@ -238,7 +238,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         sendKeyEvent(ev);
     }
 
-    public static int remapKeycode(int kc) {
+    public static int remapKeycode(int kc, char c) {
         switch(kc) {
         case Keyboard.KEY_BACK:   return 0x08;
         case Keyboard.KEY_DELETE: return 0x2E;
@@ -254,19 +254,19 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         case Keyboard.KEY_END:    return 0x23;
         case Keyboard.KEY_HOME:   return 0x24;
 
-        default: return kc;
+        default: return (int) c;
         }
     }
 
     @Override
     public void injectKeyPressedByKeyCode(int keyCode, char c, int mods) {
-        KeyEvent ev = new KeyEvent(dc_, KeyEvent.KEY_PRESSED, 0, mods, remapKeycode(keyCode), c);
+        KeyEvent ev = new KeyEvent(dc_, KeyEvent.KEY_PRESSED, 0, mods, remapKeycode(keyCode, c), c);
         sendKeyEvent(ev);
     }
 
     @Override
     public void injectKeyReleasedByKeyCode(int keyCode, char c, int mods) {
-        KeyEvent ev = new KeyEvent(dc_, KeyEvent.KEY_RELEASED, 0, mods, remapKeycode(keyCode), c);
+        KeyEvent ev = new KeyEvent(dc_, KeyEvent.KEY_RELEASED, 0, mods, remapKeycode(keyCode, c), c);
         sendKeyEvent(ev);
     }
 
