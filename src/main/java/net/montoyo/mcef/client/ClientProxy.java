@@ -162,7 +162,7 @@ public class ClientProxy extends BaseProxy {
             ArrayList<String> libs = new ArrayList<>();
 
             if(OS.isWindows()) {
-                libs.add(System.getProperty("sun.arch.data.model").equals("64") ? "d3dcompiler_47.dll" : "d3dcompiler_43.dll");
+                libs.add("d3dcompiler_47.dll");
                 libs.add("libGLESv2.dll");
                 libs.add("libEGL.dll");
                 libs.add("chrome_elf.dll");
