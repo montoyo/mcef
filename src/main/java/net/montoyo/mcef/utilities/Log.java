@@ -22,4 +22,8 @@ public class Log {
         LogManager.getLogger("MCEF").log(Level.ERROR, String.format(what, data));
     }
 
+    public static void errorEx(String what, Throwable t, Object ... data) {
+        LogManager.getLogger("MCEF").log(Level.ERROR, String.format(what, data), t);
+    }
+
 }

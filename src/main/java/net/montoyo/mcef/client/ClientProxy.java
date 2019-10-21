@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
+import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,6 +47,8 @@ import net.montoyo.mcef.virtual.VirtualBrowser;
 import org.cef.browser.CefRenderer;
 import org.cef.handler.CefLifeSpanHandlerAdapter;
 
+import javax.swing.*;
+
 public class ClientProxy extends BaseProxy {
     
     public static String ROOT = ".";
@@ -60,6 +64,8 @@ public class ClientProxy extends BaseProxy {
     private final HashMap<String, String> mimeTypeMap = new HashMap<>();
     private final AppHandler appHandler = new AppHandler();
     private ExampleMod exampleMod;
+
+    public static final String LINUX_WIKI = "https://montoyo.net/wdwiki/Linux";
 
     @Override
     public void onPreInit() {
@@ -140,8 +146,36 @@ public class ClientProxy extends BaseProxy {
         Log.info("Done without errors.");
 
         if(OS.isLinux()) {
-            Log.info("Applying linux patch...");
-            LinuxPatch.doPatch(resourceArray);
+            //LinuxPatch.doPatch(resourceArray); //Not needed, from what I experienced...
+
+            FileSystem fs = FileSystems.getDefault();
+            Path here = fs.getPath(mc.mcDataDir.getPath());
+            String[] libPath = Util.getenv("LD_LIBRARY_PATH").split(":");
+
+            if(Arrays.stream(libPath).filter(s -> !s.isEmpty()).map(fs::getPath).noneMatch(p -> Util.isSameFile(p, here))) {
+                Log.error("On Linux, you *HAVE* to add the .minecraft folder to LD_LIBRARY_PATH in order for MCEF to work.");
+                Log.error("You can do this by running the following command and then starting Minecraft within the same terminal:");
+                Log.error("export \"LD_LIBRARY_PATH=$LD_LIBRARY_PATH:%s\"", ROOT);
+                Log.error("");
+                Log.error("Since this has not been done yet, MCEF will now enter virtual mode and WILL NOT WORK.");
+                Log.error("For more info, please read %s", LINUX_WIKI);
+                Log.error("Please don't post a GitHub issue for this.");
+
+                int ans = JOptionPane.showConfirmDialog(null, "A bug on Linux requires you to add the Minecraft folder to LD_LIBRARY_PATH.\nThis has not been done, so MCEF will not work for now.\nWould you like to open the wiki page?",
+                        "MCEF Linux", JOptionPane.YES_NO_OPTION);
+
+                if(ans == JOptionPane.YES_OPTION) {
+                    try {
+                        Runtime.getRuntime().exec("xdg-open " + LINUX_WIKI);
+                    } catch(IOException ex) {
+                        Log.errorEx("Could not open wiki page", ex);
+                        JOptionPane.showMessageDialog(null, "Couldn't automatically open the wiki page. The link is:\n" + LINUX_WIKI, "MCEF Linux", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+
+                VIRTUAL = true;
+                return;
+            }
         }
 
         String exeSuffix;
