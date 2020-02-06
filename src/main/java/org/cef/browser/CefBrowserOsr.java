@@ -14,6 +14,7 @@ import net.montoyo.mcef.client.StringVisitor;
 import net.montoyo.mcef.utilities.Log;
 import org.cef.CefClient;
 import org.cef.DummyComponent;
+import org.cef.OS;
 import org.cef.callback.CefDragData;
 import org.cef.handler.CefRenderHandler;
 import org.lwjgl.BufferUtils;
@@ -26,6 +27,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
 
 /**
  * This class represents an off-screen rendered browser.
@@ -258,14 +260,28 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         }
     }
 
+    private static final HashMap<Integer, Character> WORST_HACK = new HashMap<>();
+
     @Override
     public void injectKeyPressedByKeyCode(int keyCode, char c, int mods) {
+        if(c != '\0') {
+            synchronized(WORST_HACK) {
+                WORST_HACK.put(keyCode, c);
+            }
+        }
+
         KeyEvent ev = new KeyEvent(dc_, KeyEvent.KEY_PRESSED, 0, mods, remapKeycode(keyCode, c), c);
         sendKeyEvent(ev);
     }
 
     @Override
     public void injectKeyReleasedByKeyCode(int keyCode, char c, int mods) {
+        if(c == '\0') {
+            synchronized(WORST_HACK) {
+                c = WORST_HACK.getOrDefault(keyCode, '\0');
+            }
+        }
+
         KeyEvent ev = new KeyEvent(dc_, KeyEvent.KEY_RELEASED, 0, mods, remapKeycode(keyCode, c), c);
         sendKeyEvent(ev);
     }

@@ -2,6 +2,7 @@ package net.montoyo.mcef.example;
 
 import net.minecraft.client.renderer.GlStateManager;
 import net.montoyo.mcef.MCEF;
+import net.montoyo.mcef.utilities.Log;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
@@ -12,6 +13,10 @@ import net.minecraft.client.gui.GuiTextField;
 import net.montoyo.mcef.api.API;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.MCEFApi;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
 
 public class BrowserScreen extends GuiScreen {
     

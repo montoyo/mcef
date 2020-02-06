@@ -183,13 +183,25 @@ public class ClientProxy extends BaseProxy {
             exeSuffix = ".exe";
         else
             exeSuffix = "";
+
+        File subproc = new File(ROOT, "jcef_helper" + exeSuffix);
+        if(OS.isLinux() && !subproc.canExecute()) {
+            try {
+                int retCode = Runtime.getRuntime().exec(new String[] { "/usr/bin/chmod", "+x", subproc.getAbsolutePath() }).waitFor();
+
+                if(retCode != 0)
+                    throw new RuntimeException("chmod exited with code " + retCode);
+            } catch(Throwable t) {
+                Log.errorEx("Error while giving execution rights to jcef_helper. MCEF will probably enter virtual mode. You can fix this by chmoding jcef_helper manually.", t);
+            }
+        }
         
         CefSettings settings = new CefSettings();
         settings.windowless_rendering_enabled = true;
         settings.background_color = settings.new ColorType(0, 255, 255, 255);
         settings.locales_dir_path = (new File(ROOT, "MCEFLocales")).getAbsolutePath();
         settings.cache_path = (new File(ROOT, "MCEFCache")).getAbsolutePath();
-        settings.browser_subprocess_path = (new File(ROOT, "jcef_helper" + exeSuffix)).getAbsolutePath(); //Temporary fix
+        settings.browser_subprocess_path = subproc.getAbsolutePath();
         //settings.log_severity = CefSettings.LogSeverity.LOGSEVERITY_VERBOSE;
         
         try {
