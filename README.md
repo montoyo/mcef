@@ -1,7 +1,7 @@
 # What did I do?
 Update MCEF binding to JCEF 78.3.9
 
-# h264 support? Play Bilibili Video?
+# H.264 support? Play Bilibili Video?
 Because of issues of license, Chromium project does not provide official *.dlls which support h264. 
 1. Build JCEF 
 
@@ -17,7 +17,7 @@ Because of issues of license, Chromium project does not provide official *.dlls 
 
 &emsp; &emsp;or download compiled h264 CEF here
 
-&emsp; &emsp;https://blog.csdn.net/epubcn/article/details/82689929
+&emsp; &emsp;https://blog.csdn.net/epubcn/article/details/82689929 (The uploader is not me, I just google and find it)
 
 4. Replace the (J)CEF DLLs.
 
