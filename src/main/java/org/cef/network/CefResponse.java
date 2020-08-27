@@ -26,6 +26,11 @@ public abstract class CefResponse {
     }
 
     /**
+     * Removes the native reference from an unused object.
+     */
+    public abstract void dispose();
+
+    /**
      * Returns true if this object is read-only.
      */
     public abstract boolean isReadOnly();
@@ -69,6 +74,23 @@ public abstract class CefResponse {
      * Set the response mime type.
      */
     public abstract void setMimeType(String mimeType);
+
+    /**
+     * Get the value for the specified response header field. Use getHeaderMap instead if there
+     * might be multiple values.
+     * @param name The header name.
+     * @return The header value.
+     */
+    public abstract String getHeaderByName(String name);
+
+    /**
+     * Set the value for the specified response header field.
+     * @param name The header name.
+     * @param value The header value.
+     * @param overwrite If true any existing values will be replaced with the new value. If false
+     *         any existing values will not be overwritten.
+     */
+    public abstract void setHeaderByName(String name, String value, boolean overwrite);
 
     /**
      * Get the value for the specified response header field.

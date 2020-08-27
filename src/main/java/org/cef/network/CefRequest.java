@@ -326,6 +326,11 @@ public abstract class CefRequest {
     }
 
     /**
+     * Removes the native reference from an unused object.
+     */
+    public abstract void dispose();
+
+    /**
      * Returns the globally unique identifier for this request or 0 if not
      * specified. Can be used by CefRequestHandler implementations in the browser
      * process to track a single request across multiple callbacks.
@@ -384,6 +389,24 @@ public abstract class CefRequest {
      * Set the post data.
      */
     public abstract void setPostData(CefPostData postData);
+
+    /**
+     * Get the value for the specified response header field. The Referer value cannot be retrieved
+     * using this method. Use getHeaderMap instead if there might be multiple values.
+     * @param name The header name.
+     * @return The header value.
+     */
+    public abstract String getHeaderByName(String name);
+
+    /**
+     * Set the value for the specified response header field. The Referer value cannot be set using
+     * this method.
+     * @param name The header name.
+     * @param value The header value.
+     * @param overwrite If true any existing values will be replaced with the new value. If false
+     *         any existing values will not be overwritten.
+     */
+    public abstract void setHeaderByName(String name, String value, boolean overwrite);
 
     /**
      * Get the header values.

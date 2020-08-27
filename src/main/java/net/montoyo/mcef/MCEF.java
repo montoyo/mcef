@@ -18,7 +18,7 @@ import java.security.cert.CertificateFactory;
 @Mod(modid = "mcef", name = "MCEF", version = MCEF.VERSION)
 public class MCEF {
     
-    public static final String VERSION = "1.20";
+    public static final String VERSION = "1.11";
     public static boolean ENABLE_EXAMPLE;
     public static boolean SKIP_UPDATES;
     public static boolean WARN_UPDATES;
@@ -44,6 +44,8 @@ public class MCEF {
 
         //Config: main
         SKIP_UPDATES        = cfg.getBoolean("skipUpdates"      , "main", false          , "Do not update binaries.");
+        SKIP_UPDATES = true;
+        Log.info("aaaaaaaaaaaaaaaaa715 SKIP_UPDATES TRUE");
         WARN_UPDATES        = cfg.getBoolean("warnUpdates"      , "main", true           , "Tells in the chat if a new version of MCEF is available.");
         USE_FORGE_SPLASH    = cfg.getBoolean("useForgeSplash"   , "main", true           , "Use Forge's splash screen to display resource download progress (may be unstable).");
         CEF_ARGS            = cfg.getString ("cefArgs"          , "main", "--disable-gpu", "Command line arguments passed to CEF. For advanced users.").split("\\s+");

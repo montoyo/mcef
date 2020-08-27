@@ -45,6 +45,11 @@ public abstract class CefURLRequest {
     public abstract void finalize();
 
     /**
+     * Removes the native reference from an unused object.
+     */
+    public abstract void dispose();
+
+    /**
      * Returns the request object used to create this URL request. The returned
      * object is read-only and should not be modified.
      */

@@ -310,6 +310,11 @@ class CefBrowserWr extends CefBrowser_N {
     }
 
     @Override
+    public void loadString(String val, String url) {
+
+    }
+
+    @Override
     protected CefBrowser_N createDevToolsBrowser(CefClient client, String url,
             CefRequestContext context, CefBrowser_N parent, Point inspectAt) {
         return new CefBrowserWr(client, url, context, (CefBrowserWr) this, inspectAt);

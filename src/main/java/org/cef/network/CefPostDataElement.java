@@ -29,6 +29,11 @@ public abstract class CefPostDataElement {
     }
 
     /**
+     * Removes the native reference from an unused object.
+     */
+    public abstract void dispose();
+
+    /**
      * Returns true if this object is read-only.
      */
     public abstract boolean isReadOnly();

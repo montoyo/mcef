@@ -9,10 +9,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-/*
- * I'm keeping this code but I don't think it's required anymore...
- */
-@Deprecated
 public class LinuxPatch {
 
     private static String[] getBinDirs() {
