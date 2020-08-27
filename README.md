@@ -24,3 +24,5 @@ Because of issues of license, Chromium project does not provide official *.dlls 
 &emsp; &emsp;copy CEF DLLs to your `MC folder` and replace existing files 
 
 5. Enjoy the amazing mod
+
+![image](https://github.com/xueyeshengdan/mcef/blob/master/QQ%E6%88%AA%E5%9B%BE20200827211134.png)
