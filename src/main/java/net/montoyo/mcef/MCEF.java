@@ -27,7 +27,6 @@ public class MCEF {
     public static String HOME_PAGE;
     public static String[] CEF_ARGS = new String[0];
     public static boolean CHECK_VRAM_LEAK;
-    public static SSLSocketFactory SSL_SOCKET_FACTORY;
     public static boolean SHUTDOWN_JCEF;
     public static boolean SECURE_MIRRORS_ONLY;
     
@@ -62,7 +61,6 @@ public class MCEF {
         CHECK_VRAM_LEAK = cfg.getBoolean("checkForVRAMLeak", "debug", false, "Track allocated OpenGL textures to make sure there's no leak");
         cfg.save();
 
-        importLetsEncryptCertificate();
         PROXY.onPreInit();
     }
     
@@ -76,30 +74,6 @@ public class MCEF {
     public static void onMinecraftShutdown() {
         Log.info("Minecraft shutdown hook called!");
         PROXY.onShutdown();
-    }
-
-    //This is needed, otherwise for some reason HTTPS doesn't work
-    private static void importLetsEncryptCertificate() {
-        try {
-            CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            Certificate cert = cf.generateCertificate(MCEF.class.getResourceAsStream("/assets/mcef/letsencryptauthorityx3.crt"));
-
-            KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
-            ks.load(null, null);
-            ks.setCertificateEntry("letsencrypt", cert);
-
-            TrustManagerFactory tmf = TrustManagerFactory.getInstance("X509");
-            tmf.init(ks);
-
-            SSLContext sslCtx = SSLContext.getInstance("TLS");
-            sslCtx.init(null, tmf.getTrustManagers(), new SecureRandom());
-
-            SSL_SOCKET_FACTORY = sslCtx.getSocketFactory();
-            Log.info("Successfully loaded Let's Encrypt certificate");
-        } catch(Throwable t) {
-            Log.error("Could not import Let's Encrypt certificate!! HTTPS downloads WILL fail...");
-            t.printStackTrace();
-        }
     }
 
 }
