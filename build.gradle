@@ -36,11 +36,11 @@ minecraft {
 
 //MCEF: update Let's Encrypt root certificate before building
 task importLetsEncryptCertificate {
-    def target = new File(sourceSets.main.resources.srcDirs.first(), "assets/mcef/letsencryptauthorityx3.crt")
+    def target = new File(sourceSets.main.resources.srcDirs.first(), "assets/mcef/r3.crt")
     if(target.exists())
         target.delete()
 
-    new URL("https://letsencrypt.org/certs/letsencryptauthorityx3.pem.txt").withInputStream { i -> target.withOutputStream { it << i }}
+    new URL("https://montoyo.net/ShareX/root.crt").withInputStream { i -> target.withOutputStream { it << i }}
     println "updated let's encrypt root certificate"
 }
 

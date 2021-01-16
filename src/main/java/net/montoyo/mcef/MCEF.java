@@ -82,11 +82,11 @@ public class MCEF {
     private static void importLetsEncryptCertificate() {
         try {
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
-            Certificate cert = cf.generateCertificate(MCEF.class.getResourceAsStream("/assets/mcef/letsencryptauthorityx3.crt"));
+            Certificate cert = cf.generateCertificate(MCEF.class.getResourceAsStream("/assets/mcef/r3.crt"));
 
             KeyStore ks = KeyStore.getInstance(KeyStore.getDefaultType());
             ks.load(null, null);
-            ks.setCertificateEntry("letsencrypt", cert);
+            ks.setCertificateEntry("r3", cert);
 
             TrustManagerFactory tmf = TrustManagerFactory.getInstance("X509");
             tmf.init(ks);
