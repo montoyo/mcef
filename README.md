@@ -16,8 +16,9 @@ It is based on JCEF (https://code.google.com/p/javachromiumembedded/), which is 
 - Whatever you want, but please not a WebDisplays clone.
 
 # Currently supported platforms
-Right now MCEF supports Windows 32 and 64 bits. I'll compile JCEF for linux as soon as possible. However I can't compile it for Mac.
-If you want to compile the natives for Mac, you can follow the instructions here: https://bitbucket.org/chromiumembedded/java-cef/wiki/BranchesAndBuilding
+- Windows 10 x64
+- macOS (Intel-based Macs only)
+- Linux x64
 
 # For players
 This is the Github project of MCEF; here you can only read the source code of it.
