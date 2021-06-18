@@ -142,7 +142,11 @@ public class ClientProxy extends BaseProxy {
 
         CefApp.startup(MCEF.CEF_ARGS);
         cefApp = CefApp.getInstance(settings);
-        CefApp.addAppHandler(appHandler);
+
+        // Custom scheme broken on Linux, for now
+        if (!OS.isLinux()) {
+            CefApp.addAppHandler(appHandler);
+        }
 
         loadMimeTypeMapping();
 
