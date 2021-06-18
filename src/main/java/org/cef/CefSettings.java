@@ -234,6 +234,8 @@ public class CefSettings {
     @Override
     public CefSettings clone() {
         CefSettings tmp = new CefSettings();
+        tmp.framework_dir_path = framework_dir_path;
+        tmp.main_bundle_path = main_bundle_path;
         tmp.browser_subprocess_path = browser_subprocess_path;
         tmp.windowless_rendering_enabled = windowless_rendering_enabled;
         tmp.command_line_args_disabled = command_line_args_disabled;

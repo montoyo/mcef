@@ -140,7 +140,7 @@ public class ClientProxy extends BaseProxy {
         settings.cache_path = (new File(JCEF_ROOT, "cache")).getAbsolutePath();
         settings.ignore_certificate_errors = true;
 
-        CefApp.startup(null); // TODO: pass CEF switches
+        CefApp.startup(MCEF.CEF_ARGS);
         cefApp = CefApp.getInstance(settings);
         CefApp.addAppHandler(appHandler);
 

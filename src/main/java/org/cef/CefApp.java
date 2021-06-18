@@ -497,8 +497,15 @@ public class CefApp extends CefAppHandlerAdapter {
 
     private static final String getJcefLibPath() {
         Path runtimeDir = Paths.get("");
-        Path jcefPath = runtimeDir.resolve("jcef");
-        return jcefPath.toAbsolutePath().toString();
+        final Path jcefPath;
+        if (OS.isWindows() || OS.isLinux()) {
+            jcefPath = runtimeDir.resolve("jcef");
+        } else if (OS.isMacintosh()) {
+            jcefPath = runtimeDir.resolve("jcef/jcef_app.app/Contents/Java");
+        } else {
+            jcefPath = null;
+        }
+        return jcefPath != null ? jcefPath.toAbsolutePath().toString() : null;
     }
 
     /**
