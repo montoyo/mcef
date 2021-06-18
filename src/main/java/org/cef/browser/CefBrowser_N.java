@@ -4,19 +4,6 @@
 
 package org.cef.browser;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.Canvas;
-import java.awt.Component;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Window;
-import java.awt.event.WindowEvent;
-import java.util.Vector;
-
-import javax.swing.SwingUtilities;
-
 import org.cef.CefClient;
 import org.cef.browser.CefRequestContext;
 import org.cef.callback.CefDragData;
@@ -25,11 +12,24 @@ import org.cef.callback.CefPdfPrintCallback;
 import org.cef.callback.CefRunFileDialogCallback;
 import org.cef.callback.CefStringVisitor;
 import org.cef.handler.CefClientHandler;
-import org.cef.handler.CefRenderHandler;
 import org.cef.handler.CefDialogHandler.FileDialogMode;
+import org.cef.handler.CefRenderHandler;
 import org.cef.handler.CefWindowHandler;
 import org.cef.misc.CefPdfPrintSettings;
 import org.cef.network.CefRequest;
+
+import java.awt.Canvas;
+import java.awt.Component;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Window;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.WindowEvent;
+import java.util.Vector;
+
+import javax.swing.SwingUtilities;
 
 /**
  * This class represents all methods which are connected to the
@@ -38,15 +38,16 @@ import org.cef.network.CefRequest;
  * CefBrowser instance, please use CefBrowserFactory.
  */
 abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowser {
-    private boolean isPending_ = false;
-    private CefClient client_;
-    private String url_;
-    private CefRequestContext request_context_;
-    private CefBrowser_N parent_ = null;
-    private Point inspectAt_ = null;
-    private CefBrowser_N devTools_ = null;
+    private volatile boolean isPending_ = false;
+    private final CefClient client_;
+    private final String url_;
+    private final CefRequestContext request_context_;
+    private volatile CefBrowser_N parent_ = null;
+    private volatile Point inspectAt_ = null;
+    private volatile CefBrowser_N devTools_ = null;
     private boolean closeAllowed_ = false;
-    private boolean isClosed_ = false;
+    private volatile boolean isClosed_ = false;
+    private volatile boolean isClosing_ = false;
 
     protected CefBrowser_N(CefClient client, String url, CefRequestContext context,
             CefBrowser_N parent, Point inspectAt) {
@@ -154,12 +155,19 @@ abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowser {
             boolean osr, boolean transparent, Component canvas, CefRequestContext context) {
         if (getNativeRef("CefBrowser") == 0 && !isPending_) {
             try {
-                isPending_ = N_CreateBrowser(
+                N_CreateBrowser(
                         clientHandler, windowHandle, url, osr, transparent, canvas, context);
             } catch (UnsatisfiedLinkError err) {
                 err.printStackTrace();
             }
         }
+    }
+
+    /**
+     * Called async from the (native) main UI thread.
+     */
+    private void notifyBrowserCreated() {
+        isPending_ = true;
     }
 
     /**
@@ -414,15 +422,6 @@ abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowser {
     }
 
     @Override
-    public void loadString(String val, String url) {
-        try {
-            N_LoadString(val, url);
-        } catch (UnsatisfiedLinkError ule) {
-            ule.printStackTrace();
-        }
-    }
-
-    @Override
     public void executeJavaScript(String code, String url, int line) {
         try {
             N_ExecuteJavaScript(code, url, line);
@@ -443,6 +442,9 @@ abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowser {
 
     @Override
     public void close(boolean force) {
+        if (isClosing_ || isClosed_) return;
+        if (force) isClosing_ = true;
+
         try {
             N_Close(force);
         } catch (UnsatisfiedLinkError ule) {
@@ -729,6 +731,8 @@ abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowser {
     }
 
     protected final void setParent(long windowHandle, Component canvas) {
+        if (isClosing_ || isClosed_) return;
+
         try {
             N_SetParent(windowHandle, canvas);
         } catch (UnsatisfiedLinkError ule) {
@@ -777,7 +781,6 @@ abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowser {
     private final native void N_GetText(CefStringVisitor visitor);
     private final native void N_LoadRequest(CefRequest request);
     private final native void N_LoadURL(String url);
-    private final native void N_LoadString(String val, String url);
     private final native void N_ExecuteJavaScript(String code, String url, int line);
     private final native String N_GetURL();
     private final native void N_Close(boolean force);

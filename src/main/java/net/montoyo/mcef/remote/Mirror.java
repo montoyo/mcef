@@ -19,11 +19,6 @@ public final class Mirror {
     public static final int FLAG_SECURE = 1;
 
     /**
-     * Whether the embedded Let's Encrypt certificate should be used to establish a secure connection to this host
-     */
-    public static final int FLAG_LETSENCRYPT = 2;
-
-    /**
      * Whether this mirror has been forced by the user in the MCEF configuration file
      */
     public static final int FLAG_FORCED = 4;
@@ -72,14 +67,6 @@ public final class Mirror {
      */
     public boolean isSecure() {
         return (flags & FLAG_SECURE) != 0;
-    }
-
-    /**
-     * @return Whether the Let's Encrypt flag is set
-     * @see #FLAG_LETSENCRYPT
-     */
-    public boolean usesLetsEncryptCertificate() {
-        return (flags & FLAG_LETSENCRYPT) != 0;
     }
 
     /**

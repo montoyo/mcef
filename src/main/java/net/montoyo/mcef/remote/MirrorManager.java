@@ -16,8 +16,7 @@ import java.util.Random;
 public class MirrorManager {
 
     private static final Mirror[] defaultMirrors = new Mirror[] {
-            new Mirror("montoyo.net (over HTTPS)", "https://montoyo.net/jcef", Mirror.FLAG_SECURE | Mirror.FLAG_LETSENCRYPT),
-            new Mirror("montoyo.net (non-secure)", "http://montoyo.net/jcef", 0)
+            new Mirror("Ruinscraft MCEF Mirror", "https://storage.googleapis.com/ruinscraft-mcef-mirror", Mirror.FLAG_SECURE)
     };
 
     /**

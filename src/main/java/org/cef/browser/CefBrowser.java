@@ -4,10 +4,6 @@
 
 package org.cef.browser;
 
-import java.awt.Component;
-import java.awt.Point;
-import java.util.Vector;
-
 import org.cef.CefClient;
 import org.cef.callback.CefPdfPrintCallback;
 import org.cef.callback.CefRunFileDialogCallback;
@@ -17,6 +13,12 @@ import org.cef.handler.CefRenderHandler;
 import org.cef.handler.CefWindowHandler;
 import org.cef.misc.CefPdfPrintSettings;
 import org.cef.network.CefRequest;
+
+import java.awt.Component;
+import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.util.Vector;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Interface representing a browser.
@@ -203,17 +205,6 @@ public interface CefBrowser {
     public void loadURL(String url);
 
     /**
-     * Load the contents of val with the specified dummy url.
-     * url should have a standard scheme (for example, http scheme) or
-     * behaviors like link clicks and web security restrictions may not
-     * behave as expected.
-     *
-     * @param val Content to be displayed.
-     * @param url dummy url to be used for.
-     */
-    public void loadString(String val, String url);
-
-    /**
      * Execute a string of JavaScript code in this frame. The url
      * parameter is the URL where the script in question can be found, if any.
      * The renderer may request this URL to show the developer the source of the
@@ -368,4 +359,27 @@ public interface CefBrowser {
      * @param word replace selected word with this word.
      */
     public void replaceMisspelling(String word);
+
+    /**
+     * Captures a screenshot-like image of the currently displayed content and returns it.
+     * <p>
+     * If executed on the AWT Event Thread, this returns an immediately resolved {@link
+     * java.util.concurrent.CompletableFuture}. If executed from another thread, the {@link
+     * java.util.concurrent.CompletableFuture} returned is resolved as soon as the screenshot 
+     * has been taken (which must happen on the event thread).
+     * <p>
+     * The generated screenshot can either be returned as-is, containing all natively-rendered
+     * pixels, or it can be scaled to match the logical width and height of the window.
+     * This distinction is only relevant in case of differing logical and physical resolutions
+     * (for example with HiDPI/Retina displays, which have a scaling factor of for example 2
+     * between the logical width of a window (ex. 400px) and the actual number of pixels in
+     * each row (ex. 800px with a scaling factor of 2)).
+     *
+     * @param nativeResolution whether to return an image at full native resolution (true)
+     *      or a scaled-down version whose width and height are equal to the logical size
+     *      of the screenshotted browser window
+     * @return the screenshot image
+     * @throws UnsupportedOperationException if not supported
+     */
+    public CompletableFuture<BufferedImage> createScreenshot(boolean nativeResolution);
 }

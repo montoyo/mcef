@@ -1,3 +1,0 @@
-- Used JCEF commit: 13ae2d6074bc00a31888fb752dd45f9cf254725d
-- Patch the corresponding files
-- Do not forget to remove the JAWT.lib from the linkers options

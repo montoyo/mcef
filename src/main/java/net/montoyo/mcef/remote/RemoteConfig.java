@@ -24,6 +24,8 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import static net.montoyo.mcef.client.ClientProxy.JCEF_ROOT;
+
 /**
  * A class for updating and parsing the remote configuration file.
  * @author montoyo
@@ -68,8 +70,8 @@ public class RemoteConfig {
      * @return The parsed configuration file.
      */
     private JsonObject readConfig() {
-        File newCfg = new File(ClientProxy.ROOT, "mcef2.new");
-        File cfgFle = new File(ClientProxy.ROOT, "mcef2.json");
+        File newCfg = new File(JCEF_ROOT, "mcef2.new");
+        File cfgFle = new File(JCEF_ROOT, "mcef2.json");
         
         boolean ok = Util.download("config2.json", newCfg, null);
 
@@ -116,7 +118,7 @@ public class RemoteConfig {
         }
         
         String arch = System.getProperty("sun.arch.data.model");
-        if(!arch.equals("32") && !arch.equals("64")) {
+        if(!arch.equals("64")) {
             //Shouldn't happen.
             Log.error("Your CPU arch isn't supported by MCEF. Entering virtual mode.");
             ClientProxy.VIRTUAL = true;
@@ -266,7 +268,7 @@ public class RemoteConfig {
 
         if(!zipOnly) {
             for(Resource r: resources)
-                fl.addFile(r.getFileName());
+                fl.addFile(JCEF_ROOT + "/" + r.getFileName());
         }
 
         boolean allOk = true;

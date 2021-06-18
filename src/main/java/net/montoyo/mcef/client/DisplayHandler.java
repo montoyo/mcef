@@ -93,6 +93,11 @@ public class DisplayHandler implements CefDisplayHandler {
         return false;
     }
 
+    @Override
+    public boolean onCursorChange(CefBrowser browser, int cursorType) {
+        return false;
+    }
+
     public void addHandler(IDisplayHandler h) {
         list.add(h);
     }

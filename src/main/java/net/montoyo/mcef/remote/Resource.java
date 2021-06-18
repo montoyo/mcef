@@ -40,7 +40,7 @@ public class Resource {
      * @return true if (and only if) the file exists and the checksum matches the {@link #sum} field.
      */
     public boolean exists() {
-        File f = new File(ClientProxy.ROOT, name);
+        File f = new File(ClientProxy.JCEF_ROOT, name);
         if(!f.exists())
             return false;
         
@@ -64,7 +64,7 @@ public class Resource {
         if(shouldExtract)
             end += ".gz";
 
-        File dst = new File(ClientProxy.ROOT, name);
+        File dst = new File(ClientProxy.JCEF_ROOT, name);
         File parent = dst.getParentFile();
 
         //ClientProxy.ROOT exists, but this.name might contain some subdirectories that we need to create...
@@ -82,7 +82,7 @@ public class Resource {
      */
     public boolean extract(IProgressListener ipl) {
         Util.secure(ipl).onTaskChanged("Extracting " + name);
-        return Util.extract(new File(ClientProxy.ROOT, name), new File(ClientProxy.ROOT));
+        return Util.extract(new File(ClientProxy.JCEF_ROOT, name), new File(ClientProxy.JCEF_ROOT));
     }
 
     /**
@@ -108,7 +108,7 @@ public class Resource {
      * @return The File containing the location of the specified resource.
      */
     public static File getLocationOf(String resName) {
-        return new File(ClientProxy.ROOT, resName);
+        return new File(ClientProxy.JCEF_ROOT, resName);
     }
 
 }

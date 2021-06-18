@@ -99,5 +99,4 @@ public abstract class CefAppHandlerAdapter implements CefAppHandler {
     public void setArgs(String[] args) {
         this.args_ = args;
     }
-
 }

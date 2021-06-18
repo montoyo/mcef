@@ -9,6 +9,11 @@ package org.cef.browser;
  */
 public interface CefFrame {
     /**
+     * Removes the native reference from an unused object.
+     */
+    void dispose();
+
+    /**
      * Returns the globally unique identifier for this frame or < 0 if the
      * underlying frame does not yet exist.
      * @return The frame identifier
@@ -68,4 +73,29 @@ public interface CefFrame {
      * @param line The base line number to use for error reporting.
      */
     public void executeJavaScript(String code, String url, int line);
+
+    /**
+     * Execute undo in this frame.
+     */
+    public void undo();
+
+    /**
+     * Execute redo in this frame.
+     */
+    public void redo();
+
+    /**
+     * Execute cut in this frame.
+     */
+    public void cut();
+
+    /**
+     * Execute copy in this frame.
+     */
+    public void copy();
+
+    /**
+     * Execute paste in this frame.
+     */
+    public void paste();
 }

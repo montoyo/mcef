@@ -315,9 +315,6 @@ public class Util {
             try {
                 Mirror m = MirrorManager.INSTANCE.getCurrent();
                 conn = m.getResource(res);
-
-                if(conn instanceof HttpsURLConnection && m.usesLetsEncryptCertificate() && MCEF.SSL_SOCKET_FACTORY != null)
-                    ((HttpsURLConnection) conn).setSSLSocketFactory(MCEF.SSL_SOCKET_FACTORY);
             } catch(MalformedURLException e) {
                 Log.error("%s Is the mirror list broken?", err);
                 e.printStackTrace();

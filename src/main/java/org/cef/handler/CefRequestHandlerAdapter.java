@@ -26,6 +26,12 @@ public abstract class CefRequestHandlerAdapter implements CefRequestHandler {
     }
 
     @Override
+    public boolean onOpenURLFromTab(CefBrowser browser, CefFrame frame, String target_url,
+            boolean user_gesture) {
+        return false;
+    }
+
+    @Override
     public CefResourceRequestHandler getResourceRequestHandler(CefBrowser browser, CefFrame frame,
             CefRequest request, boolean isNavigation, boolean isDownload, String requestInitiator,
             BoolRef disableDefaultHandling) {
@@ -33,7 +39,7 @@ public abstract class CefRequestHandlerAdapter implements CefRequestHandler {
     }
 
     @Override
-    public boolean getAuthCredentials(CefBrowser browser, CefFrame frame, boolean isProxy,
+    public boolean getAuthCredentials(CefBrowser browser, String origin_url, boolean isProxy,
             String host, int port, String realm, String scheme, CefAuthCallback callback) {
         return false;
     }

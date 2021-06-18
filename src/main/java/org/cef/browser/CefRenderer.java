@@ -2,29 +2,28 @@
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 
-// Modified by montoyo for MCEF
-
 package org.cef.browser;
-
-import java.awt.Rectangle;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
-
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.utilities.Log;
 import org.lwjgl.opengl.EXTBgra;
+
+import java.awt.*;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 import static org.lwjgl.opengl.GL11.*;
 
 public class CefRenderer {
 
     //montoyo: debug tool
+    //montoyo: debug tool
     private static final ArrayList<Integer> GL_TEXTURES = new ArrayList<>();
+
     public static void dumpVRAMLeak() {
         Log.info(">>>>> MCEF: Beginning VRAM leak report");
         GL_TEXTURES.forEach(tex -> Log.warning(">>>>> MCEF: This texture has not been freed: " + tex));
@@ -35,8 +34,11 @@ public class CefRenderer {
     public int[] texture_id_ = new int[1];
     private int view_width_ = 0;
     private int view_height_ = 0;
+    private float spin_x_ = 0f;
+    private float spin_y_ = 0f;
     private Rectangle popup_rect_ = new Rectangle(0, 0, 0, 0);
     private Rectangle original_popup_rect_ = new Rectangle(0, 0, 0, 0);
+    private boolean use_draw_pixels_ = false;
 
     protected CefRenderer(boolean transparent) {
         transparent_ = transparent;
@@ -47,12 +49,15 @@ public class CefRenderer {
         return transparent_;
     }
 
-    @SuppressWarnings("static-access")
+    protected int getTextureID() {
+        return texture_id_[0];
+    }
+
     protected void initialize() {
         GlStateManager.enableTexture2D();
         texture_id_[0] = glGenTextures();
 
-        if(MCEF.CHECK_VRAM_LEAK)
+        if (MCEF.CHECK_VRAM_LEAK)
             GL_TEXTURES.add(texture_id_[0]);
 
         GlStateManager.bindTexture(texture_id_[0]);
@@ -63,16 +68,16 @@ public class CefRenderer {
     }
 
     protected void cleanup() {
-        if(texture_id_[0] != 0) {
-            if(MCEF.CHECK_VRAM_LEAK)
+        if (texture_id_[0] != 0) {
+            if (MCEF.CHECK_VRAM_LEAK)
                 GL_TEXTURES.remove((Object) texture_id_[0]);
 
             glDeleteTextures(texture_id_[0]);
         }
     }
 
-    public void render(double x1, double y1, double x2, double y2) {
-        if(view_width_ == 0 || view_height_ == 0)
+    protected void render(double x1, double y1, double x2, double y2) {
+        if (view_width_ == 0 || view_height_ == 0)
             return;
 
         Tessellator t = Tessellator.getInstance();
@@ -89,28 +94,26 @@ public class CefRenderer {
     }
 
     protected void onPopupSize(Rectangle rect) {
-        if(rect.width <= 0 || rect.height <= 0)
-            return;
+        if (rect.width <= 0 || rect.height <= 0) return;
         original_popup_rect_ = rect;
         popup_rect_ = getPopupRectInWebView(original_popup_rect_);
     }
 
-    protected Rectangle getPopupRectInWebView(Rectangle rc) {
+    protected Rectangle getPopupRect() {
+        return (Rectangle) popup_rect_.clone();
+    }
+
+    protected Rectangle getPopupRectInWebView(Rectangle original_rect) {
+        Rectangle rc = original_rect;
         // if x or y are negative, move them to 0.
-        if(rc.x < 0)
-            rc.x = 0;
-        if(rc.y < 0)
-            rc.y = 0;
+        if (rc.x < 0) rc.x = 0;
+        if (rc.y < 0) rc.y = 0;
         // if popup goes outside the view, try to reposition origin
-        if(rc.x + rc.width > view_width_)
-            rc.x = view_width_ - rc.width;
-        if(rc.y + rc.height > view_height_)
-            rc.y = view_height_ - rc.height;
+        if (rc.x + rc.width > view_width_) rc.x = view_width_ - rc.width;
+        if (rc.y + rc.height > view_height_) rc.y = view_height_ - rc.height;
         // if x or y became negative, move them to 0 again.
-        if(rc.x < 0)
-            rc.x = 0;
-        if(rc.y < 0)
-            rc.y = 0;
+        if (rc.x < 0) rc.x = 0;
+        if (rc.y < 0) rc.y = 0;
         return rc;
     }
 
@@ -120,11 +123,11 @@ public class CefRenderer {
     }
 
     protected void onPaint(boolean popup, Rectangle[] dirtyRects, ByteBuffer buffer, int width, int height, boolean completeReRender) {
-        if(transparent_) // Enable alpha blending.
+        if (transparent_) // Enable alpha blending.
             GlStateManager.enableBlend();
 
         final int size = (width * height) << 2;
-        if(size > buffer.limit()) {
+        if (size > buffer.limit()) {
             Log.warning("Bad data passed to CefRenderer.onPaint() triggered safe guards... (1)");
             return;
         }
@@ -136,8 +139,8 @@ public class CefRenderer {
         int oldAlignement = glGetInteger(GL_UNPACK_ALIGNMENT);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        if(!popup) {
-            if(completeReRender || width != view_width_ || height != view_height_) {
+        if (!popup) {
+            if (completeReRender || width != view_width_ || height != view_height_) {
                 // Update/resize the whole texture.
                 view_width_ = width;
                 view_height_ = height;
@@ -146,8 +149,8 @@ public class CefRenderer {
                 glPixelStorei(GL_UNPACK_ROW_LENGTH, view_width_);
 
                 // Update just the dirty rectangles.
-                for(Rectangle rect: dirtyRects) {
-                    if(rect.x < 0 || rect.y < 0 || rect.x + rect.width > view_width_ || rect.y + rect.height > view_height_)
+                for (Rectangle rect : dirtyRects) {
+                    if (rect.x < 0 || rect.y < 0 || rect.x + rect.width > view_width_ || rect.y + rect.height > view_height_)
                         Log.warning("Bad data passed to CefRenderer.onPaint() triggered safe guards... (2)");
                     else {
                         glPixelStorei(GL_UNPACK_SKIP_PIXELS, rect.x);
@@ -160,24 +163,24 @@ public class CefRenderer {
                 glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
                 glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
             }
-        } else if(popup_rect_.width > 0 && popup_rect_.height > 0) {
+        } else if (popup_rect_.width > 0 && popup_rect_.height > 0) {
             int skip_pixels = 0, x = popup_rect_.x;
             int skip_rows = 0, y = popup_rect_.y;
             int w = width;
             int h = height;
 
             // Adjust the popup to fit inside the view.
-            if(x < 0) {
+            if (x < 0) {
                 skip_pixels = -x;
                 x = 0;
             }
-            if(y < 0) {
+            if (y < 0) {
                 skip_rows = -y;
                 y = 0;
             }
-            if(x + w > view_width_)
+            if (x + w > view_width_)
                 w -= x + w - view_width_;
-            if(y + h > view_height_)
+            if (y + h > view_height_)
                 h -= y + h - view_height_;
 
             // Update the popup rectangle.
@@ -194,12 +197,13 @@ public class CefRenderer {
         GlStateManager.bindTexture(0);
     }
 
-    public int getViewWidth() {
-        return view_width_;
+    protected void setSpin(float spinX, float spinY) {
+        spin_x_ = spinX;
+        spin_y_ = spinY;
     }
 
-    public int getViewHeight() {
-        return view_height_;
+    protected void incrementSpin(float spinDX, float spinDY) {
+        spin_x_ -= spinDX;
+        spin_y_ -= spinDY;
     }
-
 }
