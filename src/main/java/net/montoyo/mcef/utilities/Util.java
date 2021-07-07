@@ -54,9 +54,10 @@ public class Util {
         // Otherwise, extracting a .app is a pain. It refuses to run without setting executable flags on the contents, etc
         if (OS.isMacintosh()) {
             try {
-                Runtime.getRuntime().exec(new String[]{"/usr/bin/unzip", zip.getAbsolutePath(), "-d", out.getAbsolutePath()});
+                Process unzip = Runtime.getRuntime().exec(new String[]{"/usr/bin/unzip", zip.getAbsolutePath(), "-d", out.getAbsolutePath()});
+                unzip.waitFor();
                 return true;
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 return false;
             }
