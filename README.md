@@ -17,7 +17,7 @@ It is based on JCEF (https://code.google.com/p/javachromiumembedded/), which is 
 
 # Currently supported platforms
 - Windows 10 x64
-- macOS (Intel-based Macs only)
+- macOS (Intel-based Macs only) - needs work, frequent crashes
 - Linux x64
 
 # For players
