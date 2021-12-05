@@ -18,7 +18,7 @@ It is based on JCEF (https://code.google.com/p/javachromiumembedded/), which is 
 # Currently supported platforms
 - Windows 10 x64
 - macOS (Intel-based Macs only) - needs work, frequent crashes
-- Linux x64
+- Linux x64 (tested on Fedora 34 and Ubuntu 20.04)
 
 # For players
 This is the Github project of MCEF; here you can only read the source code of it.
