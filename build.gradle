@@ -14,7 +14,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.12.2-1.31'
+version = '1.12.2-1.32'
 group = 'net.montoyo.mcef'
 archivesBaseName = 'mcef'
 
