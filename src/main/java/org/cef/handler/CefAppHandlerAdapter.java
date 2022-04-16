@@ -85,18 +85,7 @@ public abstract class CefAppHandlerAdapter implements CefAppHandler {
     }
 
     @Override
-    public CefPrintHandler getPrintHandler() {
-        // The default implementation does nothing
-        return null;
-    }
-
-    @Override
     public void onScheduleMessagePumpWork(long delay_ms) {
         CefApp.getInstance().doMessageLoopWork(delay_ms);
-    }
-
-    //Modified by montoyo for MCEF
-    public void setArgs(String[] args) {
-        this.args_ = args;
     }
 }
