@@ -16,7 +16,7 @@ import java.util.Random;
 public class MirrorManager {
 
     private static final Mirror[] defaultMirrors = new Mirror[] {
-            new Mirror("Ruinscraft MCEF Mirror", "https://storage.googleapis.com/ruinscraft-mcef-mirror", Mirror.FLAG_SECURE)
+            new Mirror("ds58-mcef-mirror", "https://ds58-mcef-mirror.ewr1.vultrobjects.com", Mirror.FLAG_SECURE)
     };
 
     /**
