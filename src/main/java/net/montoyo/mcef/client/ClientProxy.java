@@ -138,7 +138,6 @@ public class ClientProxy extends BaseProxy {
         settings.windowless_rendering_enabled = true;
         settings.background_color = settings.new ColorType(0, 255, 255, 255);
         settings.cache_path = (new File(JCEF_ROOT, "cache")).getAbsolutePath();
-        settings.ignore_certificate_errors = true;
 
         CefApp.startup(MCEF.CEF_ARGS);
         cefApp = CefApp.getInstance(settings);
