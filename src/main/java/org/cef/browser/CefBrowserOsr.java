@@ -164,32 +164,31 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
     public static int remapKeycode(int kc, char c) {
         switch (kc) {
             case Keyboard.KEY_BACK:
-                return 0x08;
+                return KeyEvent.VK_BACK_SPACE;
             case Keyboard.KEY_DELETE:
-                return 0x2E;
+                return KeyEvent.VK_DELETE;
             case Keyboard.KEY_DOWN:
-                return 0x28;
+                return KeyEvent.VK_DOWN;
             case Keyboard.KEY_RETURN:
-                return 0x0D;
+                return KeyEvent.VK_ENTER;
             case Keyboard.KEY_ESCAPE:
-                return 0x1B;
+                return KeyEvent.VK_ESCAPE;
             case Keyboard.KEY_LEFT:
-                return 0x25;
+                return KeyEvent.VK_LEFT;
             case Keyboard.KEY_RIGHT:
-                return 0x27;
+                return KeyEvent.VK_RIGHT;
             case Keyboard.KEY_TAB:
-                return 0x09;
+                return KeyEvent.VK_TAB;
             case Keyboard.KEY_UP:
-                return 0x26;
+                return KeyEvent.VK_UP;
             case Keyboard.KEY_PRIOR:
-                return 0x21;
+                return KeyEvent.VK_PAGE_UP;
             case Keyboard.KEY_NEXT:
-                return 0x22;
+                return KeyEvent.VK_PAGE_DOWN;
             case Keyboard.KEY_END:
-                return 0x23;
+                return Keyboard.KEY_END;
             case Keyboard.KEY_HOME:
-                return 0x24;
-
+                return Keyboard.KEY_HOME;
             default:
                 return c;
         }
