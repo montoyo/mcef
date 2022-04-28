@@ -8,4 +8,4 @@ Chromium Version `100.0.4896`
 # Currently supported platforms
 - Windows 10/11 64 bit
 - macOS (Intel-based Macs only)
-- Linux x64 (tested on Fedora 34 and Ubuntu 20.04)
+- Linux 64 bit (tested on Fedora 34 and Ubuntu 20.04)
