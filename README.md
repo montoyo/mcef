@@ -5,6 +5,8 @@ Chromium Version `100.0.4896`
 
 [See the original project here for more information](https://github.com/montoyo/mcef)
 
+[My JCEF mirror](https://ds58-mcef-mirror.ewr1.vultrobjects.com/)
+
 # Currently supported platforms
 - Windows 10/11 64 bit
 - macOS (Intel-based Macs only)
