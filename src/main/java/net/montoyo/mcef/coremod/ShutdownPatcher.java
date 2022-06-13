@@ -1,4 +1,4 @@
-package net.montoyo.mcef.coremod;
+/*package net.montoyo.mcef.coremod;
 
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import net.minecraft.launchwrapper.IClassTransformer;
@@ -112,3 +112,4 @@ public class ShutdownPatcher implements IFMLLoadingPlugin, IClassTransformer {
     }
 
 }
+*/
