@@ -1,22 +1,21 @@
 package net.montoyo.mcef.example;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import net.minecraft.client.Keyboard;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.input.KeyboardInput;
+import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.utilities.Log;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.input.Keyboard;
-import org.lwjgl.input.Mouse;
 
-import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiScreen;
-import net.minecraft.client.gui.GuiTextField;
 import net.montoyo.mcef.api.API;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.MCEFApi;
@@ -77,11 +76,11 @@ public class BrowserScreen extends Screen {
         // buttonList.clear();
         
         if(url == null) {
-            addDrawableChild(back = (new ButtonWidget( 0, 0, 20, 20, new LiteralText("<"))));
-            addDrawableChild(fwd = (new ButtonWidget( 20, 0, 20, 20, new LiteralText(">"))));
-            addDrawableChild(go = (new ButtonWidget( width - 60, 0, 20, 20, new TranslatableText("fabricef.example.screen.go"))));
-            addDrawableChild(min = (new ButtonWidget(width - 20, 0, 20, 20, new LiteralText("_"))));
-            addDrawableChild(vidMode = (new ButtonWidget(width - 40, 0, 20, 20, new LiteralText("YT"))));
+            addDrawableChild(back = (new ButtonWidget( 0, 0, 20, 20, new LiteralText("<"), (button -> this.legacyActionPerformed(1)))));
+            addDrawableChild(fwd = (new ButtonWidget( 20, 0, 20, 20, new LiteralText(">"),(button -> this.legacyActionPerformed(2)))));
+            addDrawableChild(go = (new ButtonWidget( width - 60, 0, 20, 20, new TranslatableText("fabricef.example.screen.go"), (button -> this.legacyActionPerformed(3)))));
+            addDrawableChild(min = (new ButtonWidget(width - 20, 0, 20, 20, new LiteralText("_"), (button -> this.legacyActionPerformed(4)))));
+            addDrawableChild(vidMode = (new ButtonWidget(width - 40, 0, 20, 20, new LiteralText("YT"), (button -> this.legacyActionPerformed(5)))));
             vidModeState = false;
             
             url = new TextFieldWidget(client.textRenderer, 40, 0, width - 100, 20, new LiteralText(""));
@@ -99,14 +98,15 @@ public class BrowserScreen extends Screen {
             min.x = width - 20;
             
             String old = url.getText();
-            url = new GuiTextField(5, fontRenderer, 40, 0, width - 100, 20);
-            url.setMaxStringLength(65535);
+            url = new TextFieldWidget( client.textRenderer, 40, 0, width - 100, 20, new LiteralText(""));
+            url.setMaxLength(65535);
             url.setText(old);
         }
     }
     
     public int scaleY(int y) {
-        double sy = ((double) y) / ((double) height) * ((double) mc.displayHeight);
+        assert client != null;
+        double sy = ((double) y) / ((double) height) * ((double) client.getWindow().getHeight());
         return (int) sy;
     }
     
@@ -117,8 +117,8 @@ public class BrowserScreen extends Screen {
             browser.loadURL(url);
     }
 
-    @Override
-    public void updateScreen() {
+    // formerly updateScreen
+    public void preRender() {
         if(urlToLoad != null && browser != null) {
             browser.loadURL(urlToLoad);
             urlToLoad = null;
@@ -126,93 +126,114 @@ public class BrowserScreen extends Screen {
     }
 
     @Override
-    public void drawScreen(int i1, int i2, float f) {
+    public void render(MatrixStack matrices,int mouseX, int mouseY, float delta) {
         //Render the URL box first because it overflows a bit
-        url.drawTextBox();
+        this.preRender();
+        url.render(matrices, mouseX, mouseY, delta);
         
         //Render buttons
-        super.drawScreen(i1, i2, f);
+        super.render(matrices, mouseX, mouseY, delta);
         
         //Renders the browser if itsn't null
         if(browser != null) {
-            GlStateManager.disableDepth();
-            GlStateManager.enableTexture2D();
-            GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f);
+            GlStateManager._disableDepthTest();
+            GlStateManager._disableTexture();
+            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
             browser.draw(.0d, height, width, 20.d); //Don't forget to flip Y axis.
-            GlStateManager.enableDepth();
+            GlStateManager._enableDepthTest();
         }
     }
     
     @Override
-    public void onGuiClosed() {
+    public void close() {
         //Make sure to close the browser when you don't need it anymore.
         if(!ExampleMod.INSTANCE.hasBackup() && browser != null)
             browser.close();
         
-        Keyboard.enableRepeatEvents(false);
+        // Keyboard.enableRepeatEvents(false);
+        super.close();
     }
-    
+
     @Override
-    public void handleInput() {
-        while(Keyboard.next()) {
-            if(Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
-                mc.displayGuiScreen(null);
-                return;
-            }
-            
-            boolean pressed = Keyboard.getEventKeyState();
-            boolean focused = url.isFocused();
-            char key = Keyboard.getEventCharacter();
-            int num = Keyboard.getEventKey();
-            
-            if(browser != null && !focused) { //Inject events into browser
-                if(pressed)
-                    browser.injectKeyPressedByKeyCode(num, key, 0);
-                else
-                    browser.injectKeyReleasedByKeyCode(num, key, 0);
-
-                if(key != 0)
-                    browser.injectKeyTyped(key, 0);
-            }
-            
-            //Forward event to text box.
-            if(!pressed && focused && num == Keyboard.KEY_RETURN)
-                actionPerformed(go);
-            else if(pressed)
-                url.textboxKeyTyped(key, num);
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        return this.keyChanged(keyCode, scanCode, modifiers, true);
+    }
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        return this.keyChanged(keyCode, scanCode, modifiers, false);
+    }
+    public boolean keyChanged(int keyCode, int scanCode, int modifiers, boolean pressed) {
+        assert client != null;
+        if(keyCode == GLFW.GLFW_KEY_ESCAPE) {
+            client.setScreen(null);
+            return true;
         }
-        
-        while(Mouse.next()) {
-            int btn = Mouse.getEventButton();
-            boolean pressed = Mouse.getEventButtonState();
-            int sx = Mouse.getEventX();
-            int sy = Mouse.getEventY();
-            int wheel = Mouse.getEventDWheel();
-            
-            if(browser != null) { //Inject events into browser. TODO: Handle mods & leaving.
-                int y = mc.displayHeight - sy - scaleY(20); //Don't forget to flip Y axis.
 
-                if(wheel != 0)
-                    browser.injectMouseWheel(sx, y, 0, 1, wheel);
-                else if(btn == -1)
-                    browser.injectMouseMove(sx, y, 0, y < 0);
-                else
-                    browser.injectMouseButton(sx, y, 0, btn + 1, pressed, 1);
-            }
-            
-            if(pressed) { //Forward events to GUI.
-                int x = sx * width / mc.displayWidth;
-                int y = height - (sy * height / mc.displayHeight) - 1;
+        boolean focused = url.isFocused();
+        InputUtil.Key iuKey = InputUtil.fromKeyCode(keyCode, scanCode);
+        // TODO: not depend on translation hack
+        String keystr = iuKey.getLocalizedText().getString();
+        char key = keystr.charAt(keystr.length() - 1);
 
-                try {
-                    mouseClicked(x, y, btn);
-                } catch(Throwable t) {
-                    t.printStackTrace();
-                }
+        if(browser != null && !focused) { //Inject events into browser
+            if(pressed)
+                browser.injectKeyPressedByKeyCode(keyCode, key, 0);
+            else
+                browser.injectKeyReleasedByKeyCode(keyCode, key, 0);
 
-                url.mouseClicked(x, y, btn);
-            }
+            if(key != 0)
+                browser.injectKeyTyped(key, 0);
+            return true; // Something did happen
         }
+
+        // Legacy Forwarding
+        /*if(!pressed && focused && num == GLFW.GLFW_KEY_ENTER)
+            actionPerformed(go);
+        else if(pressed)
+            url.textboxKeyTyped(key, num);*/
+        return false;
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        return this.mouseChanged(mouseX, mouseY, button, 0,0,0,true) || super.mouseClicked(mouseX,mouseY,button);
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        return this.mouseChanged(mouseX, mouseY, button, 0,0,0,false);
+    }
+
+    @Override
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+        return this.mouseChanged(mouseX, mouseY, button, deltaX,deltaY,0,true);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+        return this.mouseChanged(mouseX, mouseY, -1, 0,0,0,false);
+    }
+
+    public boolean mouseChanged(double mouseX, double mouseY,  int btn, double deltaX, double deltaY, double scrollAmount, boolean pressed){
+        int sx = (int) mouseX;
+        int sy = (int) mouseY;
+        int wheel = (int) scrollAmount;
+
+        if(browser != null) { //Inject events into browser. TODO: Handle mods & leaving.
+            int y = client.getWindow().getHeight() - sy - scaleY(20); //Don't forget to flip Y axis.
+
+            if(wheel != 0)
+                browser.injectMouseWheel(sx, y, 0, 1, wheel);
+            else if(btn == -1)
+                browser.injectMouseMove(sx, y, 0, y < 0);
+            else
+                browser.injectMouseButton(sx, y, 0, btn + 1, pressed, 1);
+        }
+
+        if(pressed) { //Forward events to GUI.
+            return false;
+        }
+        return true;
     }
     
     //Called by ExampleMod when the current browser's URL changes.
@@ -223,23 +244,23 @@ public class BrowserScreen extends Screen {
         }
     }
     
-    //Handle button clicks
-    @Override
-    protected void actionPerformed(GuiButton src) {
+    //Handle button clicks the old way...
+    protected void legacyActionPerformed(int id) {
         if(browser == null)
             return;
         
-        if(src.id == 0)
+        if(id == 0)
             browser.goBack();
-        else if(src.id == 1)
+        else if(id == 1)
             browser.goForward();
-        else if(src.id == 2) {
+        else if(id == 2) {
             String fixedURL = ExampleMod.INSTANCE.getAPI().punycode(url.getText());
             browser.loadURL(fixedURL);
-        } else if(src.id == 3) {
+        } else if(id == 3) {
             ExampleMod.INSTANCE.setBackup(this);
-            mc.displayGuiScreen(null);
-        } else if(src.id == 4) {
+            assert client != null;
+            client.setScreen(null);
+        } else if(id == 4) {
             String loc = browser.getURL();
             String vId = null;
             boolean redo = false;
@@ -253,7 +274,7 @@ public class BrowserScreen extends Screen {
 
             if(vId != null || redo) {
                 ExampleMod.INSTANCE.setBackup(this);
-                mc.displayGuiScreen(new ScreenCfg(browser, vId));
+                client.setScreen(new ScreenCfg(browser, vId));
             }
         }
     }
