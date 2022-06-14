@@ -1,6 +1,13 @@
 package net.montoyo.mcef.example;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.utilities.Log;
 import org.lwjgl.opengl.GL11;
@@ -18,15 +25,16 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 
-public class BrowserScreen extends GuiScreen {
+public class BrowserScreen extends Screen {
     
     IBrowser browser = null;
-    private GuiButton back = null;
-    private GuiButton fwd = null;
-    private GuiButton go = null;
-    private GuiButton min = null;
-    private GuiButton vidMode = null;
-    private GuiTextField url = null;
+    private ButtonWidget back = null;
+    private ButtonWidget fwd = null;
+    private ButtonWidget go = null;
+    private ButtonWidget min = null;
+    private ButtonWidget vidMode = null;
+    private boolean vidModeState = false;
+    private TextFieldWidget url = null;
     private String urlToLoad = null;
 
     private static final String YT_REGEX1 = "^https?://(?:www\\.)?youtube\\.com/watch\\?v=([a-zA-Z0-9_\\-]+)$";
@@ -34,15 +42,18 @@ public class BrowserScreen extends GuiScreen {
     private static final String YT_REGEX3 = "^https?://(?:www\\.)?youtube\\.com/embed/([a-zA-Z0-9_\\-]+)(\\?.+)?$";
 
     public BrowserScreen() {
+        super(new TranslatableText("fabricef.example.screen.title"));
         urlToLoad = MCEF.HOME_PAGE;
     }
 
     public BrowserScreen(String url) {
+        super(new TranslatableText("fabricef.example.screen.title"));
         urlToLoad = (url == null) ? MCEF.HOME_PAGE : url;
     }
     
     @Override
-    public void initGui() {
+    public void init() {
+        super.init(); // narrator trigger lmao
         ExampleMod.INSTANCE.hudBrowser = null;
 
         if(browser == null) {
@@ -57,30 +68,30 @@ public class BrowserScreen extends GuiScreen {
         }
         
         //Resize the browser if window size changed
-        if(browser != null)
-            browser.resize(mc.displayWidth, mc.displayHeight - scaleY(20));
+        if(browser != null && client != null && client.getWindow() != null) {
+            browser.resize(client.getWindow().getWidth(), client.getWindow().getHeight() - scaleY(20));
+        }
         
         //Create GUI
-        Keyboard.enableRepeatEvents(true);
-        buttonList.clear();
+        // Keyboard.enableRepeatEvents(true);
+        // buttonList.clear();
         
         if(url == null) {
-            buttonList.add(back = (new GuiButton(0, 0, 0, 20, 20, "<")));
-            buttonList.add(fwd = (new GuiButton(1, 20, 0, 20, 20, ">")));
-            buttonList.add(go = (new GuiButton(2, width - 60, 0, 20, 20, "Go")));
-            buttonList.add(min = (new GuiButton(3, width - 20, 0, 20, 20, "_")));
-            buttonList.add(vidMode = (new GuiButton(4, width - 40, 0, 20, 20, "YT")));
-            vidMode.enabled = false;
+            addDrawableChild(back = (new ButtonWidget( 0, 0, 20, 20, new LiteralText("<"))));
+            addDrawableChild(fwd = (new ButtonWidget( 20, 0, 20, 20, new LiteralText(">"))));
+            addDrawableChild(go = (new ButtonWidget( width - 60, 0, 20, 20, new TranslatableText("fabricef.example.screen.go"))));
+            addDrawableChild(min = (new ButtonWidget(width - 20, 0, 20, 20, new LiteralText("_"))));
+            addDrawableChild(vidMode = (new ButtonWidget(width - 40, 0, 20, 20, new LiteralText("YT"))));
+            vidModeState = false;
             
-            url = new GuiTextField(5, fontRenderer, 40, 0, width - 100, 20);
-            url.setMaxStringLength(65535);
+            url = new TextFieldWidget(client.textRenderer, 40, 0, width - 100, 20, new LiteralText(""));
+            url.setMaxLength(65535);
             //url.setText("mod://mcef/home.html");
         } else {
-            buttonList.add(back);
-            buttonList.add(fwd);
-            buttonList.add(go);
-            buttonList.add(min);
-            buttonList.add(vidMode);
+            addDrawableChild(fwd);
+            addDrawableChild(go);
+            addDrawableChild(min);
+            addDrawableChild(vidMode);
             
             //Handle resizing
             vidMode.x = width - 40;
@@ -208,7 +219,7 @@ public class BrowserScreen extends GuiScreen {
     public void onUrlChanged(IBrowser b, String nurl) {
         if(b == browser && url != null) {
             url.setText(nurl);
-            vidMode.enabled = nurl.matches(YT_REGEX1) || nurl.matches(YT_REGEX2) || nurl.matches(YT_REGEX3);
+            vidModeState = nurl.matches(YT_REGEX1) || nurl.matches(YT_REGEX2) || nurl.matches(YT_REGEX3);
         }
     }
     

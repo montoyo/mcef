@@ -16,7 +16,6 @@ import org.cef.callback.CefDragData;
 import org.cef.handler.CefRenderHandler;
 import org.cef.handler.CefScreenInfo;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.input.Keyboard;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -27,6 +26,8 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 /**
  * This class represents an off-screen rendered browser.
@@ -163,32 +164,33 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 
     public static int remapKeycode(int kc, char c) {
         switch (kc) {
-            case Keyboard.KEY_BACK:
+            // Unable to remap
+            case GLFW_KEY_BACKSPACE:
                 return KeyEvent.VK_BACK_SPACE;
-            case Keyboard.KEY_DELETE:
+            case GLFW_KEY_DELETE:
                 return KeyEvent.VK_DELETE;
-            case Keyboard.KEY_DOWN:
+            case GLFW_KEY_DOWN:
                 return KeyEvent.VK_DOWN;
-            case Keyboard.KEY_RETURN:
+            case GLFW_KEY_ENTER:
                 return KeyEvent.VK_ENTER;
-            case Keyboard.KEY_ESCAPE:
+            case GLFW_KEY_ESCAPE:
                 return KeyEvent.VK_ESCAPE;
-            case Keyboard.KEY_LEFT:
+            case GLFW_KEY_LEFT:
                 return KeyEvent.VK_LEFT;
-            case Keyboard.KEY_RIGHT:
+            case GLFW_KEY_RIGHT:
                 return KeyEvent.VK_RIGHT;
-            case Keyboard.KEY_TAB:
+            case GLFW_KEY_TAB:
                 return KeyEvent.VK_TAB;
-            case Keyboard.KEY_UP:
+            case GLFW_KEY_UP:
                 return KeyEvent.VK_UP;
-            case Keyboard.KEY_PRIOR:
+            case GLFW_KEY_PAGE_UP:
                 return KeyEvent.VK_PAGE_UP;
-            case Keyboard.KEY_NEXT:
+            case GLFW_KEY_PAGE_DOWN:
                 return KeyEvent.VK_PAGE_DOWN;
-            case Keyboard.KEY_END:
-                return Keyboard.KEY_END;
-            case Keyboard.KEY_HOME:
-                return Keyboard.KEY_HOME;
+            case GLFW_KEY_END:
+                return GLFW_KEY_END;
+            case GLFW_KEY_HOME:
+                return GLFW_KEY_HOME;
             default:
                 return c;
         }

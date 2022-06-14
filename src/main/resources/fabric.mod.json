@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "id": "fabricef",
+  "version": "${version}",
+
+  "name": "Fabric MCEF",
+  "description": "Port of the MCEF project. ",
+  "authors": [
+    "javaarchive"
+  ],
+  "contact": {
+    "homepage": "https://github.com/javaarchive/mcef-fabric",
+    "sources": "https://github.com/javaarchive/mcef-fabric"
+  },
+
+  "license": "BSD-3-Clause",
+  "icon": "assets/fabricef/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "net.montoyo.mcef.MCEF"
+    ]
+  },
+  "mixins": [
+    "fabricef.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.14.6",
+    "fabric": "*",
+    "minecraft": "~1.18.2",
+    "java": ">=16"
+  }
+}

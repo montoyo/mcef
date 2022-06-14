@@ -43,7 +43,7 @@ public class ConfigForm implements ActionListener, WindowListener {
         config.load();
 
         //Frame and content pane
-        frame = new JFrame("MCEF Setup - Configuration");
+        frame = new JFrame("MCEF Setup - Configuration (does not save yet)");
         frame.setMinimumSize(new Dimension(500, 1));
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);

@@ -1,24 +1,14 @@
 package net.montoyo.mcef.client;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.client.SplashProgress;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraft.client.MinecraftClient;
 import net.montoyo.mcef.BaseProxy;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IDisplayHandler;
 import net.montoyo.mcef.api.IJSQueryHandler;
 import net.montoyo.mcef.api.IScheme;
-import net.montoyo.mcef.coremod.ShutdownPatcher;
 import net.montoyo.mcef.example.ExampleMod;
 import net.montoyo.mcef.remote.RemoteConfig;
-import net.montoyo.mcef.utilities.ForgeProgressListener;
 import net.montoyo.mcef.utilities.IProgressListener;
 import net.montoyo.mcef.utilities.Log;
 import net.montoyo.mcef.utilities.Util;
@@ -54,7 +44,7 @@ public class ClientProxy extends BaseProxy {
     private CefMessageRouter cefRouter;
     private final ArrayList<CefBrowserOsr> browsers = new ArrayList<>();
     private String updateStr;
-    private final Minecraft mc = Minecraft.getMinecraft();
+    private final MinecraftClient mc = MinecraftClient.getInstance();
     private final DisplayHandler displayHandler = new DisplayHandler();
     private final HashMap<String, String> mimeTypeMap = new HashMap<>();
     private final AppHandler appHandler = new AppHandler();
@@ -70,16 +60,7 @@ public class ClientProxy extends BaseProxy {
     public void onInit() {
         appHandler.setArgs(MCEF.CEF_ARGS);
 
-        boolean enableForgeSplash = false;
-        try {
-            Field f = SplashProgress.class.getDeclaredField("enabled");
-            f.setAccessible(true);
-            enableForgeSplash = f.getBoolean(null);
-        } catch (Throwable t) {
-            t.printStackTrace();
-        }
-
-        ROOT = mc.mcDataDir.getAbsolutePath().replaceAll("\\\\", "/");
+        ROOT = mc.runDirectory.getAbsolutePath().replaceAll("\\\\", "/");
         if (ROOT.endsWith("."))
             ROOT = ROOT.substring(0, ROOT.length() - 1);
 
@@ -92,10 +73,8 @@ public class ClientProxy extends BaseProxy {
 
         IProgressListener ipl;
         RemoteConfig cfg = new RemoteConfig();
-        if (MCEF.USE_FORGE_SPLASH && enableForgeSplash)
-            ipl = new ForgeProgressListener();
-        else
-            ipl = new UpdateFrame();
+        // Forge splash used to run here
+        ipl = new UpdateFrame();
 
         cfg.load();
 
@@ -163,12 +142,9 @@ public class ClientProxy extends BaseProxy {
             }
         });
 
-        if (!ShutdownPatcher.didPatchSucceed()) {
-            Log.warning("ShutdownPatcher failed to patch Minecraft.run() method; starting ShutdownThread...");
-            (new ShutdownThread()).start();
-        }
+        // If shutdown patcher fail runs shutdown patcher
+        // removed!
 
-        MinecraftForge.EVENT_BUS.register(this);
         if (MCEF.ENABLE_EXAMPLE)
             exampleMod.onInit();
 
@@ -224,23 +200,20 @@ public class ClientProxy extends BaseProxy {
         return appHandler.isSchemeRegistered(name);
     }
 
-    @SubscribeEvent
-    public void onTick(TickEvent.RenderTickEvent ev) {
-        if (ev.phase == TickEvent.Phase.START) {
-            mc.mcProfiler.startSection("MCEF");
+    public void onTickStart() {
+        mc.getProfiler().push("MCEF");
 
-            if (cefApp != null)
-                cefApp.N_DoMessageLoopWork();
+        if (cefApp != null)
+            cefApp.N_DoMessageLoopWork();
 
-            for (CefBrowserOsr b : browsers)
-                b.mcefUpdate();
+        for (CefBrowserOsr b : browsers)
+            b.mcefUpdate();
 
-            displayHandler.update();
-            mc.mcProfiler.endSection();
-        }
+        displayHandler.update();
+        mc.getProfiler().pop();
     }
 
-    @SubscribeEvent
+    /*@SubscribeEvent
     public void onLogin(PlayerEvent.PlayerLoggedInEvent ev) {
         if (updateStr == null || !MCEF.WARN_UPDATES)
             return;
@@ -252,7 +225,7 @@ public class ClientProxy extends BaseProxy {
         cct.setStyle(cs);
 
         ev.player.sendMessage(cct);
-    }
+    }*/
 
     public void removeBrowser(CefBrowserOsr b) {
         browsers.remove(b);
