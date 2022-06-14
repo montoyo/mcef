@@ -1,5 +1,6 @@
 package net.montoyo.mcef.example;
 
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
@@ -56,6 +57,8 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
             api.registerDisplayHandler(this);
             api.registerJSQueryHandler(this);
         }
+
+        ClientTickEvents.START_CLIENT_TICK.register(client -> this.onTickStart());
     }
     
     public void setBackup(BrowserScreen bu) {
@@ -86,14 +89,12 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
             return null;
     }
     
-    public void onTick(TickEvent ev) {
-        if(ev.phase == TickEvent.Phase.START && ev.side == Side.CLIENT && ev.type == TickEvent.Type.CLIENT) {
-            //Check if our key was pressed
-            if(key.isPressed() && !(mc.currentScreen instanceof BrowserScreen)) {
-                //Display the web browser UI.
-                mc.setScreen(hasBackup() ? backup : new BrowserScreen());
-                backup = null;
-            }
+    public void onTickStart() {
+        // Check if our key was pressed
+        if(key.isPressed() && !(mc.currentScreen instanceof BrowserScreen)) {
+            //Display the web browser UI.
+            mc.setScreen(hasBackup() ? backup : new BrowserScreen());
+            backup = null;
         }
     }
 
@@ -149,10 +150,10 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
     public void cancelQuery(IBrowser b, long queryId) {
     }
 
-    @SubscribeEvent
+    /*@SubscribeEvent
     public void onDrawHUD(RenderGameOverlayEvent.Post ev) {
         if(hudBrowser != null)
             hudBrowser.drawScreen(0, 0, 0.f);
-    }
+    }*/
 
 }

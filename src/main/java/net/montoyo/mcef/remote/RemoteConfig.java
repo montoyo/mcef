@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import net.minecraft.client.Minecraft;
+import net.minecraft.client.MinecraftClient;
 import net.montoyo.mcef.setup.FileListing;
 import org.cef.OS;
 
@@ -170,7 +170,7 @@ public class RemoteConfig {
         
         JsonElement mcVersions = json.get("latestVersions");
         if(mcVersions != null && mcVersions.isJsonObject()) {
-            JsonElement cVer = mcVersions.getAsJsonObject().get(Minecraft.getMinecraft().getVersion());
+            JsonElement cVer = mcVersions.getAsJsonObject().get(MinecraftClient.getInstance().getGameVersion());
 
             if(cVer != null && cVer.isJsonPrimitive())
                 version = cVer.getAsString();

@@ -4,18 +4,19 @@
 
 package org.cef.browser;
 
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import com.mojang.blaze3d.platform.GlStateManager;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.VertexFormats;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.utilities.Log;
-import org.lwjgl.opengl.EXTBgra;
 
 import java.awt.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
+import static org.lwjgl.opengl.EXTBGRA.GL_BGRA_EXT;
 import static org.lwjgl.opengl.GL11.*;
 
 public class CefRenderer {
@@ -54,17 +55,17 @@ public class CefRenderer {
     }
 
     protected void initialize() {
-        GlStateManager.enableTexture2D();
+        GlStateManager._enableTexture();
         texture_id_[0] = glGenTextures();
 
         if (MCEF.CHECK_VRAM_LEAK)
             GL_TEXTURES.add(texture_id_[0]);
 
-        GlStateManager.bindTexture(texture_id_[0]);
+        GlStateManager._bindTexture(texture_id_[0]);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-        GlStateManager.bindTexture(0);
+        GlStateManager._bindTexture(0);
     }
 
     protected void cleanup() {
@@ -83,14 +84,15 @@ public class CefRenderer {
         Tessellator t = Tessellator.getInstance();
         BufferBuilder vb = t.getBuffer();
 
-        GlStateManager.bindTexture(texture_id_[0]);
-        vb.begin(GL_QUADS, DefaultVertexFormats.POSITION_TEX_COLOR);
-        vb.pos(x1, y1, 0.0).tex(0.0, 1.0).color(255, 255, 255, 255).endVertex();
-        vb.pos(x2, y1, 0.0).tex(1.f, 1.f).color(255, 255, 255, 255).endVertex();
-        vb.pos(x2, y2, 0.0).tex(1.f, 0.0).color(255, 255, 255, 255).endVertex();
-        vb.pos(x1, y2, 0.0).tex(0.0, 0.0).color(255, 255, 255, 255).endVertex();
+        GlStateManager._bindTexture(texture_id_[0]);
+        // previously GL_QUADS for drawmode
+        vb.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
+        vb.vertex(x1, y1, 0.0).texture(0.0f, 1.0f).color(255, 255, 255, 255);
+        vb.vertex(x2, y1, 0.0).texture(1.f, 1.f).color(255, 255, 255, 255);
+        vb.vertex(x2, y2, 0.0).texture(1.f, 0.0f).color(255, 255, 255, 255);
+        vb.vertex(x1, y2, 0.0).texture(0.0f, 0.0f).color(255, 255, 255, 255);
         t.draw();
-        GlStateManager.bindTexture(0);
+        GlStateManager._bindTexture(0);
     }
 
     protected void onPopupSize(Rectangle rect) {
@@ -124,7 +126,7 @@ public class CefRenderer {
 
     protected void onPaint(boolean popup, Rectangle[] dirtyRects, ByteBuffer buffer, int width, int height, boolean completeReRender) {
         if (transparent_) // Enable alpha blending.
-            GlStateManager.enableBlend();
+            GlStateManager._enableBlend();
 
         final int size = (width * height) << 2;
         if (size > buffer.limit()) {
@@ -133,8 +135,8 @@ public class CefRenderer {
         }
 
         // Enable 2D textures.
-        GlStateManager.enableTexture2D();
-        GlStateManager.bindTexture(texture_id_[0]);
+        GlStateManager._enableTexture();
+        GlStateManager._bindTexture(texture_id_[0]);
 
         int oldAlignement = glGetInteger(GL_UNPACK_ALIGNMENT);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -144,7 +146,7 @@ public class CefRenderer {
                 // Update/resize the whole texture.
                 view_width_ = width;
                 view_height_ = height;
-                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, view_width_, view_height_, 0, EXTBgra.GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, view_width_, view_height_, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
             } else {
                 glPixelStorei(GL_UNPACK_ROW_LENGTH, view_width_);
 
@@ -155,7 +157,7 @@ public class CefRenderer {
                     else {
                         glPixelStorei(GL_UNPACK_SKIP_PIXELS, rect.x);
                         glPixelStorei(GL_UNPACK_SKIP_ROWS, rect.y);
-                        glTexSubImage2D(GL_TEXTURE_2D, 0, rect.x, rect.y, rect.width, rect.height, EXTBgra.GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+                        glTexSubImage2D(GL_TEXTURE_2D, 0, rect.x, rect.y, rect.width, rect.height, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
                     }
                 }
 
@@ -187,14 +189,14 @@ public class CefRenderer {
             glPixelStorei(GL_UNPACK_ROW_LENGTH, width);
             glPixelStorei(GL_UNPACK_SKIP_PIXELS, skip_pixels);
             glPixelStorei(GL_UNPACK_SKIP_ROWS, skip_rows);
-            glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, EXTBgra.GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
+            glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
             glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
             glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
             glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
         }
 
         glPixelStorei(GL_UNPACK_ALIGNMENT, oldAlignement);
-        GlStateManager.bindTexture(0);
+        GlStateManager._bindTexture(0);
     }
 
     protected void setSpin(float spinX, float spinY) {
