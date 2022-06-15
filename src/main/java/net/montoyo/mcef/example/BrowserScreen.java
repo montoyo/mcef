@@ -76,11 +76,11 @@ public class BrowserScreen extends Screen {
         // buttonList.clear();
         
         if(url == null) {
-            addDrawableChild(back = (new ButtonWidget( 0, 0, 20, 20, new LiteralText("<"), (button -> this.legacyActionPerformed(1)))));
-            addDrawableChild(fwd = (new ButtonWidget( 20, 0, 20, 20, new LiteralText(">"),(button -> this.legacyActionPerformed(2)))));
-            addDrawableChild(go = (new ButtonWidget( width - 60, 0, 20, 20, new TranslatableText("fabricef.example.screen.go"), (button -> this.legacyActionPerformed(3)))));
-            addDrawableChild(min = (new ButtonWidget(width - 20, 0, 20, 20, new LiteralText("_"), (button -> this.legacyActionPerformed(4)))));
-            addDrawableChild(vidMode = (new ButtonWidget(width - 40, 0, 20, 20, new LiteralText("YT"), (button -> this.legacyActionPerformed(5)))));
+            addDrawableChild(back = (new ButtonWidget( 0, 0, 20, 20, new LiteralText("<"), (button -> this.legacyActionPerformed(0)))));
+            addDrawableChild(fwd = (new ButtonWidget( 20, 0, 20, 20, new LiteralText(">"),(button -> this.legacyActionPerformed(1)))));
+            addDrawableChild(go = (new ButtonWidget( width - 60, 0, 20, 20, new TranslatableText("fabricef.example.screen.go"), (button -> this.legacyActionPerformed(2)))));
+            addDrawableChild(min = (new ButtonWidget(width - 20, 0, 20, 20, new LiteralText("_"), (button -> this.legacyActionPerformed(3)))));
+            addDrawableChild(vidMode = (new ButtonWidget(width - 40, 0, 20, 20, new LiteralText("YT"), (button -> this.legacyActionPerformed(4)))));
             vidModeState = false;
             
             url = new TextFieldWidget(client.textRenderer, 40, 0, width - 100, 20, new LiteralText(""));
@@ -108,6 +108,12 @@ public class BrowserScreen extends Screen {
         assert client != null;
         double sy = ((double) y) / ((double) height) * ((double) client.getWindow().getHeight());
         return (int) sy;
+    }
+
+    public int scaleX(int x) {
+        assert client != null;
+        double sx = ((double) x) / ((double) width) * ((double) client.getWindow().getWidth());
+        return (int) sx;
     }
     
     public void loadURL(String url) {
@@ -182,6 +188,7 @@ public class BrowserScreen extends Screen {
         }
         if(keyCode == GLFW.GLFW_KEY_F10){
             System.out.println("Early term F10");
+            url.setTextFieldFocused(!url.isFocused());
             return true;
         }
 
@@ -192,7 +199,10 @@ public class BrowserScreen extends Screen {
         String keystr = GLFW.glfwGetKeyName(keyCode, scanCode);
         System.out.println("KEY STR " + keystr);
         if(keystr == null){
-            return false;
+            keystr = "\0";
+        }
+        if(keyCode == GLFW.GLFW_KEY_ENTER){
+            keystr = "\n";
         }
         if(keystr.length() == 0){
             return false;
@@ -206,8 +216,8 @@ public class BrowserScreen extends Screen {
             else
                 browser.injectKeyReleasedByKeyCode(keyCode, key, 0);
 
-            // if(key != 0)
-            //    browser.injectKeyTyped(key, 0);
+            if(key == '\n')
+               browser.injectKeyTyped(key, 0);
             return true; // Something did happen
         }
 
@@ -240,24 +250,24 @@ public class BrowserScreen extends Screen {
     }
 
     public boolean mouseChanged(double mouseX, double mouseY,  int btn, double deltaX, double deltaY, double scrollAmount, boolean pressed){
-        int sx = (int) mouseX;
+        int sx = scaleX((int) mouseX);
         int sy = (int) mouseY;
         int wheel = (int) scrollAmount;
 
         if(browser != null) { //Inject events into browser. TODO: Handle mods & leaving.
-            int y = client.getWindow().getHeight() - sy - scaleY(20); //Don't forget to flip Y axis.
+            int y = scaleY(sy - 20); //Don't forget to flip Y axis.
 
             System.out.println("Dest coords " + sx + " " + y + " button " + btn + " " + pressed);
 
             if(wheel != 0)
-                browser.injectMouseWheel(sx, y, 0, 1, wheel);
+                browser.injectMouseWheel(sx, y, 0,  wheel, 0);
             else if(btn == -1)
                 browser.injectMouseMove(sx, y, 0, y < 0);
             else
                 browser.injectMouseButton(sx, y, 0, btn + 1, pressed, 1);
         }
 
-        if(pressed) { //Forward events to GUI.
+        if(mouseY <= 20) { //Forward events to GUI.
             return false;
         }
         return true;

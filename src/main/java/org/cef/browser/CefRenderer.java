@@ -154,6 +154,8 @@ public class CefRenderer {
                 view_width_ = width;
                 view_height_ = height;
                 System.out.println("going to glTexImage2D " + width + " " + height + " " + buffer.limit());
+                glPixelStorei(GL_UNPACK_SKIP_PIXELS,0);
+                glPixelStorei(GL_UNPACK_SKIP_ROWS,0);
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, view_width_, view_height_, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
                 //System.out.println("glTexImage2D ok");
             } else {

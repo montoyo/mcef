@@ -12,4 +12,6 @@ Thanks to ds58 for the original chromium update and platform support. Only the f
 # Currently supported platforms
 - Windows 10/11 64 bit
 - macOS (Intel-based Macs only)
-- Linux 64 bit (tested on Fedora 34 and Ubuntu 20.04)
+- Linux 64 bit (tested on Fedora 34 and Ubuntu 20.04) 
+  (note:  linux actually has an incompatible glibc 2.32 in the newest CEF builds sadly so 20.04 and lower will run into library issues)
+  
