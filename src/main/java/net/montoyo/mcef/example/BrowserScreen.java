@@ -223,6 +223,8 @@ public class BrowserScreen extends Screen {
         if(browser != null) { //Inject events into browser. TODO: Handle mods & leaving.
             int y = client.getWindow().getHeight() - sy - scaleY(20); //Don't forget to flip Y axis.
 
+            System.out.println("Dest coords " + sx + " " + y + " button " + btn + " " + pressed);
+
             if(wheel != 0)
                 browser.injectMouseWheel(sx, y, 0, 1, wheel);
             else if(btn == -1)

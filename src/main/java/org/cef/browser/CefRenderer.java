@@ -142,27 +142,27 @@ public class CefRenderer {
         GlStateManager._enableTexture();
         GlStateManager._bindTexture(texture_id_[0]);
 
-        System.out.println("ON BROWSER PAINT");
+        //System.out.println("ON BROWSER PAINT");
 
         int oldAlignement = glGetInteger(GL_UNPACK_ALIGNMENT);
-        System.out.println("glGetInteger ok");
+        //System.out.println("glGetInteger ok");
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        System.out.println("glPixelStore ok");
+        //System.out.println("glPixelStore ok");
         if (!popup) {
             if (completeReRender || width != view_width_ || height != view_height_) {
                 // Update/resize the whole texture.
                 view_width_ = width;
                 view_height_ = height;
-                System.out.println("going to glTexImage2D " + width + " " + height + " " + buffer.limit());
+                //System.out.println("going to glTexImage2D " + width + " " + height + " " + buffer.limit());
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, view_width_, view_height_, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
-                System.out.println("glTexImage2D ok");
+                //System.out.println("glTexImage2D ok");
             } else {
-                System.out.println("Noncomplete rerender processing pixel store");
+                // System.out.println("Noncomplete rerender processing pixel store");
                 glPixelStorei(GL_UNPACK_ROW_LENGTH, view_width_);
 
                 // Update just the dirty rectangles.
                 for (Rectangle rect : dirtyRects) {
-                    System.out.println("Updating rect");
+                    //System.out.println("Updating rect");
                     if (rect.x < 0 || rect.y < 0 || rect.x + rect.width > view_width_ || rect.y + rect.height > view_height_)
                         Log.warning("Bad data passed to CefRenderer.onPaint() triggered safe guards... (2)");
                     else {
@@ -171,7 +171,7 @@ public class CefRenderer {
                         glTexSubImage2D(GL_TEXTURE_2D, 0, rect.x, rect.y, rect.width, rect.height, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
                     }
                 }
-                System.out.println("More GLPixel store stuff");
+                //System.out.println("More GLPixel store stuff");
                 glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
                 glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
                 glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
@@ -198,7 +198,7 @@ public class CefRenderer {
                 h -= y + h - view_height_;
 
             // Update the popup rectangle.
-            System.out.println("glPixelStorei...");
+            //System.out.println("glPixelStorei...");
             glPixelStorei(GL_UNPACK_ROW_LENGTH, width);
             glPixelStorei(GL_UNPACK_SKIP_PIXELS, skip_pixels);
             glPixelStorei(GL_UNPACK_SKIP_ROWS, skip_rows);
@@ -207,7 +207,7 @@ public class CefRenderer {
             glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
             glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
         }
-        System.out.println("glPixelStorei final...");
+        //System.out.println("glPixelStorei final...");
         glPixelStorei(GL_UNPACK_ALIGNMENT, oldAlignement);
         GlStateManager._bindTexture(0);
     }
