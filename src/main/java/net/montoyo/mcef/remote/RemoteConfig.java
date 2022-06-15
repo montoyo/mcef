@@ -167,11 +167,15 @@ public class RemoteConfig {
                     extract.add(e.getAsString());
             }
         }
+
+        String actualVersion = MinecraftClient.getInstance().getGameVersion();
         
         JsonElement mcVersions = json.get("latestVersions");
         if(mcVersions != null && mcVersions.isJsonObject()) {
-            JsonElement cVer = mcVersions.getAsJsonObject().get(MinecraftClient.getInstance().getGameVersion());
+            JsonElement cVer = mcVersions.getAsJsonObject().get("1.12.2");
 
+            // My glibc version is 2.31 :( so newer doesn't work
+            
             if(cVer != null && cVer.isJsonPrimitive())
                 version = cVer.getAsString();
         }

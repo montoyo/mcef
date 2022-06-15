@@ -69,6 +69,9 @@ public class BrowserScreen extends Screen {
         //Resize the browser if window size changed
         if(browser != null && client != null && client.getWindow() != null) {
             browser.resize(client.getWindow().getWidth(), client.getWindow().getHeight() - scaleY(20));
+        }else{
+            assert browser != null;
+            browser.resize(800,600);
         }
         
         //Create GUI
@@ -85,7 +88,7 @@ public class BrowserScreen extends Screen {
             
             url = new TextFieldWidget(client.textRenderer, 40, 0, width - 100, 20, new LiteralText(""));
             url.setMaxLength(65535);
-            //url.setText("mod://mcef/home.html");
+            url.setText(browser.getURL());
         } else {
             addDrawableChild(fwd);
             addDrawableChild(go);
@@ -138,7 +141,8 @@ public class BrowserScreen extends Screen {
         if(browser != null) {
             GlStateManager._disableDepthTest();
             GlStateManager._disableTexture();
-            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+            // GlStateManager._clearColor(1.0f,1.0f,1.0f,1.0f);
+            // GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
             browser.draw(.0d, height, width, 20.d); //Don't forget to flip Y axis.
             GlStateManager._enableDepthTest();
         }
@@ -156,11 +160,11 @@ public class BrowserScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        return this.keyChanged(keyCode, scanCode, modifiers, true);
+        return this.keyChanged(keyCode, scanCode, modifiers, true) || super.keyPressed(keyCode, scanCode, modifiers);
     }
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        return this.keyChanged(keyCode, scanCode, modifiers, false);
+        return this.keyChanged(keyCode, scanCode, modifiers, false) || super.keyReleased(keyCode, scanCode, modifiers);
     }
     public boolean keyChanged(int keyCode, int scanCode, int modifiers, boolean pressed) {
         assert client != null;
@@ -176,6 +180,7 @@ public class BrowserScreen extends Screen {
         char key = keystr.charAt(keystr.length() - 1);
 
         if(browser != null && !focused) { //Inject events into browser
+            System.out.println("Sent keystroke " + keystr);
             if(pressed)
                 browser.injectKeyPressedByKeyCode(keyCode, key, 0);
             else
@@ -201,17 +206,17 @@ public class BrowserScreen extends Screen {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        return this.mouseChanged(mouseX, mouseY, button, 0,0,0,false);
+        return this.mouseChanged(mouseX, mouseY, button, 0,0,0,false) || super.mouseReleased(mouseX,mouseY,button);
     }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        return this.mouseChanged(mouseX, mouseY, button, deltaX,deltaY,0,true);
+        return this.mouseChanged(mouseX, mouseY, button, deltaX,deltaY,0,true) || super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        return this.mouseChanged(mouseX, mouseY, -1, 0,0,0,false);
+        return this.mouseChanged(mouseX, mouseY, -1, 0,0,0,false) || super.mouseScrolled(mouseX, mouseY, amount);
     }
 
     public boolean mouseChanged(double mouseX, double mouseY,  int btn, double deltaX, double deltaY, double scrollAmount, boolean pressed){

@@ -290,9 +290,13 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
     public void mcefUpdate() {
         synchronized (paintData) {
             if (paintData.hasFrame) {
+                System.out.println("New frame!");
                 renderer_.onPaint(false, paintData.dirtyRects, paintData.buffer, paintData.width, paintData.height, paintData.fullReRender);
                 paintData.hasFrame = false;
                 paintData.fullReRender = false;
+
+            }else{
+
             }
         }
 
