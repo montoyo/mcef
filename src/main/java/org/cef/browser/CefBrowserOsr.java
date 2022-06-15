@@ -273,6 +273,8 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
                 if (paintData.buffer == null || size != paintData.buffer.capacity()) //This only happens when the browser gets resized
                     paintData.buffer = BufferUtils.createByteBuffer(size);
 
+                BufferUtils.zeroBuffer(paintData.buffer);
+
                 paintData.buffer.position(0);
                 paintData.buffer.limit(buffer.limit());
                 buffer.position(0);

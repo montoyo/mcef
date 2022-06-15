@@ -67,13 +67,9 @@ public class BrowserScreen extends Screen {
         }
         
         //Resize the browser if window size changed
-        if(browser != null && client != null && client.getWindow() != null) {
-            browser.resize(client.getWindow().getWidth(), client.getWindow().getHeight() - scaleY(20));
-        }else{
-            assert browser != null;
-            browser.resize(800,600);
-        }
-        
+
+        browser.resize(client.getWindow().getWidth(), client.getWindow().getHeight() - scaleY(20));
+
         //Create GUI
         // Keyboard.enableRepeatEvents(true);
         // buttonList.clear();
