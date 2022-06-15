@@ -36,6 +36,8 @@ public class BrowserScreen extends Screen {
     private TextFieldWidget url = null;
     private String urlToLoad = null;
 
+    private long initTime = System.currentTimeMillis();
+
     private static final String YT_REGEX1 = "^https?://(?:www\\.)?youtube\\.com/watch\\?v=([a-zA-Z0-9_\\-]+)$";
     private static final String YT_REGEX2 = "^https?://(?:www\\.)?youtu\\.be/([a-zA-Z0-9_\\-]+)$";
     private static final String YT_REGEX3 = "^https?://(?:www\\.)?youtube\\.com/embed/([a-zA-Z0-9_\\-]+)(\\?.+)?$";
@@ -102,6 +104,8 @@ public class BrowserScreen extends Screen {
             url.setMaxLength(65535);
             url.setText(old);
         }
+
+        this.initTime = System.currentTimeMillis();
     }
     
     public int scaleY(int y) {
@@ -188,7 +192,9 @@ public class BrowserScreen extends Screen {
         }
         if(keyCode == GLFW.GLFW_KEY_F10){
             System.out.println("Early term F10");
-            url.setTextFieldFocused(!url.isFocused());
+            if(pressed && System.currentTimeMillis() - this.initTime > 1000L) {
+                url.setTextFieldFocused(!url.isFocused());
+            }
             return true;
         }
 
