@@ -153,7 +153,7 @@ public class CefRenderer {
                 // Update/resize the whole texture.
                 view_width_ = width;
                 view_height_ = height;
-                //System.out.println("going to glTexImage2D " + width + " " + height + " " + buffer.limit());
+                System.out.println("going to glTexImage2D " + width + " " + height + " " + buffer.limit());
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, view_width_, view_height_, 0, GL_BGRA_EXT, GL_UNSIGNED_BYTE, buffer);
                 //System.out.println("glTexImage2D ok");
             } else {

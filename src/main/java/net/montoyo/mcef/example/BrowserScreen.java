@@ -63,12 +63,13 @@ public class BrowserScreen extends Screen {
             
             //Create a browser and resize it to fit the screen
             browser = api.createBrowser((urlToLoad == null) ? MCEF.HOME_PAGE : urlToLoad, false);
+            browser.resize(client.getWindow().getWidth(), client.getWindow().getHeight() - scaleY(20));
             urlToLoad = null;
         }
         
         //Resize the browser if window size changed
 
-        browser.resize(client.getWindow().getWidth(), client.getWindow().getHeight() - scaleY(20));
+
 
         //Create GUI
         // Keyboard.enableRepeatEvents(true);
@@ -162,17 +163,39 @@ public class BrowserScreen extends Screen {
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         return this.keyChanged(keyCode, scanCode, modifiers, false) || super.keyReleased(keyCode, scanCode, modifiers);
     }
+
+    @Override
+    public boolean charTyped(char codePoint, int modifiers) {
+        if(browser != null && !url.isFocused()) {
+            browser.injectKeyTyped(codePoint, modifiers);
+            return true;
+        }else{
+            return super.charTyped(codePoint, modifiers);
+        }
+    }
+
     public boolean keyChanged(int keyCode, int scanCode, int modifiers, boolean pressed) {
         assert client != null;
         if(keyCode == GLFW.GLFW_KEY_ESCAPE) {
             client.setScreen(null);
             return true;
         }
+        if(keyCode == ExampleMod.INSTANCE.key.getDefaultKey().getCode()){
+            return false;
+        }
 
         boolean focused = url.isFocused();
-        InputUtil.Key iuKey = InputUtil.fromKeyCode(keyCode, scanCode);
+        // InputUtil.Key iuKey = InputUtil.fromKeyCode(keyCode, scanCode);
         // TODO: not depend on translation hack
-        String keystr = iuKey.getLocalizedText().getString();
+        //String keystr = iuKey.getLocalizedText().getString();
+        String keystr = GLFW.glfwGetKeyName(keyCode, scanCode);
+        System.out.println("KEY STR " + keystr);
+        if(keystr == null){
+            return false;
+        }
+        if(keystr.length() == 0){
+            return false;
+        }
         char key = keystr.charAt(keystr.length() - 1);
 
         if(browser != null && !focused) { //Inject events into browser
@@ -182,8 +205,8 @@ public class BrowserScreen extends Screen {
             else
                 browser.injectKeyReleasedByKeyCode(keyCode, key, 0);
 
-            if(key != 0)
-                browser.injectKeyTyped(key, 0);
+            // if(key != 0)
+            //    browser.injectKeyTyped(key, 0);
             return true; // Something did happen
         }
 
