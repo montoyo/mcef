@@ -180,8 +180,9 @@ public class BrowserScreen extends Screen {
             client.setScreen(null);
             return true;
         }
-        if(keyCode == ExampleMod.INSTANCE.key.getDefaultKey().getCode()){
-            return false;
+        if(keyCode == GLFW.GLFW_KEY_F10){
+            System.out.println("Early term F10");
+            return true;
         }
 
         boolean focused = url.isFocused();
