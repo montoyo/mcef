@@ -46,7 +46,7 @@ import javax.swing.ToolTipManager;
  * The visibility of this class is "package". To create a new
  * CefBrowser instance, please use CefBrowserFactory.
  */
-class CefBrowserWr extends CefBrowser_N {
+public class CefBrowserWr extends CefBrowser_N {
     private Canvas canvas_ = null;
     private Component component_ = null;
     private Rectangle content_rect_ = new Rectangle(0, 0, 0, 0);

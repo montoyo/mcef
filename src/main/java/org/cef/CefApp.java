@@ -475,6 +475,8 @@ public class CefApp extends CefAppHandlerAdapter {
     public static final boolean startup(String[] args) {
         String jcefPath = getJcefLibPath();
 
+        System.out.println("JCEF Path -> " + jcefPath);
+
         if (OS.isWindows()) {
             System.load(jcefPath + "\\d3dcompiler_47.dll");
             System.load(jcefPath + "\\libGLESv2.dll");

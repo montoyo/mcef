@@ -1,5 +1,6 @@
 package net.montoyo.mcef.client;
 
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.montoyo.mcef.BaseProxy;
 import net.montoyo.mcef.MCEF;
@@ -17,11 +18,8 @@ import org.cef.CefApp;
 import org.cef.CefClient;
 import org.cef.CefSettings;
 import org.cef.OS;
-import org.cef.browser.CefBrowser;
-import org.cef.browser.CefBrowserOsr;
-import org.cef.browser.CefMessageRouter;
+import org.cef.browser.*;
 import org.cef.browser.CefMessageRouter.CefMessageRouterConfig;
-import org.cef.browser.CefRenderer;
 import org.cef.handler.CefLifeSpanHandlerAdapter;
 
 import java.io.BufferedReader;
@@ -43,6 +41,7 @@ public class ClientProxy extends BaseProxy {
     private CefClient cefClient;
     private CefMessageRouter cefRouter;
     private final ArrayList<CefBrowserOsr> browsers = new ArrayList<>();
+    private final ArrayList<Object> nogc = new ArrayList<>();
     private String updateStr;
     private final MinecraftClient mc = MinecraftClient.getInstance();
     private final DisplayHandler displayHandler = new DisplayHandler();
@@ -74,12 +73,18 @@ public class ClientProxy extends BaseProxy {
         IProgressListener ipl;
         RemoteConfig cfg = new RemoteConfig();
         // Forge splash used to run here
+        System.out.println("SYSTEM HEADLESS PROPERTY: " + System.getProperty("java.awt.headless"));
+        System.setProperty("java.awt.headless","false"); // local is bugged for me
         ipl = new UpdateFrame();
 
         cfg.load();
 
+        System.out.println("Updating MCEF file listing ");
+
         if (!cfg.updateFileListing(fileListing, false))
             Log.warning("There was a problem while establishing file list. Uninstall may not delete all files.");
+
+        System.out.println("Updating MCEF missing files... ");
 
         if (!cfg.downloadMissing(ipl)) {
             Log.warning("Going in virtual mode; couldn't download resources.");
@@ -117,6 +122,7 @@ public class ClientProxy extends BaseProxy {
         settings.windowless_rendering_enabled = true;
         settings.background_color = settings.new ColorType(0, 255, 255, 255);
         settings.cache_path = (new File(JCEF_ROOT, "cache")).getAbsolutePath();
+        // settings.user_agent = "MCEF"
 
         CefApp.startup(MCEF.CEF_ARGS);
         cefApp = CefApp.getInstance(settings);
@@ -149,6 +155,8 @@ public class ClientProxy extends BaseProxy {
             exampleMod.onInit();
 
         Log.info("MCEF loaded successfuly.");
+
+        ClientTickEvents.START_CLIENT_TICK.register(client -> this.onTickStart());
     }
 
     public CefApp getCefApp() {
@@ -160,10 +168,19 @@ public class ClientProxy extends BaseProxy {
         if (VIRTUAL)
             return new VirtualBrowser();
 
+        System.out.println("Creating CEF browser at url " + url);
+
         CefBrowserOsr ret = (CefBrowserOsr) cefClient.createBrowser(url, true, transp);
         ret.setCloseAllowed();
         ret.createImmediately();
+        ret.loadURL("http://localhost:8181");
 
+        /*CefBrowserWr ret2 = (CefBrowserWr) cefClient.createBrowser(url, false, transp);
+        ret2.setCloseAllowed();
+        ret2.createImmediately();
+        ret2.loadURL("http://localhost:8181");
+
+        nogc.add(ret2);*/
         browsers.add(ret);
         return ret;
     }

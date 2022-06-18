@@ -2,6 +2,7 @@ package net.montoyo.mcef;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.easy_forge_compat.Configuration;
 import net.montoyo.mcef.utilities.Log;
@@ -27,6 +28,7 @@ public class MCEF implements ModInitializer{
 
     @Override
     public void onInitialize() {
+        System.out.println("MCEF Initalizing...");
         Log.info("Loading MCEF config...");
         Configuration cfg = new Configuration();
 
@@ -46,7 +48,7 @@ public class MCEF implements ModInitializer{
 
         //Config: exampleBrowser
         ENABLE_EXAMPLE = cfg.getBoolean("enable", "exampleBrowser", true, "Set this to false if you don't want to enable the F10 browser.");
-        HOME_PAGE = cfg.getString("home", "exampleBrowser", "mod://mcef/home.html", "The home page of the F10 browser.");
+        HOME_PAGE = cfg.getString("home", "exampleBrowser", "https://google.com", "The home page of the F10 browser.");
 
         //Config: debug
         CHECK_VRAM_LEAK = cfg.getBoolean("checkForVRAMLeak", "debug", false, "Track allocated OpenGL textures to make sure there's no leak");
@@ -55,6 +57,7 @@ public class MCEF implements ModInitializer{
         setupProxy();
 
         PROXY.onPreInit();
+        this.onInit(); // old init
     }
 
     @Environment(EnvType.CLIENT)

@@ -28,7 +28,7 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
     public static ExampleMod INSTANCE;
 
     public ScreenCfg hudBrowser = null;
-    private KeyBinding key = new KeyBinding("Open Browser", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F10, "key.categories.misc");
+    public KeyBinding key = new KeyBinding("Open Browser", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F10, "key.categories.misc");
     private MinecraftClient mc = MinecraftClient.getInstance();
     private BrowserScreen backup = null;
     private API api;

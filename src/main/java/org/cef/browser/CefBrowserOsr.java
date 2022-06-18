@@ -273,6 +273,8 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
                 if (paintData.buffer == null || size != paintData.buffer.capacity()) //This only happens when the browser gets resized
                     paintData.buffer = BufferUtils.createByteBuffer(size);
 
+                BufferUtils.zeroBuffer(paintData.buffer);
+
                 paintData.buffer.position(0);
                 paintData.buffer.limit(buffer.limit());
                 buffer.position(0);
@@ -290,9 +292,13 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
     public void mcefUpdate() {
         synchronized (paintData) {
             if (paintData.hasFrame) {
+                // System.out.println("New frame!");
                 renderer_.onPaint(false, paintData.dirtyRects, paintData.buffer, paintData.width, paintData.height, paintData.fullReRender);
                 paintData.hasFrame = false;
                 paintData.fullReRender = false;
+
+            }else{
+
             }
         }
 
