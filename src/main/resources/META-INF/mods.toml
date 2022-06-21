@@ -1,0 +1,40 @@
+modLoader="javafml" #mandatory
+
+loaderVersion="[40,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+
+license="BSD-3-Clause"
+
+issueTrackerURL="" #optional
+
+[[mods]] #mandatory
+
+modId="forgecef" #mandatory
+
+version="1.0.0" #mandatory
+
+displayName="MCEF" #mandatory
+
+displayURL="https://github.com/Mysticpasta1/mcef-forge" #optional
+
+logoFile= "" #optional
+
+credits="" #optional
+
+authors="Mysticpasta1, WaterPicker, Montoyo, javaarchive" #optional
+
+description='''
+'''
+
+[[dependencies.mcef]] #optional
+modId="forge" #mandatory
+mandatory=true #mandatory
+versionRange="[40,)" #mandatory
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.mcef]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.18.2,1.19)"
+ordering="NONE"
+side="BOTH"

@@ -1,10 +1,14 @@
 package net.montoyo.mcef.example;
 
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraftforge.client.ClientRegistry;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.montoyo.mcef.utilities.Log;
 
 import net.montoyo.mcef.api.API;
@@ -50,15 +54,14 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
         INSTANCE = this;
         
         // Register key binding via fabric api
-        KeyBindingHelper.registerKeyBinding(key);
+        ClientRegistry.registerKeyBinding(key);
         // We used to register to event bus here
         if(api != null) {
             //Register this class to handle onAddressChange and onQuery events
             api.registerDisplayHandler(this);
             api.registerJSQueryHandler(this);
         }
-
-        ClientTickEvents.START_CLIENT_TICK.register(client -> this.onTickStart());
+        MinecraftForge.EVENT_BUS.register(this);
     }
     
     public void setBackup(BrowserScreen bu) {
@@ -88,8 +91,9 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
         else
             return null;
     }
-    
-    public void onTickStart() {
+
+    @SubscribeEvent
+    public void onTickStart(TickEvent.ClientTickEvent event) {
         // Check if our key was pressed
         if(key.isPressed() && !(mc.currentScreen instanceof BrowserScreen)) {
             //Display the web browser UI.
@@ -150,10 +154,10 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
     public void cancelQuery(IBrowser b, long queryId) {
     }
 
-    /*@SubscribeEvent
+    @SubscribeEvent
     public void onDrawHUD(RenderGameOverlayEvent.Post ev) {
         if(hudBrowser != null)
-            hudBrowser.drawScreen(0, 0, 0.f);
-    }*/
+            hudBrowser.drawTexture(new MatrixStack(), 0, 0, 0, 0, 20, 20);
+    }
 
 }

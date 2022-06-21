@@ -1,16 +1,16 @@
 package net.montoyo.mcef;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.common.Mod;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.easy_forge_compat.Configuration;
 import net.montoyo.mcef.utilities.Log;
-import net.fabricmc.api.ModInitializer;
 
-public class MCEF implements ModInitializer{
+@Mod("forgecef")
+public class MCEF {
 
-    public static final String VERSION = "1.33";
+    public static final String VERSION = "1.0.0";
     public static boolean ENABLE_EXAMPLE;
     public static boolean SKIP_UPDATES;
     public static boolean WARN_UPDATES;
@@ -26,8 +26,7 @@ public class MCEF implements ModInitializer{
 
     public static BaseProxy PROXY;
 
-    @Override
-    public void onInitialize() {
+    public MCEF() {
         System.out.println("MCEF Initalizing...");
         Log.info("Loading MCEF config...");
         Configuration cfg = new Configuration();
@@ -60,7 +59,7 @@ public class MCEF implements ModInitializer{
         this.onInit(); // old init
     }
 
-    @Environment(EnvType.CLIENT)
+    @OnlyIn(Dist.CLIENT)
     public void setupProxy(){
         PROXY = new ClientProxy();
     }

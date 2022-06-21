@@ -1,6 +1,6 @@
 package net.montoyo.mcef.api;
 
-import net.fabricmc.loader.api.FabricLoader;
+import net.minecraftforge.fml.ModList;
 
 public class MCEFApi {
     
@@ -24,7 +24,7 @@ public class MCEFApi {
      * @return true if it is loaded. false otherwise.
      */
     public static boolean isMCEFLoaded() {
-        return FabricLoader.getInstance().isModLoaded("fabricef");
+        return  ModList.get().isLoaded("forgecef");
     }
 
 }

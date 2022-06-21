@@ -1,7 +1,15 @@
 package net.montoyo.mcef.client;
 
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
+import net.minecraft.text.TextColor;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.montoyo.mcef.BaseProxy;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.IBrowser;
@@ -155,8 +163,6 @@ public class ClientProxy extends BaseProxy {
             exampleMod.onInit();
 
         Log.info("MCEF loaded successfuly.");
-
-        ClientTickEvents.START_CLIENT_TICK.register(client -> this.onTickStart());
     }
 
     public CefApp getCefApp() {
@@ -217,7 +223,8 @@ public class ClientProxy extends BaseProxy {
         return appHandler.isSchemeRegistered(name);
     }
 
-    public void onTickStart() {
+    @SubscribeEvent
+    public void onTickStart(TickEvent.ClientTickEvent event) {
         mc.getProfiler().push("MCEF");
 
         if (cefApp != null)
@@ -230,19 +237,19 @@ public class ClientProxy extends BaseProxy {
         mc.getProfiler().pop();
     }
 
-    /*@SubscribeEvent
+    @SubscribeEvent
     public void onLogin(PlayerEvent.PlayerLoggedInEvent ev) {
         if (updateStr == null || !MCEF.WARN_UPDATES)
             return;
 
-        Style cs = new Style();
-        cs.setColor(TextFormatting.LIGHT_PURPLE);
+        Style cs = Style.EMPTY;
+        cs.withColor(Formatting.LIGHT_PURPLE);
 
-        TextComponentString cct = new TextComponentString(updateStr);
-        cct.setStyle(cs);
+        MutableText cct = (MutableText) Text.of(updateStr);
+        cct.getWithStyle(cs);
 
-        ev.player.sendMessage(cct);
-    }*/
+        ev.getPlayer().sendMessage(cct, true);
+    }
 
     public void removeBrowser(CefBrowserOsr b) {
         browsers.remove(b);

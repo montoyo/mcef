@@ -1,6 +1,6 @@
-/*package net.montoyo.mcef.coremod;
+package net.montoyo.mcef.coremod;
 
-import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
+/*import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 import net.minecraft.launchwrapper.IClassTransformer;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
