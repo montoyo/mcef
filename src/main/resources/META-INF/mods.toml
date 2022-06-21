@@ -25,14 +25,14 @@ authors="Mysticpasta1, WaterPicker, Montoyo, javaarchive" #optional
 description='''
 '''
 
-[[dependencies.mcef]] #optional
+[[dependencies.forgecef]] #optional
 modId="forge" #mandatory
 mandatory=true #mandatory
 versionRange="[40,)" #mandatory
 ordering="NONE"
 side="BOTH"
 
-[[dependencies.mcef]]
+[[dependencies.forgecef]]
 modId="minecraft"
 mandatory=true
 versionRange="[1.18.2,1.19)"
