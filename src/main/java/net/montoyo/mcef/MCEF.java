@@ -10,7 +10,7 @@ import net.montoyo.mcef.utilities.Log;
 @Mod("forgecef")
 public class MCEF {
 
-    public static final String VERSION = "1.0.0";
+    public static final String VERSION = "1.33";
     public static boolean ENABLE_EXAMPLE;
     public static boolean SKIP_UPDATES;
     public static boolean WARN_UPDATES;
