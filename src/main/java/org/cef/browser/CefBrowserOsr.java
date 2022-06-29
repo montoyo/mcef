@@ -296,8 +296,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
                 renderer_.onPaint(false, paintData.dirtyRects, paintData.buffer, paintData.width, paintData.height, paintData.fullReRender);
                 paintData.hasFrame = false;
                 paintData.fullReRender = false;
-
-            }else{
+            }else {
 
             }
         }

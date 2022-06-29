@@ -5,10 +5,9 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.montoyo.mcef.BaseProxy;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.IBrowser;
@@ -40,7 +39,6 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Mod.EventBusSubscriber
 public class ClientProxy extends BaseProxy {
 
     public static String ROOT = ".";
@@ -165,6 +163,9 @@ public class ClientProxy extends BaseProxy {
             exampleMod.onInit();
 
         Log.info("MCEF loaded successfuly.");
+
+        MinecraftForge.EVENT_BUS.addListener(this::onTickStart);
+        MinecraftForge.EVENT_BUS.addListener(this::onLogin);
     }
 
     public CefApp getCefApp() {
@@ -225,7 +226,6 @@ public class ClientProxy extends BaseProxy {
         return appHandler.isSchemeRegistered(name);
     }
 
-    @SubscribeEvent
     public void onTickStart(TickEvent.ClientTickEvent event) {
         mc.getProfiler().push("MCEF");
 
@@ -239,7 +239,6 @@ public class ClientProxy extends BaseProxy {
         mc.getProfiler().pop();
     }
 
-    @SubscribeEvent
     public void onLogin(PlayerEvent.PlayerLoggedInEvent ev) {
         if (updateStr == null || !MCEF.WARN_UPDATES)
             return;
