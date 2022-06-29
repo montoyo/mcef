@@ -6,6 +6,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -176,6 +177,9 @@ public class ClientProxy extends BaseProxy {
                 exampleMod.onInit();
 
             Log.info("MCEF loaded successfuly.");
+
+            MinecraftForge.EVENT_BUS.addListener(this::onTickStart);
+            MinecraftForge.EVENT_BUS.addListener(this::onLogin);
         });
     }
 
