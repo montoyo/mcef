@@ -179,9 +179,6 @@ public class ClientProxy extends BaseProxy {
                 exampleMod.onInit();
 
             Log.info("MCEF loaded successfuly.");
-
-            MinecraftForge.EVENT_BUS.addListener(this::onTickStart);
-            MinecraftForge.EVENT_BUS.addListener(this::onLogin);
         });
     }
 

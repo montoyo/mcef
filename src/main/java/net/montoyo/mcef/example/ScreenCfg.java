@@ -1,5 +1,6 @@
 package net.montoyo.mcef.example;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.Tessellator;
@@ -108,8 +109,8 @@ public class ScreenCfg extends Screen {
 
     @Override
     public void render(MatrixStack matricies, int i1, int i2, float f) {
-        GL11.glDisable(GL11.GL_DEPTH_TEST);
-        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        RenderSystem.disableDepthTest();
+        RenderSystem.enableTexture();
         browser.draw(matricies, unscaleX(x), unscaleY(height + y), unscaleX(width + x), unscaleY(y));
 
         if(drawSquare) {
@@ -118,14 +119,14 @@ public class ScreenCfg extends Screen {
 
             // drawMode -> GL11.GL_LINE_LOOP
             vb.begin(VertexFormat.DrawMode.LINES, VertexFormats.POSITION_COLOR);
-            vb.vertex(unscaleX(x + width), unscaleY(y + height), 0.0).color(255, 255, 255, 255);
-            vb.vertex(unscaleX(x + width + 10), unscaleY(y + height), 0.0).color(255, 255, 255, 255);
-            vb.vertex(unscaleX(x + width + 10), unscaleY(y + height + 10), 0.0).color(255, 255, 255, 255);
-            vb.vertex(unscaleX(x + width), unscaleY(y + height + 10), 0.0).color(255, 255, 255, 255);
+            vb.vertex(matricies.peek().getPositionMatrix(), (float) unscaleX(x + width), (float) unscaleY(y + height), 0.0f).color(255, 255, 255, 255);
+            vb.vertex(matricies.peek().getPositionMatrix(), (float) unscaleX(x + width + 10), (float) unscaleY(y + height), 0.0f).color(255, 255, 255, 255);
+            vb.vertex(matricies.peek().getPositionMatrix(), (float) unscaleX(x + width + 10), (float) unscaleY(y + height + 10), 0.0f).color(255, 255, 255, 255);
+            vb.vertex(matricies.peek().getPositionMatrix(), (float) unscaleX(x + width), (float) unscaleY(y + height + 10), 0.0f).color(255, 255, 255, 255);
             t.draw();
         }
 
-        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        RenderSystem.enableDepthTest();
     }
 
     public double unscaleX(int x) {

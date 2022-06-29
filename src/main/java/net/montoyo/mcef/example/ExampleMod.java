@@ -56,7 +56,6 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
         }
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.addListener(this::onTickStart);
-        MinecraftForge.EVENT_BUS.addListener(this::onDrawHUD);
     }
     
     public void setBackup(BrowserScreen bu) {
@@ -150,9 +149,9 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
     }
 
 
-    public void onDrawHUD(RenderGameOverlayEvent.Post ev) {
+    /*public void onDrawHUD(RenderGameOverlayEvent.Post ev) {
         if(hudBrowser != null)
             hudBrowser.drawTexture(new MatrixStack(), 0, 0, 0, 0, 20, 20);
-    }
+    }*/
 
 }
