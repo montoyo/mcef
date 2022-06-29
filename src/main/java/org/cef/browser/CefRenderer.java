@@ -79,21 +79,18 @@ public class CefRenderer {
 
     protected void render(MatrixStack matrix, double x1, double y1, double x2, double y2) {
         Matrix4f positionMatrix = matrix.peek().getPositionMatrix();
-        BufferBuilder builder = Tessellator.getInstance().getBuffer();
-        RenderSystem.enableBlend();
-        RenderSystem.disableTexture();
-        RenderSystem.defaultBlendFunc();
+        Tessellator t = Tessellator.getInstance();
+        BufferBuilder vb = t.getBuffer();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, texture_id_[0]);
-        builder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
-        builder.vertex(positionMatrix, (float)x1, (float)y2, 0.0F).texture(0.0f, 1.0f).color(1, 1, 1, 1).next();
-        builder.vertex(positionMatrix, (float)x2, (float)y2, 0.0F).texture(1.f, 1.f).color(1, 1, 1, 1).next();
-        builder.vertex(positionMatrix, (float)x2, (float)y1, 0.0F).texture(1.f, 0.0f).color(1, 1, 1, 1).next();
-        builder.vertex(positionMatrix, (float)x1, (float)y1, 0.0F).texture(0.0f, 0.0f).color(1, 1, 1, 1).next();
-        builder.end();
-        BufferRenderer.draw(builder);
-        RenderSystem.enableTexture();
-        RenderSystem.disableBlend();
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        // previously GL_QUADS for drawmode
+        vb.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
+        vb.vertex(positionMatrix, (float) x1, (float) y1, 0.0f).texture(0.0f, 1.0f).color(255, 255, 255, 255).next();
+        vb.vertex(positionMatrix, (float) x2, (float) y1, 0.0f).texture(1.f, 1.f).color(255, 255, 255, 255).next();
+        vb.vertex(positionMatrix, (float) x2, (float) y2, 0.0f).texture(1.f, 0.0f).color(255, 255, 255, 255).next();
+        vb.vertex(positionMatrix, (float) x1, (float) y2, 0.0f).texture(0.0f, 0.0f).color(255, 255, 255, 255).next();
+        t.draw();
     }
 
     protected void onPopupSize(Rectangle rect) {
