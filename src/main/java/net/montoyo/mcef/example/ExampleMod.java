@@ -9,6 +9,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.montoyo.mcef.utilities.Log;
 
 import net.montoyo.mcef.api.API;
@@ -27,6 +28,7 @@ import org.lwjgl.glfw.GLFW;
  * @author montoyo
  *
  */
+@Mod.EventBusSubscriber
 public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
     
     public static ExampleMod INSTANCE;
@@ -157,7 +159,7 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
     @SubscribeEvent
     public void onDrawHUD(RenderGameOverlayEvent.Post ev) {
         if(hudBrowser != null)
-            hudBrowser.drawTexture(new MatrixStack(), 0, 0, 0, 0, 20, 20);
+            hudBrowser.drawTexture(new MatrixStack(), 20, 20, 0, 0, 20, 20);
     }
 
 }

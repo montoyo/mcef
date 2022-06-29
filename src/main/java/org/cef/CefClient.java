@@ -147,7 +147,7 @@ public class CefClient extends CefClientHandler
     @Override
     protected CefBrowser getBrowser(int identifier) {
         synchronized (browser_) {
-            return browser_.get(new Integer(identifier));
+            return browser_.get((identifier));
         }
     }
 

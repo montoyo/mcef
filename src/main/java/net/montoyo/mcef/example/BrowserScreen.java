@@ -43,12 +43,12 @@ public class BrowserScreen extends Screen {
     private static final String YT_REGEX3 = "^https?://(?:www\\.)?youtube\\.com/embed/([a-zA-Z0-9_\\-]+)(\\?.+)?$";
 
     public BrowserScreen() {
-        super(new TranslatableText("fabricef.example.screen.title"));
+        super(new TranslatableText("forgecef.example.screen.title"));
         urlToLoad = MCEF.HOME_PAGE;
     }
 
     public BrowserScreen(String url) {
-        super(new TranslatableText("fabricef.example.screen.title"));
+        super(new TranslatableText("forgecef.example.screen.title"));
         urlToLoad = (url == null) ? MCEF.HOME_PAGE : url;
     }
     

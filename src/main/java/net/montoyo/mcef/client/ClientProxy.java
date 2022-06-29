@@ -4,12 +4,11 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.montoyo.mcef.BaseProxy;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.IBrowser;
@@ -26,19 +25,22 @@ import org.cef.CefApp;
 import org.cef.CefClient;
 import org.cef.CefSettings;
 import org.cef.OS;
-import org.cef.browser.*;
+import org.cef.browser.CefBrowser;
+import org.cef.browser.CefBrowserOsr;
+import org.cef.browser.CefMessageRouter;
 import org.cef.browser.CefMessageRouter.CefMessageRouterConfig;
+import org.cef.browser.CefRenderer;
 import org.cef.handler.CefLifeSpanHandlerAdapter;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Mod.EventBusSubscriber
 public class ClientProxy extends BaseProxy {
 
     public static String ROOT = ".";
