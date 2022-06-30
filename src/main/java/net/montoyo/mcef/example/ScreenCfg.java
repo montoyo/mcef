@@ -110,7 +110,7 @@ public class ScreenCfg extends Screen {
     public void render(MatrixStack matricies, int i1, int i2, float f) {
         GL11.glDisable(GL11.GL_DEPTH_TEST);
         GL11.glEnable(GL11.GL_TEXTURE_2D);
-        browser.draw(unscaleX(x), unscaleY(height + y), unscaleX(width + x), unscaleY(y));
+        browser.draw(matricies, unscaleX(x), unscaleY(height + y), unscaleX(width + x), unscaleY(y));
 
         if(drawSquare) {
             Tessellator t = Tessellator.getInstance();

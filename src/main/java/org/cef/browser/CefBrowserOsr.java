@@ -4,6 +4,7 @@
 
 package org.cef.browser;
 
+import net.minecraft.client.util.math.MatrixStack;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IStringVisitor;
@@ -132,8 +133,8 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
     }
 
     @Override
-    public void draw(double x1, double y1, double x2, double y2) {
-        renderer_.render(x1, y1, x2, y2);
+    public void draw(MatrixStack matrixStack, double x1, double y1, double x2, double y2) {
+        renderer_.render(matrixStack, x1, y1, x2, y2);
     }
 
     @Override

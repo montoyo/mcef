@@ -1,5 +1,7 @@
 package net.montoyo.mcef.api;
 
+import net.minecraft.client.util.math.MatrixStack;
+
 public interface IBrowser {
     
     /**
@@ -23,7 +25,7 @@ public interface IBrowser {
      * @param x2 The second X coord of the rectangle to render the web view on (right).
      * @param y2 The second Y coord of the rectangle to render the web view on (bottom).
      */
-    void draw(double x1, double y1, double x2, double y2);
+    void draw(MatrixStack matrixStack, double x1, double y1, double x2, double y2);
 
     /**
      * Gets the OpenGL texture ID of the web view.

@@ -7,6 +7,8 @@ package org.cef.browser;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.render.*;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.Matrix4f;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.utilities.Log;
 import org.lwjgl.opengl.GL21;
@@ -76,27 +78,23 @@ public class CefRenderer {
         }
     }
 
-    protected void render(double x1, double y1, double x2, double y2) {
-        // if (view_width_ == 0 || view_height_ == 0)
-        //    return;
-
-        Tessellator t = Tessellator.getInstance();
-        BufferBuilder vb = t.getBuffer();
-
-        // GlStateManager._bindTexture(texture_id_[0]);
-
-
+    protected void render(MatrixStack matrix, double x1, double y1, double x2, double y2) {
+        Matrix4f positionMatrix = matrix.peek().getPositionMatrix();
+        BufferBuilder builder = Tessellator.getInstance().getBuffer();
+        RenderSystem.enableBlend();
+        RenderSystem.disableTexture();
+        RenderSystem.defaultBlendFunc();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, texture_id_[0]);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        // previously GL_QUADS for drawmode
-        vb.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
-        vb.vertex(x1, y1, 0.0).texture(0.0f, 1.0f).color(255, 255, 255, 255).next();
-        vb.vertex(x2, y1, 0.0).texture(1.f, 1.f).color(255, 255, 255, 255).next();
-        vb.vertex(x2, y2, 0.0).texture(1.f, 0.0f).color(255, 255, 255, 255).next();
-        vb.vertex(x1, y2, 0.0).texture(0.0f, 0.0f).color(255, 255, 255, 255).next();
-        t.draw();
-        // GlStateManager._bindTexture(0);
+        builder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
+        builder.vertex(positionMatrix, (float)x1, (float)y2, 0.0F).texture(0.0f, 1.0f).color(1, 1, 1, 1).next();
+        builder.vertex(positionMatrix, (float)x2, (float)y2, 0.0F).texture(1.f, 1.f).color(1, 1, 1, 1).next();
+        builder.vertex(positionMatrix, (float)x2, (float)y1, 0.0F).texture(1.f, 0.0f).color(1, 1, 1, 1).next();
+        builder.vertex(positionMatrix, (float)x1, (float)y1, 0.0F).texture(0.0f, 0.0f).color(1, 1, 1, 1).next();
+        builder.end();
+        BufferRenderer.draw(builder);
+        RenderSystem.enableTexture();
+        RenderSystem.disableBlend();
     }
 
     protected void onPopupSize(Rectangle rect) {
