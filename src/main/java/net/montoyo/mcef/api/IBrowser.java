@@ -58,7 +58,7 @@ public interface IBrowser {
     /**
      * Simulates a keyboard type.
      * 
-     * @param c The typed character.
+     * @param key The typed character.
      * @param mods The key modifiers (shift, ctrl, alt)
      */
     void injectKeyTyped(int key, int mods);
