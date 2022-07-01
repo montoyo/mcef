@@ -32,7 +32,7 @@ public class VirtualBrowser implements IBrowser {
     }
 
     @Override
-    public void injectKeyTyped(char c, int mods) {
+    public void injectKeyTyped(int key, int mods) {
     }
 
     @Override
