@@ -2,6 +2,7 @@ package net.montoyo.mcef;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.easy_forge_compat.Configuration;
@@ -24,7 +25,7 @@ public class MCEF {
 
     public static MCEF INSTANCE;
 
-    public static BaseProxy PROXY;
+    public static BaseProxy PROXY = DistExecutor.<BaseProxy>runForDist(() -> ClientProxy::new, () -> BaseProxy::new);
 
     public MCEF() {
         System.out.println("MCEF Initalizing...");
@@ -53,15 +54,8 @@ public class MCEF {
         CHECK_VRAM_LEAK = cfg.getBoolean("checkForVRAMLeak", "debug", false, "Track allocated OpenGL textures to make sure there's no leak");
         cfg.save();
 
-        setupProxy();
-
         PROXY.onPreInit();
         this.onInit(); // old init
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    public void setupProxy(){
-        PROXY = new ClientProxy();
     }
 
     public void onInit() {
