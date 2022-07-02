@@ -163,7 +163,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 
     @Override
     public void injectKeyTyped(int key, int mods) {
-        KeyEvent ev = new KeyEvent(dc_, KeyEvent.KEY_TYPED, 0, mods, key, (char) remapKeycode(key, (char) key));
+        KeyEvent ev = new KeyEvent(dc_, KeyEvent.KEY_TYPED, 0, mods, 0, (char) key);
         sendKeyEvent(ev);
     }
 
