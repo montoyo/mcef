@@ -1,16 +1,11 @@
 package net.montoyo.mcef.example;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.TranslatableText;
+import com.mojang.blaze3d.vertex.*;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.montoyo.mcef.api.IBrowser;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
 
 public class ScreenCfg extends Screen {
 
@@ -26,7 +21,7 @@ public class ScreenCfg extends Screen {
     private boolean drawSquare = true;
 
     public ScreenCfg(IBrowser b, String vId) {
-        super(new TranslatableText("fabricef.screen.config.title"));
+        super(new TranslatableComponent("forgecef.screen.config.title"));
         browser = b;
         if(vId != null)
             b.loadURL("https://www.youtube.com/embed/" + vId + "?autoplay=1");
@@ -40,7 +35,7 @@ public class ScreenCfg extends Screen {
             drawSquare = false;
             ExampleMod.INSTANCE.hudBrowser = this;
             browser.injectMouseMove(-10, -10, 0, true);
-            client.setScreen(null);
+            minecraft.setScreen(null);
             return true;
         }
 
@@ -61,8 +56,8 @@ public class ScreenCfg extends Screen {
     }
     public boolean mouseChange(double mouseX, double mouseY, int btn, boolean pressed) {
         int sx = (int) mouseX;
-        assert client != null;
-        int sy = (int) (client.getWindow().getHeight() - mouseY);
+        assert minecraft != null;
+        int sy = (int) (minecraft.getWindow().getHeight() - mouseY);
 
         // send to browser
         if(btn == 1 && pressed && sx >= x && sy >= y && sx < x + width && sy < y + height) {
@@ -108,33 +103,33 @@ public class ScreenCfg extends Screen {
 
 
     @Override
-    public void render(MatrixStack matricies, int i1, int i2, float f) {
+    public void render(PoseStack matricies, int i1, int i2, float f) {
         RenderSystem.disableDepthTest();
         RenderSystem.enableTexture();
         browser.draw(matricies, unscaleX(x), unscaleY(height + y), unscaleX(width + x), unscaleY(y));
 
         if(drawSquare) {
-            Tessellator t = Tessellator.getInstance();
-            BufferBuilder vb = t.getBuffer();
+            Tesselator t = Tesselator.getInstance();
+            BufferBuilder vb = t.getBuilder();
 
             // drawMode -> GL11.GL_LINE_LOOP
-            vb.begin(VertexFormat.DrawMode.LINES, VertexFormats.POSITION_COLOR);
-            vb.vertex(matricies.peek().getPositionMatrix(), (float) unscaleX(x + width), (float) unscaleY(y + height), 0.0f).color(255, 255, 255, 255);
-            vb.vertex(matricies.peek().getPositionMatrix(), (float) unscaleX(x + width + 10), (float) unscaleY(y + height), 0.0f).color(255, 255, 255, 255);
-            vb.vertex(matricies.peek().getPositionMatrix(), (float) unscaleX(x + width + 10), (float) unscaleY(y + height + 10), 0.0f).color(255, 255, 255, 255);
-            vb.vertex(matricies.peek().getPositionMatrix(), (float) unscaleX(x + width), (float) unscaleY(y + height + 10), 0.0f).color(255, 255, 255, 255);
-            t.draw();
+            vb.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
+            vb.vertex(matricies.last().pose(), (float) unscaleX(x + width), (float) unscaleY(y + height), 0.0f).color(255, 255, 255, 255);
+            vb.vertex(matricies.last().pose(), (float) unscaleX(x + width + 10), (float) unscaleY(y + height), 0.0f).color(255, 255, 255, 255);
+            vb.vertex(matricies.last().pose(), (float) unscaleX(x + width + 10), (float) unscaleY(y + height + 10), 0.0f).color(255, 255, 255, 255);
+            vb.vertex(matricies.last().pose(), (float) unscaleX(x + width), (float) unscaleY(y + height + 10), 0.0f).color(255, 255, 255, 255);
+            t.end();
         }
 
         RenderSystem.enableDepthTest();
     }
 
     public double unscaleX(int x) {
-        return ((double) x) / ((double) client.getWindow().getWidth()) * ((double) super.width);
+        return ((double) x) / ((double) minecraft.getWindow().getWidth()) * ((double) super.width);
     }
 
     public double unscaleY(int y) {
-        return ((double) y) / ((double) client.getWindow().getHeight()) * ((double) super.height);
+        return ((double) y) / ((double) minecraft.getWindow().getHeight()) * ((double) super.height);
     }
 
 }

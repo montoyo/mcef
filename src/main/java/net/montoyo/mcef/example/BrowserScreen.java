@@ -1,39 +1,29 @@
 package net.montoyo.mcef.example;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import net.minecraft.client.Keyboard;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.input.KeyboardInput;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.montoyo.mcef.MCEF;
-import net.montoyo.mcef.utilities.Log;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL11;
-
 import net.montoyo.mcef.api.API;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.MCEFApi;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.HashMap;
+import org.lwjgl.glfw.GLFW;
 
 public class BrowserScreen extends Screen {
     
     IBrowser browser = null;
-    private ButtonWidget back = null;
-    private ButtonWidget fwd = null;
-    private ButtonWidget go = null;
-    private ButtonWidget min = null;
-    private ButtonWidget vidMode = null;
+    private Button back = null;
+    private Button fwd = null;
+    private Button go = null;
+    private Button min = null;
+    private Button vidMode = null;
     private boolean vidModeState = false;
-    private TextFieldWidget url = null;
+    private EditBox url = null;
     private String urlToLoad = null;
 
     private long initTime = System.currentTimeMillis();
@@ -43,12 +33,12 @@ public class BrowserScreen extends Screen {
     private static final String YT_REGEX3 = "^https?://(?:www\\.)?youtube\\.com/embed/([a-zA-Z0-9_\\-]+)(\\?.+)?$";
 
     public BrowserScreen() {
-        super(new TranslatableText("forgecef.example.screen.title"));
+        super(new TranslatableComponent("forgecef.example.screen.title"));
         urlToLoad = MCEF.HOME_PAGE;
     }
 
     public BrowserScreen(String url) {
-        super(new TranslatableText("forgecef.example.screen.title"));
+        super(new TranslatableComponent("forgecef.example.screen.title"));
         urlToLoad = (url == null) ? MCEF.HOME_PAGE : url;
     }
     
@@ -65,7 +55,7 @@ public class BrowserScreen extends Screen {
             
             //Create a browser and resize it to fit the screen
             browser = api.createBrowser((urlToLoad == null) ? MCEF.HOME_PAGE : urlToLoad, false);
-            browser.resize(client.getWindow().getWidth(), client.getWindow().getHeight() - scaleY(20));
+            browser.resize(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight() - scaleY(20));
             urlToLoad = null;
         }
         
@@ -78,45 +68,45 @@ public class BrowserScreen extends Screen {
         // buttonList.clear();
         
         if(url == null) {
-            addDrawableChild(back = (new ButtonWidget( 0, 0, 20, 20, new LiteralText("<"), (button -> this.legacyActionPerformed(0)))));
-            addDrawableChild(fwd = (new ButtonWidget( 20, 0, 20, 20, new LiteralText(">"),(button -> this.legacyActionPerformed(1)))));
-            addDrawableChild(go = (new ButtonWidget( width - 60, 0, 20, 20, new TranslatableText("fabricef.example.screen.go"), (button -> this.legacyActionPerformed(2)))));
-            addDrawableChild(min = (new ButtonWidget(width - 20, 0, 20, 20, new LiteralText("_"), (button -> this.legacyActionPerformed(3)))));
-            addDrawableChild(vidMode = (new ButtonWidget(width - 40, 0, 20, 20, new LiteralText("YT"), (button -> this.legacyActionPerformed(4)))));
+            addWidget(back = (new Button( 0, 0, 20, 20, new TextComponent("<"), (button -> this.legacyActionPerformed(0)))));
+            addWidget(fwd = (new Button( 20, 0, 20, 20, new TextComponent(">"),(button -> this.legacyActionPerformed(1)))));
+            addWidget(go = (new Button( width - 60, 0, 20, 20, new TranslatableComponent("forgecef.example.screen.go"), (button -> this.legacyActionPerformed(2)))));
+            addWidget(min = (new Button(width - 20, 0, 20, 20, new TextComponent("_"), (button -> this.legacyActionPerformed(3)))));
+            addWidget(vidMode = (new Button(width - 40, 0, 20, 20, new TextComponent("YT"), (button -> this.legacyActionPerformed(4)))));
             vidModeState = false;
             
-            url = new TextFieldWidget(client.textRenderer, 40, 0, width - 100, 20, new LiteralText(""));
+            url = new EditBox(minecraft.font, 40, 0, width - 100, 20, new TextComponent(""));
             url.setMaxLength(65535);
-            url.setText(browser.getURL());
+            url.setValue(browser.getURL());
         } else {
-            addDrawableChild(fwd);
-            addDrawableChild(go);
-            addDrawableChild(min);
-            addDrawableChild(vidMode);
+            addWidget(fwd);
+            addWidget(go);
+            addWidget(min);
+            addWidget(vidMode);
             
             //Handle resizing
             vidMode.x = width - 40;
             go.x = width - 60;
             min.x = width - 20;
             
-            String old = url.getText();
-            url = new TextFieldWidget( client.textRenderer, 40, 0, width - 100, 20, new LiteralText(""));
+            String old = url.getValue();
+            url = new EditBox(minecraft.font, 40, 0, width - 100, 20, new TextComponent(""));
             url.setMaxLength(65535);
-            url.setText(old);
+            url.setValue(old);
         }
 
         this.initTime = System.currentTimeMillis();
     }
     
     public int scaleY(int y) {
-        assert client != null;
-        double sy = ((double) y) / ((double) height) * ((double) client.getWindow().getHeight());
+        assert minecraft != null;
+        double sy = ((double) y) / ((double) height) * ((double) minecraft.getWindow().getHeight());
         return (int) sy;
     }
 
     public int scaleX(int x) {
-        assert client != null;
-        double sx = ((double) x) / ((double) width) * ((double) client.getWindow().getWidth());
+        assert minecraft != null;
+        double sx = ((double) x) / ((double) width) * ((double) minecraft.getWindow().getWidth());
         return (int) sx;
     }
     
@@ -136,7 +126,7 @@ public class BrowserScreen extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrices,int mouseX, int mouseY, float delta) {
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         //Render the URL box first because it overflows a bit
         this.preRender();
         url.render(matrices, mouseX, mouseY, delta);
@@ -154,15 +144,15 @@ public class BrowserScreen extends Screen {
             GlStateManager._enableDepthTest();
         }
     }
-    
+
     @Override
-    public void close() {
+    public void onClose() {
         //Make sure to close the browser when you don't need it anymore.
         if(!ExampleMod.INSTANCE.hasBackup() && browser != null)
             browser.close();
         
         // Keyboard.enableRepeatEvents(false);
-        super.close();
+        super.onClose();
     }
 
     @Override
@@ -177,7 +167,7 @@ public class BrowserScreen extends Screen {
     @Override
     public boolean charTyped(char codePoint, int modifiers) {
         if(browser != null && !url.isFocused()) {
-            browser.injectKeyTyped(codePoint, modifiers);
+            browser.injectKeyTyped((int) codePoint, modifiers);
             return true;
         }else{
             return super.charTyped(codePoint, modifiers);
@@ -185,31 +175,24 @@ public class BrowserScreen extends Screen {
     }
 
     public boolean keyChanged(int keyCode, int scanCode, int modifiers, boolean pressed) {
-        assert client != null;
+        assert minecraft != null;
         if(keyCode == GLFW.GLFW_KEY_ESCAPE) {
-            client.setScreen(null);
+            minecraft.setScreen(null);
             return true;
         }
         if(keyCode == GLFW.GLFW_KEY_F10){
             System.out.println("Early term F10");
             if(pressed && System.currentTimeMillis() - this.initTime > 1000L) {
-                url.setTextFieldFocused(!url.isFocused());
+                url.setFocus(!url.isFocused());
             }
             return true;
         }
 
         boolean focused = url.isFocused();
-        // InputUtil.Key iuKey = InputUtil.fromKeyCode(keyCode, scanCode);
-        // TODO: not depend on translation hack
-        //String keystr = iuKey.getLocalizedText().getString();
-        String keystr = GLFW.glfwGetKeyName(keyCode, scanCode);
+        InputConstants.Key iuKey = InputConstants.getKey(keyCode, scanCode);
+        String keystr = iuKey.getDisplayName().getString();
+       // String keystr = GLFW.glfwGetKeyName(keyCode, scanCode);
         System.out.println("KEY STR " + keystr);
-        if(keystr == null){
-            keystr = "\0";
-        }
-        if(keyCode == GLFW.GLFW_KEY_ENTER){
-            keystr = "\n";
-        }
         if(keystr.length() == 0){
             return false;
         }
@@ -222,8 +205,9 @@ public class BrowserScreen extends Screen {
             else
                 browser.injectKeyReleasedByKeyCode(keyCode, key, 0);
 
-            if(key == '\n')
-               browser.injectKeyTyped(key, 0);
+            switch(keyCode) {
+                case GLFW.GLFW_KEY_BACKSPACE -> browser.injectKeyTyped(iuKey.getValue(), 0);
+            }
             return true; // Something did happen
         }
 
@@ -282,7 +266,7 @@ public class BrowserScreen extends Screen {
     //Called by ExampleMod when the current browser's URL changes.
     public void onUrlChanged(IBrowser b, String nurl) {
         if(b == browser && url != null) {
-            url.setText(nurl);
+            url.setValue(nurl);
             vidModeState = nurl.matches(YT_REGEX1) || nurl.matches(YT_REGEX2) || nurl.matches(YT_REGEX3);
         }
     }
@@ -297,12 +281,12 @@ public class BrowserScreen extends Screen {
         else if(id == 1)
             browser.goForward();
         else if(id == 2) {
-            String fixedURL = ExampleMod.INSTANCE.getAPI().punycode(url.getText());
+            String fixedURL = ExampleMod.INSTANCE.getAPI().punycode(url.getValue());
             browser.loadURL(fixedURL);
         } else if(id == 3) {
             ExampleMod.INSTANCE.setBackup(this);
-            assert client != null;
-            client.setScreen(null);
+            assert minecraft != null;
+            minecraft.setScreen(null);
         } else if(id == 4) {
             String loc = browser.getURL();
             String vId = null;
@@ -317,7 +301,7 @@ public class BrowserScreen extends Screen {
 
             if(vId != null || redo) {
                 ExampleMod.INSTANCE.setBackup(this);
-                client.setScreen(new ScreenCfg(browser, vId));
+                minecraft.setScreen(new ScreenCfg(browser, vId));
             }
         }
     }

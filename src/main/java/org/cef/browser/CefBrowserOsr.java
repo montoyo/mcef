@@ -4,15 +4,13 @@
 
 package org.cef.browser;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.Window;
-import net.minecraft.client.util.math.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IStringVisitor;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.client.StringVisitor;
+import net.montoyo.mcef.client.UnsafeExample;
 import net.montoyo.mcef.utilities.Log;
 import org.apache.commons.lang3.NotImplementedException;
 import org.cef.CefClient;
@@ -20,7 +18,6 @@ import org.cef.callback.CefDragData;
 import org.cef.handler.CefRenderHandler;
 import org.cef.handler.CefScreenInfo;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.glfw.GLFWCharModsCallbackI;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -32,6 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import static java.awt.event.KeyEvent.*;
 import static org.lwjgl.glfw.GLFW.*;
 
 /**
@@ -90,7 +88,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
     protected CefBrowser_N createDevToolsBrowser(CefClient client, String url,
                                                  CefRequestContext context, CefBrowser_N parent, Point inspectAt) {
         return new CefBrowserOsr(
-                client, url, isTransparent_, context, (CefBrowserOsr) this, inspectAt);
+                client, url, isTransparent_, context, this, inspectAt);
     }
 
     @Override
@@ -137,7 +135,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
     }
 
     @Override
-    public void draw(MatrixStack matrixStack, double x1, double y1, double x2, double y2) {
+    public void draw(PoseStack matrixStack, double x1, double y1, double x2, double y2) {
         renderer_.render(matrixStack, x1, y1, x2, y2);
     }
 
@@ -163,8 +161,17 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 
     @Override
     public void injectKeyTyped(int key, int mods) {
-        KeyEvent ev = new KeyEvent(dc_, KeyEvent.KEY_TYPED, 0, mods, 0, (char) key);
-        sendKeyEvent(ev);
+        if( key != GLFW_KEY_BACKSPACE && key != VK_UNDEFINED) {
+            KeyEvent ev = new UnsafeExample().makeEvent(dc_, key, (char) key, KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, mods);
+            sendKeyEvent(ev);
+        } else {
+            switch (key) {
+                case GLFW_KEY_HOME, VK_END, VK_PAGE_UP, VK_PAGE_DOWN, VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_BEGIN, VK_KP_LEFT, VK_KP_UP, VK_KP_RIGHT, VK_KP_DOWN, VK_F1, VK_F2, VK_F3, VK_F4, VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12, VK_F13, VK_F14, VK_F15, VK_F16, VK_F17, VK_F18, VK_F19, VK_F20, VK_F21, VK_F22, VK_F23, VK_F24, VK_PRINTSCREEN, VK_SCROLL_LOCK, VK_CAPS_LOCK, VK_NUM_LOCK, VK_PAUSE, GLFW_KEY_INSERT, GLFW_KEY_BACKSPACE -> {
+                    KeyEvent ev = new UnsafeExample().makeEvent(dc_, key, '\0', KEY_LOCATION_UNKNOWN, KEY_TYPED,0, mods);
+                    sendKeyEvent(ev);
+                }
+            }
+        }
     }
 
     public static int remapKeycode(int kc, char c) {

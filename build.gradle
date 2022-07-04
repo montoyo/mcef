@@ -1,102 +1,139 @@
-plugins {
-	id 'dev.architectury.loom' version '0.12.0-SNAPSHOT'
-	id 'io.github.juuxel.loom-quiltflower' version '1.6.0'
-	id 'maven-publish'
+buildscript {
+	repositories {
+		maven { url = 'https://maven.minecraftforge.net' }
+		mavenCentral()
+		maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
+	}
+	dependencies {
+		classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+		classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+	}
+}
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+//apply from: 'https://raw.githubusercontent.com/SizableShrimp/Forge-Class-Remapper/main/classremapper.gradle'
+
+version = mod_version
+group = maven_group // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = archives_base_name
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+minecraft {
+	mappings channel: 'official', version: '1.18.2'
+	//accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+	runs {
+		client {
+			properties 'mixin.env.remapRefMap': 'true'
+			property 'mixin.env.refMapRemappingFile', "${project.projectDir}/build/createSrgToMcp/output.srg"
+			workingDirectory project.file('run')
+			arg "-mixin.config=forgecef.mixins.json"
+			property 'forge.logging.console.level', 'debug'
+
+			mods {
+				citadel {
+					source sourceSets.main
+				}
+			}
+		}
+
+		server {
+			properties 'mixin.env.remapRefMap': 'true'
+			property 'mixin.env.refMapRemappingFile', "${project.projectDir}/build/createSrgToMcp/output.srg"
+			workingDirectory project.file('run')
+			arg "-mixin.config=forgecef.mixins.json"
+
+
+			property 'forge.logging.console.level', 'debug'
+
+			mods {
+				citadel {
+					source sourceSets.main
+				}
+			}
+		}
+
+		data {
+			workingDirectory project.file('run')
+			properties 'mixin.env.remapRefMap': 'true'
+			property 'mixin.env.refMapRemappingFile', "${project.projectDir}/build/createSrgToMcp/output.srg"
+			property 'forge.logging.console.level', 'debug'
+			args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/'), '--existing', sourceSets.main.resources.srcDirs[0]
+			mods {
+				citadel {
+					source sourceSets.main
+				}
+			}
+		}
+	}
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
-
-archivesBaseName = project.archives_base_name
-version = project.mod_version
-group = project.maven_group
-
-repositories {
-	// Add repositories to retrieve artifacts from in here.
-	// You should only use this when depending on other mods because
-	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
-	// for more information about repositories.
+repositories{
 	maven {
-		url = "https://cursemaven.com"
+		name = "CurseMaven"
+		url = "https://www.cursemaven.com"
 		content {
 			includeGroup "curse.maven"
 		}
 	}
-
-	maven {
-		name = "Fuzs Mod Resources"
-		url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
-	}
-
 	mavenCentral()
 }
 
 dependencies {
-	// To change the versions see the gradle.properties file
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	forge "net.minecraftforge:forge:${project.forge_version}"
+	minecraft 'net.minecraftforge:forge:1.18.2-40.1.54'
+	annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
-loom {
-	forge {
-		mixinConfigs = [
-				"forgecef.mixins.json"
-		]
-	}
+sourceSets {
+	main.resources.srcDirs += 'src/generated/resources'
 }
 
-
-processResources {
-	inputs.property "version", project.version
-
-	filesMatching("fabric.mod.json") {
-		expand "version": project.version
-	}
-}
-
-tasks.withType(JavaCompile).configureEach {
-	// Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
-	it.options.release = 17
-}
-
-java {
-	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-	// if it is present.
-	// If you remove this line, sources will not be generated.
-	withSourcesJar()
-}
-
+// Example for how to get properties into the manifest for reading by the runtime..
 jar {
-	from("LICENSE") {
-		rename { "${it}_${project.archivesBaseName}"}
+	manifest {
+		attributes([
+				"Specification-Title": "mcef",
+				"Specification-Vendor": "forgecef",
+				"Specification-Version": "1", // We are version 1 of ourselves
+				"Implementation-Title": project.name,
+				"Implementation-Version": "${version}",
+				"Implementation-Vendor" :"forgecef",
+				"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+				"MixinConfigs": "forgecef.mixins.json"
+		])
 	}
-    manifest {
-        attributes([
-                "Specification-Title"     : "mcef-fabric",
-                "Specification-Vendor"    : "mcef-fabric",
-                "Specification-Version"   : "1", // We are version 1 of ourselves
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : project.version,
-                "Implementation-Vendor"   : "mcef-fabric",
-        ])
-    }
 }
 
-// configure the maven publication
+// Example configuration to allow publishing using the maven-publish task
+// we define a custom artifact that is sourced from the reobfJar output task
+// and then declare that to be published
+// Note you'll need to add a repository here
+def reobfFile = file("$buildDir/reobfJar/output.jar")
+def reobfArtifact = artifacts.add('default', reobfFile) {
+	type 'jar'
+	builtBy 'reobfJar'
+}
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			from components.java
+			artifact reobfArtifact
 		}
 	}
-
-	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
 	repositories {
-		// Add repositories to publish to here.
-		// Notice: This block does NOT have the same function as the block in the top level.
-		// The repositories here will be used for publishing your artifact, not for
-		// retrieving dependencies.
+		maven {
+			url "file:///${project.projectDir}/mcmodsrepo"
+		}
 	}
+}
+
+apply plugin: 'org.spongepowered.mixin'
+
+mixin {
+	add sourceSets.main, "forgecef.refmap.json"
+}
+
+task deobfJar(type: Jar) {
+	from sourceSets.main.output
+	classifier = 'deobf'
 }

@@ -6,9 +6,9 @@ package org.cef.browser;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.render.*;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Matrix4f;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
+import net.minecraft.client.renderer.GameRenderer;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.utilities.Log;
 
@@ -77,20 +77,20 @@ public class CefRenderer {
         }
     }
 
-    protected void render(MatrixStack matrix, double x1, double y1, double x2, double y2) {
-        Matrix4f positionMatrix = matrix.peek().getPositionMatrix();
-        Tessellator t = Tessellator.getInstance();
-        BufferBuilder vb = t.getBuffer();
+    protected void render(PoseStack matrix, double x1, double y1, double x2, double y2) {
+        Matrix4f positionMatrix = matrix.last().pose();
+        Tesselator t = Tesselator.getInstance();
+        BufferBuilder vb = t.getBuilder();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, texture_id_[0]);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
         // previously GL_QUADS for drawmode
-        vb.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
-        vb.vertex(positionMatrix, (float) x1, (float) y1, 0.0f).texture(0.0f, 1.0f).color(255, 255, 255, 255).next();
-        vb.vertex(positionMatrix, (float) x2, (float) y1, 0.0f).texture(1.f, 1.f).color(255, 255, 255, 255).next();
-        vb.vertex(positionMatrix, (float) x2, (float) y2, 0.0f).texture(1.f, 0.0f).color(255, 255, 255, 255).next();
-        vb.vertex(positionMatrix, (float) x1, (float) y2, 0.0f).texture(0.0f, 0.0f).color(255, 255, 255, 255).next();
-        t.draw();
+        vb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        vb.vertex(positionMatrix, (float) x1, (float) y1, 0.0f).uv(0.0f, 1.0f).color(255, 255, 255, 255).endVertex();
+        vb.vertex(positionMatrix, (float) x2, (float) y1, 0.0f).uv(1.f, 1.f).color(255, 255, 255, 255).endVertex();
+        vb.vertex(positionMatrix, (float) x2, (float) y2, 0.0f).uv(1.f, 0.0f).color(255, 255, 255, 255).endVertex();
+        vb.vertex(positionMatrix, (float) x1, (float) y2, 0.0f).uv(0.0f, 0.0f).color(255, 255, 255, 255).endVertex();
+        t.end();
     }
 
     protected void onPopupSize(Rectangle rect) {

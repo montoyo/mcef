@@ -1,11 +1,9 @@
 package net.montoyo.mcef.example;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.math.MatrixStack;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.ClientRegistry;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.montoyo.mcef.api.*;
@@ -25,8 +23,8 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
     public static ExampleMod INSTANCE;
 
     public ScreenCfg hudBrowser = null;
-    public KeyBinding key = new KeyBinding("Open Browser", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F10, "key.categories.misc");
-    private MinecraftClient mc = MinecraftClient.getInstance();
+    public KeyMapping key = new KeyMapping("Open Browser", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_F10, "key.categories.misc");
+    private Minecraft mc = Minecraft.getInstance();
     private BrowserScreen backup = null;
     private API api;
 
@@ -67,8 +65,8 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
     }
     
     public void showScreen(String url) {
-        if(mc.currentScreen instanceof BrowserScreen)
-            ((BrowserScreen) mc.currentScreen).loadURL(url);
+        if(mc.screen instanceof BrowserScreen)
+            ((BrowserScreen) mc.screen).loadURL(url);
         else if(hasBackup()) {
             mc.setScreen(backup);
             backup.loadURL(url);
@@ -78,8 +76,8 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
     }
     
     public IBrowser getBrowser() {
-        if(mc.currentScreen instanceof BrowserScreen)
-            return ((BrowserScreen) mc.currentScreen).browser;
+        if(mc.screen instanceof BrowserScreen)
+            return ((BrowserScreen) mc.screen).browser;
         else if(backup != null)
             return backup.browser;
         else
@@ -89,7 +87,7 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
 
     public void onTickStart(TickEvent.ClientTickEvent event) {
         // Check if our key was pressed
-        if(key.isPressed() && !(mc.currentScreen instanceof BrowserScreen)) {
+        if(key.isDown() && !(mc.screen instanceof BrowserScreen)) {
             //Display the web browser UI.
             mc.setScreen(hasBackup() ? backup : new BrowserScreen());
             backup = null;
@@ -99,8 +97,8 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
     @Override
     public void onAddressChange(IBrowser browser, String url) {
         //Called by MCEF if a browser's URL changes. Forward this event to the screen.
-        if(mc.currentScreen instanceof BrowserScreen)
-            ((BrowserScreen) mc.currentScreen).onUrlChanged(browser, url);
+        if(mc.screen instanceof BrowserScreen)
+            ((BrowserScreen) mc.screen).onUrlChanged(browser, url);
         else if(hasBackup())
             backup.onUrlChanged(browser, url);
     }
@@ -123,11 +121,11 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
             if(b.getURL().startsWith("mod://")) {
                 //Only allow MCEF URLs to get the player's username to keep his identity secret
 
-                mc.executeTask(() -> {
+                mc.doRunTask(() -> {
                     //Add this to a scheduled task because this is NOT called from the main Minecraft thread...
 
                     try {
-                        String name = mc.getSession().getUsername();
+                        String name = mc.getUser().getName();
                         cb.success(name);
                     } catch(Throwable t) {
                         cb.failure(500, "Internal error.");

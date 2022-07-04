@@ -1,7 +1,5 @@
 package net.montoyo.mcef;
 
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.montoyo.mcef.client.ClientProxy;

@@ -1,16 +1,15 @@
 package net.montoyo.mcef.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.montoyo.mcef.BaseProxy;
@@ -56,7 +55,7 @@ public class ClientProxy extends BaseProxy {
     private final ArrayList<CefBrowserOsr> browsers = new ArrayList<>();
     private final ArrayList<Object> nogc = new ArrayList<>();
     private String updateStr;
-    private final MinecraftClient mc = MinecraftClient.getInstance();
+    private final Minecraft mc = Minecraft.getInstance();
     private final DisplayHandler displayHandler = new DisplayHandler();
     private final HashMap<String, String> mimeTypeMap = new HashMap<>();
     private final AppHandler appHandler = new AppHandler();
@@ -78,12 +77,12 @@ public class ClientProxy extends BaseProxy {
     }
 
     public void onInitializeClient(FMLClientSetupEvent event) {
-        MinecraftClient.getInstance().send(() -> {
+        Minecraft.getInstance().tell(() -> {
             RenderSystem.assertOnRenderThread();
 
             appHandler.setArgs(MCEF.CEF_ARGS);
 
-            ROOT = mc.runDirectory.getAbsolutePath().replaceAll("\\\\", "/");
+            ROOT = mc.gameDirectory.getAbsolutePath().replaceAll("\\\\", "/");
             if (ROOT.endsWith("."))
                 ROOT = ROOT.substring(0, ROOT.length() - 1);
 
@@ -258,12 +257,12 @@ public class ClientProxy extends BaseProxy {
             return;
 
         Style cs = Style.EMPTY;
-        cs.withColor(Formatting.LIGHT_PURPLE);
+        cs.withColor(ChatFormatting.LIGHT_PURPLE);
 
-        MutableText cct = (MutableText) Text.of(updateStr);
-        cct.getWithStyle(cs);
+        MutableComponent cct = (MutableComponent) Component.nullToEmpty(updateStr);
+        cct.withStyle(cs);
 
-        ev.getPlayer().sendMessage(cct, true);
+        ev.getPlayer().displayClientMessage(cct, true);
     }
 
     public void removeBrowser(CefBrowserOsr b) {
