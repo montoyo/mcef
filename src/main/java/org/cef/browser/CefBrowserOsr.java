@@ -160,14 +160,12 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
     }
 
     @Override
-    public void injectKeyTyped(int key, int mods) {
-        if( key != GLFW_KEY_BACKSPACE && key != VK_UNDEFINED) {
-            KeyEvent ev = new UnsafeExample().makeEvent(dc_, key, (char) key, KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, mods);
+    public void injectKeyTyped(KeyEvent ev) {
+        if( ev.getKeyCode() != VK_BACK_SPACE && ev.getKeyCode() != VK_UNDEFINED) {
             sendKeyEvent(ev);
         } else {
-            switch (key) {
-                case GLFW_KEY_HOME, VK_END, VK_PAGE_UP, VK_PAGE_DOWN, VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_BEGIN, VK_KP_LEFT, VK_KP_UP, VK_KP_RIGHT, VK_KP_DOWN, VK_F1, VK_F2, VK_F3, VK_F4, VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12, VK_F13, VK_F14, VK_F15, VK_F16, VK_F17, VK_F18, VK_F19, VK_F20, VK_F21, VK_F22, VK_F23, VK_F24, VK_PRINTSCREEN, VK_SCROLL_LOCK, VK_CAPS_LOCK, VK_NUM_LOCK, VK_PAUSE, GLFW_KEY_INSERT, GLFW_KEY_BACKSPACE -> {
-                    KeyEvent ev = new UnsafeExample().makeEvent(dc_, key, '\0', KEY_LOCATION_UNKNOWN, KEY_TYPED,0, mods);
+            switch (ev.getKeyCode()) {
+                case VK_HOME, VK_END, VK_PAGE_UP, VK_PAGE_DOWN, VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_BEGIN, VK_KP_LEFT, VK_KP_UP, VK_KP_RIGHT, VK_KP_DOWN, VK_F1, VK_F2, VK_F3, VK_F4, VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12, VK_F13, VK_F14, VK_F15, VK_F16, VK_F17, VK_F18, VK_F19, VK_F20, VK_F21, VK_F22, VK_F23, VK_F24, VK_PRINTSCREEN, VK_SCROLL_LOCK, VK_CAPS_LOCK, VK_NUM_LOCK, VK_PAUSE, VK_INSERT, VK_BACK_SPACE -> {
                     sendKeyEvent(ev);
                 }
             }

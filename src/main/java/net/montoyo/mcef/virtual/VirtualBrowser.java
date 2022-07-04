@@ -4,6 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IStringVisitor;
 
+import java.awt.event.KeyEvent;
+
 public class VirtualBrowser implements IBrowser {
 
     @Override
@@ -32,7 +34,7 @@ public class VirtualBrowser implements IBrowser {
     }
 
     @Override
-    public void injectKeyTyped(int key, int mods) {
+    public void injectKeyTyped(KeyEvent keyEvent) {
     }
 
     @Override

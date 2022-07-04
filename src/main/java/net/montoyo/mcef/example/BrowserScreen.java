@@ -167,7 +167,7 @@ public class BrowserScreen extends Screen {
     @Override
     public boolean charTyped(char codePoint, int modifiers) {
         if(browser != null && !url.isFocused()) {
-            browser.injectKeyTyped((int) codePoint, modifiers);
+           //browser.injectKeyTyped((int) codePoint, modifiers);
             return true;
         }else{
             return super.charTyped(codePoint, modifiers);
@@ -206,7 +206,7 @@ public class BrowserScreen extends Screen {
                 browser.injectKeyReleasedByKeyCode(keyCode, key, 0);
 
             switch(keyCode) {
-                case GLFW.GLFW_KEY_BACKSPACE -> browser.injectKeyTyped(iuKey.getValue(), 0);
+                //case GLFW.GLFW_KEY_BACKSPACE -> browser.injectKeyTyped(iuKey.getValue(), 0);
             }
             return true; // Something did happen
         }
