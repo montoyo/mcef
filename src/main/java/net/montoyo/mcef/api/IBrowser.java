@@ -2,8 +2,6 @@ package net.montoyo.mcef.api;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import java.awt.event.KeyEvent;
-
 public interface IBrowser {
     
     /**
@@ -56,8 +54,14 @@ public interface IBrowser {
      * @param ccnt The click count. You probably want this to be 1.
      */
     void injectMouseButton(int x, int y, int mods, int btn, boolean pressed, int ccnt);
-
-    void injectKeyTyped(KeyEvent keyEvent);
+    
+    /**
+     * Simulates a keyboard type.
+     * 
+     * @param key The typed character.
+     * @param mods The key modifiers (shift, ctrl, alt)
+     */
+    void injectKeyTyped(int key, int mods);
     
     /**
      * Simulates a key press.
