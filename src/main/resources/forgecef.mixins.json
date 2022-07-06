@@ -7,7 +7,6 @@
   "mixins": [
   ],
   "client": [
-    "ForgeInitEquavilentMixin"
   ],
   "injectors": {
     "defaultRequire": 1
