@@ -94,6 +94,7 @@ public final class Mirror {
      */
     public HttpURLConnection getResource(String name) throws MalformedURLException, IOException {
         HttpURLConnection ret = (HttpURLConnection) (new URL(url + '/' + name)).openConnection();
+        System.out.println("Connecting to " + (new URL(url + '/' + name)).toString());
         ret.setConnectTimeout(30000);
         ret.setReadTimeout(15000);
         ret.setRequestProperty("User-Agent", "MCEF");

@@ -1,12 +1,17 @@
 package net.montoyo.mcef.remote;
 
 import java.io.File;
+import java.io.IOException;
 
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.utilities.IProgressListener;
 import net.montoyo.mcef.utilities.Log;
 import net.montoyo.mcef.utilities.Util;
+
+import io.sigpipe.jbsdiff.InvalidHeaderException;
+import io.sigpipe.jbsdiff.ui.FileUI;
+import org.apache.commons.compress.compressors.CompressorException;
 
 /**
  * A remote resource. Can be downloaded, extracted and checked.
@@ -44,16 +49,17 @@ public class Resource {
         if(!f.exists())
             return false;
 
-        return true; // temp supress due to my glibc
-        // TODO: REMOVE!
+        if(MCEF.FORCE_LEGACY_VERSION) {
+            return true; // temp supress due to my glibc AND also because I don't have checksums for the legacy version files.
+        }
 
-        /*String hash = Util.hash(f);
+        String hash = Util.hash(f);
         if(hash == null) {
             Log.warning("Couldn't hash file %s; assuming it doesn't exist.", f.getAbsolutePath());
             return false;
         }
         
-        return hash.equalsIgnoreCase(sum);*/
+        return hash.equalsIgnoreCase(sum);
     }
     
     /**
@@ -74,7 +80,26 @@ public class Resource {
         if(!parent.exists() && !parent.mkdirs())
             Log.warning("Couldn't create directory %s... ignoring this error, but this might cause some issues later...", parent.getAbsolutePath());
 
-        return Util.download(MCEF.VERSION + '/' + platform + '/' + name + end, dst, shouldExtract, ipl);
+        boolean ok = Util.download(MCEF.VERSION + '/' + platform + '/' + name + end, dst, shouldExtract, ipl);
+        if(MCEF.FORCE_LEGACY_VERSION){
+            boolean foundDiff = Util.checkExistence("mcef-codec-patch/" + MCEF.VERSION + '/' + platform + "/Release/" + name + end + ".bsdiff");
+            if(foundDiff){
+                Log.info("Found bsdiff for %s", name);
+                Util.download( "mcef-codec-patch/" + MCEF.VERSION + '/' + platform + "/Release/" + name + end + ".bsdiff", new File(dst.getParent(),dst.getName() + ".bsdiff"), shouldExtract, ipl);
+                Log.info("Patching %s", name);
+                try {
+                    FileUI.patch(dst, dst,new File(dst.getName() + ".bsdiff"));
+                    // temporarily horrible exception catching
+                } catch (CompressorException e) {
+                    throw new RuntimeException(e);
+                } catch (InvalidHeaderException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+        return ok;
     }
     
     /**
@@ -84,6 +109,7 @@ public class Resource {
      * @return true if the operation was successful.
      */
     public boolean extract(IProgressListener ipl) {
+        Log.info("Extracting %s", name);
         Util.secure(ipl).onTaskChanged("Extracting " + name);
         return Util.extract(new File(ClientProxy.JCEF_ROOT, name), new File(ClientProxy.JCEF_ROOT));
     }
