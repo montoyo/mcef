@@ -3,12 +3,18 @@ package net.montoyo.mcef.remote;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import io.sigpipe.jbsdiff.InvalidHeaderException;
+import io.sigpipe.jbsdiff.ui.FileUI;
 import net.minecraft.client.MinecraftClient;
 import net.montoyo.mcef.setup.FileListing;
+import org.apache.commons.compress.compressors.CompressorException;
 import org.cef.OS;
 
 import net.montoyo.mcef.MCEF;
@@ -244,7 +250,34 @@ public class RemoteConfig {
             Log.info("Done; all resources were downloaded.");
         } else
             Log.info("None are missing. Good.");
-        
+
+        try {
+            if(OS.isMacintosh() && !(new File("jcef/macos.patched")).isFile()){
+                Files.walk(Paths.get("jcef/jcef_app.app")).forEach(path -> {
+                    File f = path.toFile();
+                    String relPath = f.getAbsolutePath().replace(new File("jcef/jcef_app.app").getAbsolutePath() + "/", "");
+                    if(Util.checkExistence("mcef-codec-patch/1.30/mac64/Release/jcef_app.app/" + relPath + ".bsdiff")){
+                        File diffDest = new File(f.getParent(), f.getName() + ".bsdiff");
+                        Util.download("mcef-codec-patch/1.30/mac64/Release/jcef_app.app/" + relPath + ".bsdiff", diffDest, ipl);
+                        try {
+                            FileUI.patch(f, f, diffDest);
+                            // yea I know the error catching below sucks
+                        } catch (CompressorException e) {
+                            throw new RuntimeException(e);
+                        } catch (InvalidHeaderException e) {
+                            throw new RuntimeException(e);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+                // Flag
+                (new File("jcef/macos.patched")).createNewFile();
+            }
+        } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+
         return true;
     }
     

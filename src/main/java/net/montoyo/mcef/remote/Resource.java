@@ -1,12 +1,17 @@
 package net.montoyo.mcef.remote;
 
 import java.io.File;
+import java.io.IOException;
 
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.utilities.IProgressListener;
 import net.montoyo.mcef.utilities.Log;
 import net.montoyo.mcef.utilities.Util;
+
+import io.sigpipe.jbsdiff.InvalidHeaderException;
+import io.sigpipe.jbsdiff.ui.FileUI;
+import org.apache.commons.compress.compressors.CompressorException;
 
 /**
  * A remote resource. Can be downloaded, extracted and checked.
@@ -77,11 +82,21 @@ public class Resource {
 
         boolean ok = Util.download(MCEF.VERSION + '/' + platform + '/' + name + end, dst, shouldExtract, ipl);
         if(MCEF.FORCE_LEGACY_VERSION){
-            boolean foundDiff = Util.checkExistence(MCEF.VERSION + '/' + platform + "/Release/" + name + end + ".bsdiff");
+            boolean foundDiff = Util.checkExistence("mcef-codec-patch/" + MCEF.VERSION + '/' + platform + "/Release/" + name + end + ".bsdiff");
             if(foundDiff){
                 Log.info("Found bsdiff for %s", name);
-                Util.download(MCEF.VERSION + '/' + platform + "/Release/" + name + end + ".bsdiff", new File(dst.getParent(),dst.getName() + ".bsdiff"), shouldExtract, ipl);
+                Util.download( "mcef-codec-patch/" + MCEF.VERSION + '/' + platform + "/Release/" + name + end + ".bsdiff", new File(dst.getParent(),dst.getName() + ".bsdiff"), shouldExtract, ipl);
                 Log.info("Patching %s", name);
+                try {
+                    FileUI.patch(dst, dst,new File(dst.getName() + ".bsdiff"));
+                    // temporarily horrible exception catching
+                } catch (CompressorException e) {
+                    throw new RuntimeException(e);
+                } catch (InvalidHeaderException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
         return ok;
@@ -94,6 +109,7 @@ public class Resource {
      * @return true if the operation was successful.
      */
     public boolean extract(IProgressListener ipl) {
+        Log.info("Extracting %s", name);
         Util.secure(ipl).onTaskChanged("Extracting " + name);
         return Util.extract(new File(ClientProxy.JCEF_ROOT, name), new File(ClientProxy.JCEF_ROOT));
     }

@@ -18,7 +18,7 @@ public class Configuration {
         if(!configFile.isFile()){
             try {
                 BufferedWriter bw = new BufferedWriter(new FileWriter(configFile));
-                bw.write("{\"useLegacyVersionWithCodecs\": false, \"skipLegacyVersionWarning\": false}");
+                bw.write("{\"useLegacyVersionWithCodecs\": true, \"skipLegacyVersionWarning\": false}");
                 bw.close();
             } catch (IOException e) {
                 e.printStackTrace();
