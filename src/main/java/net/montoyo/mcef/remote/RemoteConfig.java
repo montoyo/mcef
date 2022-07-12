@@ -129,6 +129,9 @@ public class RemoteConfig {
         Log.info("Detected platform: %s", PLATFORM);
 
         JsonElement ver = json.get(MCEF.VERSION);
+        if(MCEF.FORCE_LEGACY_VERSION){
+            ver = json.get("1.32"); // Workaround below wtfing
+        }
         if(ver == null || !ver.isJsonObject()) {
             Log.error("Config file does NOT contain the latest MCEF version (wtf??). Entering virtual mode.");
             ClientProxy.VIRTUAL = true;
@@ -189,13 +192,20 @@ public class RemoteConfig {
                 continue;
 
             String key = e.getKey();
+            String filename = e.getValue().getAsString();
+            if(MCEF.FORCE_LEGACY_VERSION){
+                // Hack for file rename
+                // if(filename.endsWith(".pak")) {
+                //     filename = filename.replace("chrome", "cef");
+                // }
+            }
             if(key.length() >= 2 && key.charAt(0) == '@') {
-                Resource eRes = new Resource(key.substring(1), e.getValue().getAsString(), pform);
+                Resource eRes = new Resource(key.substring(1), filename, pform);
                 eRes.setShouldExtract();
 
                 resources.add(eRes);
             } else
-                resources.add(new Resource(key, e.getValue().getAsString(), pform));
+                resources.add(new Resource(key, filename, pform));
         }
     }
     

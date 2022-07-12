@@ -44,16 +44,17 @@ public class Resource {
         if(!f.exists())
             return false;
 
-        return true; // temp supress due to my glibc
-        // TODO: REMOVE!
+        if(MCEF.FORCE_LEGACY_VERSION) {
+            return true; // temp supress due to my glibc AND also because I don't have checksums for the legacy version files.
+        }
 
-        /*String hash = Util.hash(f);
+        String hash = Util.hash(f);
         if(hash == null) {
             Log.warning("Couldn't hash file %s; assuming it doesn't exist.", f.getAbsolutePath());
             return false;
         }
         
-        return hash.equalsIgnoreCase(sum);*/
+        return hash.equalsIgnoreCase(sum);
     }
     
     /**
@@ -74,7 +75,16 @@ public class Resource {
         if(!parent.exists() && !parent.mkdirs())
             Log.warning("Couldn't create directory %s... ignoring this error, but this might cause some issues later...", parent.getAbsolutePath());
 
-        return Util.download(MCEF.VERSION + '/' + platform + '/' + name + end, dst, shouldExtract, ipl);
+        boolean ok = Util.download(MCEF.VERSION + '/' + platform + '/' + name + end, dst, shouldExtract, ipl);
+        if(MCEF.FORCE_LEGACY_VERSION){
+            boolean foundDiff = Util.checkExistence(MCEF.VERSION + '/' + platform + "/Release/" + name + end + ".bsdiff");
+            if(foundDiff){
+                Log.info("Found bsdiff for %s", name);
+                Util.download(MCEF.VERSION + '/' + platform + "/Release/" + name + end + ".bsdiff", new File(dst.getParent(),dst.getName() + ".bsdiff"), shouldExtract, ipl);
+                Log.info("Patching %s", name);
+            }
+        }
+        return ok;
     }
     
     /**

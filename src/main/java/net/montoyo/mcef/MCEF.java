@@ -10,7 +10,7 @@ import net.fabricmc.api.ModInitializer;
 
 public class MCEF implements ModInitializer{
 
-    public static final String VERSION = "1.33";
+    public static String VERSION = "1.33";
     public static boolean ENABLE_EXAMPLE;
     public static boolean SKIP_UPDATES;
     public static boolean WARN_UPDATES;
@@ -21,6 +21,9 @@ public class MCEF implements ModInitializer{
     public static boolean CHECK_VRAM_LEAK;
     public static boolean SHUTDOWN_JCEF;
     public static boolean SECURE_MIRRORS_ONLY;
+
+    public static boolean FORCE_LEGACY_VERSION;
+    public static boolean BYPASS_LEGACY_WARNING;
 
     public static MCEF INSTANCE;
 
@@ -52,6 +55,15 @@ public class MCEF implements ModInitializer{
 
         //Config: debug
         CHECK_VRAM_LEAK = cfg.getBoolean("checkForVRAMLeak", "debug", false, "Track allocated OpenGL textures to make sure there's no leak");
+
+        //Config: smashmaster's legacy mode
+        FORCE_LEGACY_VERSION = cfg.getBoolean("useLegacyVersionWithCodecs", "legacy", false, "Set this to true if you want to use the 1.30 version of JCEF. This however provides Codec patches. ");
+        BYPASS_LEGACY_WARNING = cfg.getBoolean("skipLegacyWarning", "legacy", false, "Set this to true if you want to bypass the warning message about security against exploits.");
+
+        if(FORCE_LEGACY_VERSION){
+            VERSION = "1.30";
+        }
+
         cfg.save();
 
         setupProxy();
