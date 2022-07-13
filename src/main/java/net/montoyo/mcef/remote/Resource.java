@@ -88,7 +88,7 @@ public class Resource {
                 Util.download( "mcef-codec-patch/" + MCEF.VERSION + '/' + platform + "/Release/" + name + end + ".bsdiff", new File(dst.getParent(),dst.getName() + ".bsdiff"), shouldExtract, ipl);
                 Log.info("Patching %s", name);
                 try {
-                    FileUI.patch(dst, dst,new File(dst.getParent(),dst.getName() + ".bsdiff"));
+                    FileUI.patch(dst, dst,new File(dst.getName() + ".bsdiff"));
                     // temporarily horrible exception catching
                 } catch (CompressorException e) {
                     throw new RuntimeException(e);
