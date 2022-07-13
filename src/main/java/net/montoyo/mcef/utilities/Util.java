@@ -5,7 +5,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
@@ -174,8 +173,7 @@ public class Util {
         String err = "Couldn't download " + dst.getName() + "!";
         
         ph = secure(ph);
-        boolean isLegacy = MCEF.FORCE_LEGACY_VERSION;
-        ph.onTaskChanged("Downloading " + dst.getName() + (isLegacy ? " (old legacy version!!!)":""));
+        ph.onTaskChanged("Downloading " + dst.getName());
         
         SizedInputStream sis = openStream(res, err);
         if(sis == null)
@@ -373,23 +371,12 @@ public class Util {
                     return null;
                 }
                 
-                Log.error("%s HTTP response is %d; trying with another mirror. url %s", err, rc, conn.getURL().toString());
+                Log.error("%s HTTP response is %d; trying with another mirror.", err, rc);
             }
         } while(MirrorManager.INSTANCE.markCurrentMirrorAsBroken());
         
         Log.error("%s All mirrors seems broken.", err);
         return null;
-    }
-
-    public static boolean checkExistence(String resource){
-        try {
-            Mirror m = MirrorManager.INSTANCE.getCurrent();
-            HttpURLConnection ret = m.getResource(resource);
-            ret.setRequestMethod("HEAD");
-            return ret.getResponseCode() == HttpURLConnection.HTTP_OK;
-        }catch (Exception ex){
-            return false;
-        }
     }
     
     /**
