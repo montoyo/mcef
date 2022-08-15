@@ -3,7 +3,6 @@ package net.montoyo.mcef.example;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.montoyo.mcef.api.*;
@@ -45,7 +44,7 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
         INSTANCE = this;
         
         // Register key binding via fabric api
-        ClientRegistry.registerKeyBinding(key);
+        //ClientRegistry.registerKeyBinding(key);
         // We used to register to event bus here
         if(api != null) {
             //Register this class to handle onAddressChange and onQuery events
@@ -97,10 +96,10 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
     @Override
     public void onAddressChange(IBrowser browser, String url) {
         //Called by MCEF if a browser's URL changes. Forward this event to the screen.
-        if(mc.screen instanceof BrowserScreen)
-            ((BrowserScreen) mc.screen).onUrlChanged(browser, url);
-        else if(hasBackup())
-            backup.onUrlChanged(browser, url);
+        // if(mc.screen instanceof BrowserScreen)
+        //     ((BrowserScreen) mc.screen).onUrlChanged(browser, url);
+        // else if(hasBackup())
+        //     backup.onUrlChanged(browser, url);
     }
 
     @Override

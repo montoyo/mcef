@@ -6,8 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.API;
 import net.montoyo.mcef.api.IBrowser;
@@ -33,12 +32,12 @@ public class BrowserScreen extends Screen {
     private static final String YT_REGEX3 = "^https?://(?:www\\.)?youtube\\.com/embed/([a-zA-Z0-9_\\-]+)(\\?.+)?$";
 
     public BrowserScreen() {
-        super(new TranslatableComponent("forgecef.example.screen.title"));
+        super(Component.translatable("forgecef.example.screen.title"));
         urlToLoad = MCEF.HOME_PAGE;
     }
 
     public BrowserScreen(String url) {
-        super(new TranslatableComponent("forgecef.example.screen.title"));
+        super(Component.translatable("forgecef.example.screen.title"));
         urlToLoad = (url == null) ? MCEF.HOME_PAGE : url;
     }
     
@@ -68,14 +67,14 @@ public class BrowserScreen extends Screen {
         // buttonList.clear();
         
         if(url == null) {
-            addWidget(back = (new Button( 0, 0, 20, 20, new TextComponent("<"), (button -> this.legacyActionPerformed(0)))));
-            addWidget(fwd = (new Button( 20, 0, 20, 20, new TextComponent(">"),(button -> this.legacyActionPerformed(1)))));
-            addWidget(go = (new Button( width - 60, 0, 20, 20, new TranslatableComponent("forgecef.example.screen.go"), (button -> this.legacyActionPerformed(2)))));
-            addWidget(min = (new Button(width - 20, 0, 20, 20, new TextComponent("_"), (button -> this.legacyActionPerformed(3)))));
-            addWidget(vidMode = (new Button(width - 40, 0, 20, 20, new TextComponent("YT"), (button -> this.legacyActionPerformed(4)))));
+            addWidget(back = (new Button( 0, 0, 20, 20, Component.literal("<"), (button -> this.legacyActionPerformed(0)))));
+            addWidget(fwd = (new Button( 20, 0, 20, 20, Component.literal(">"),(button -> this.legacyActionPerformed(1)))));
+            addWidget(go = (new Button( width - 60, 0, 20, 20, Component.translatable("forgecef.example.screen.go"), (button -> this.legacyActionPerformed(2)))));
+            addWidget(min = (new Button(width - 20, 0, 20, 20, Component.literal("_"), (button -> this.legacyActionPerformed(3)))));
+            addWidget(vidMode = (new Button(width - 40, 0, 20, 20, Component.literal("YT"), (button -> this.legacyActionPerformed(4)))));
             vidModeState = false;
             
-            url = new EditBox(minecraft.font, 40, 0, width - 100, 20, new TextComponent(""));
+            url = new EditBox(minecraft.font, 40, 0, width - 100, 20, Component.literal(""));
             url.setMaxLength(65535);
             url.setValue(browser.getURL());
         } else {
@@ -90,7 +89,7 @@ public class BrowserScreen extends Screen {
             min.x = width - 20;
             
             String old = url.getValue();
-            url = new EditBox(minecraft.font, 40, 0, width - 100, 20, new TextComponent(""));
+            url = new EditBox(minecraft.font, 40, 0, width - 100, 20, Component.literal(""));
             url.setMaxLength(65535);
             url.setValue(old);
         }

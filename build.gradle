@@ -21,7 +21,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-	mappings channel: 'official', version: '1.18.2'
+	mappings channel: 'official', version: '1.19'
 	//accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 	runs {
 		client {
@@ -81,7 +81,7 @@ repositories{
 }
 
 dependencies {
-	minecraft 'net.minecraftforge:forge:1.18.2-40.1.54'
+	minecraft 'net.minecraftforge:forge:1.19-41.0.1'
 	annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
