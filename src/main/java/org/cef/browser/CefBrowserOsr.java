@@ -47,7 +47,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
     private int depth = 32;
     private int depth_per_component = 8;
     private boolean isTransparent_;
-    private final Component dc_ = new Component() {
+    public static final Component dc_ = new Component() {
         @Override
         public Point getLocationOnScreen() {
             return new Point(0, 0);
@@ -161,20 +161,55 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 
     @Override
     public void injectKeyTyped(int key, int mods) {
-        if( key != GLFW_KEY_BACKSPACE && key != VK_UNDEFINED) {
-            KeyEvent ev = new UnsafeExample().makeEvent(dc_, key, (char) key, KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, mods);
-            sendKeyEvent(ev);
-        } else {
+        if(key != VK_UNDEFINED) {
             switch (key) {
-                case GLFW_KEY_HOME, VK_END, VK_PAGE_UP, VK_PAGE_DOWN, VK_UP, VK_DOWN, VK_LEFT, VK_RIGHT, VK_BEGIN, VK_KP_LEFT, VK_KP_UP, VK_KP_RIGHT, VK_KP_DOWN, VK_F1, VK_F2, VK_F3, VK_F4, VK_F5, VK_F6, VK_F7, VK_F8, VK_F9, VK_F10, VK_F11, VK_F12, VK_F13, VK_F14, VK_F15, VK_F16, VK_F17, VK_F18, VK_F19, VK_F20, VK_F21, VK_F22, VK_F23, VK_F24, VK_PRINTSCREEN, VK_SCROLL_LOCK, VK_CAPS_LOCK, VK_NUM_LOCK, VK_PAUSE, GLFW_KEY_INSERT, GLFW_KEY_BACKSPACE -> {
-                    KeyEvent ev = new UnsafeExample().makeEvent(dc_, key, '\0', KEY_LOCATION_UNKNOWN, KEY_TYPED,0, mods);
+                case GLFW_KEY_BACKSPACE, GLFW_KEY_HOME, GLFW_KEY_END, GLFW_KEY_PAGE_UP, GLFW_KEY_PAGE_DOWN, GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_KP_4, GLFW_KEY_KP_8, GLFW_KEY_KP_6, GLFW_KEY_KP_2, GLFW_KEY_PRINT_SCREEN, GLFW_KEY_SCROLL_LOCK, GLFW_KEY_CAPS_LOCK, GLFW_KEY_NUM_LOCK, GLFW_KEY_PAUSE, GLFW_KEY_INSERT -> {
+                    KeyEvent ev = new UnsafeExample().makeEvent(dc_, key, CHAR_UNDEFINED, KEY_LOCATION_UNKNOWN, KEY_TYPED,0, mods);
+                    sendKeyEvent(ev);
+                }
+                default -> {
+                    KeyEvent ev = new UnsafeExample().makeEvent(dc_, key, (char) key, KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, mods);
                     sendKeyEvent(ev);
                 }
             }
         }
     }
 
-    public static int remapKeycode(int kc, char c) {
+    public static int remapKeycodeNoChar(int kc) {
+        switch (kc) {
+            // Unable to remap
+            case GLFW_KEY_BACKSPACE:
+                return KeyEvent.VK_BACK_SPACE;
+            case GLFW_KEY_DELETE:
+                return KeyEvent.VK_DELETE;
+            case GLFW_KEY_DOWN:
+                return KeyEvent.VK_DOWN;
+            case GLFW_KEY_ENTER:
+                return KeyEvent.VK_ENTER;
+            case GLFW_KEY_ESCAPE:
+                return KeyEvent.VK_ESCAPE;
+            case GLFW_KEY_LEFT:
+                return KeyEvent.VK_LEFT;
+            case GLFW_KEY_RIGHT:
+                return KeyEvent.VK_RIGHT;
+            case GLFW_KEY_TAB:
+                return KeyEvent.VK_TAB;
+            case GLFW_KEY_UP:
+                return KeyEvent.VK_UP;
+            case GLFW_KEY_PAGE_UP:
+                return KeyEvent.VK_PAGE_UP;
+            case GLFW_KEY_PAGE_DOWN:
+                return KeyEvent.VK_PAGE_DOWN;
+            case GLFW_KEY_END:
+                return GLFW_KEY_END;
+            case GLFW_KEY_HOME:
+                return GLFW_KEY_HOME;
+            default:
+                return CHAR_UNDEFINED;
+        }
+    }
+
+    private int remapKeycode(int kc, char c) {
         switch (kc) {
             // Unable to remap
             case GLFW_KEY_BACKSPACE:
@@ -209,29 +244,47 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
     }
 
     @Override
-    public void injectKeyPressedByKeyCode(int keyCode, char c, int mods) {
+    public void injectKeyPressedByKeyCode(int key, char c, int mods) {
         if (c != '\0') {
             synchronized (WORST_HACK) {
-                WORST_HACK.put(keyCode, c);
+                WORST_HACK.put(key, c);
             }
         }
 
-        KeyEvent ev = new KeyEvent(dc_, KeyEvent.KEY_PRESSED, 0, mods, remapKeycode(keyCode, c), c);
-        sendKeyEvent(ev);
+        switch (key) {
+            case GLFW_KEY_BACKSPACE, GLFW_KEY_HOME, GLFW_KEY_END, GLFW_KEY_PAGE_UP, GLFW_KEY_PAGE_DOWN, GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_KP_4, GLFW_KEY_KP_8, GLFW_KEY_KP_6, GLFW_KEY_KP_2, GLFW_KEY_PRINT_SCREEN, GLFW_KEY_SCROLL_LOCK, GLFW_KEY_CAPS_LOCK, GLFW_KEY_NUM_LOCK, GLFW_KEY_PAUSE, GLFW_KEY_INSERT -> {
+                KeyEvent ev = new KeyEvent(dc_, KEY_PRESSED, 0, mods, remapKeycode(key, CHAR_UNDEFINED), CHAR_UNDEFINED);
+                sendKeyEvent(ev);
+            }
+
+            default -> {
+                KeyEvent ev = new KeyEvent(dc_, KEY_PRESSED, 0, mods, remapKeycode(key, c), c);
+                sendKeyEvent(ev);
+            }
+        }
     }
 
     private static final Map<Integer, Character> WORST_HACK = new HashMap<>();
 
     @Override
-    public void injectKeyReleasedByKeyCode(int keyCode, char c, int mods) {
+    public void injectKeyReleasedByKeyCode(int key, char c, int mods) {
         if (c == '\0') {
             synchronized (WORST_HACK) {
-                c = WORST_HACK.getOrDefault(keyCode, '\0');
+                c = WORST_HACK.getOrDefault(key, '\0');
             }
         }
 
-        KeyEvent ev = new KeyEvent(dc_, KeyEvent.KEY_RELEASED, 0, mods, remapKeycode(keyCode, c), c);
-        sendKeyEvent(ev);
+        switch (key) {
+            case GLFW_KEY_BACKSPACE, GLFW_KEY_HOME, GLFW_KEY_END, GLFW_KEY_PAGE_UP, GLFW_KEY_PAGE_DOWN, GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_KP_4, GLFW_KEY_KP_8, GLFW_KEY_KP_6, GLFW_KEY_KP_2, GLFW_KEY_PRINT_SCREEN, GLFW_KEY_SCROLL_LOCK, GLFW_KEY_CAPS_LOCK, GLFW_KEY_NUM_LOCK, GLFW_KEY_PAUSE, GLFW_KEY_INSERT -> {
+                KeyEvent ev = new KeyEvent(dc_, KEY_RELEASED, 0, mods, remapKeycode(key, CHAR_UNDEFINED), CHAR_UNDEFINED);
+                sendKeyEvent(ev);
+            }
+
+            default -> {
+                KeyEvent ev = new KeyEvent(dc_, KEY_RELEASED, 0, mods, remapKeycode(key, c), c);
+                sendKeyEvent(ev);
+            }
+        }
     }
 
     @Override
