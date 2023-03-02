@@ -262,7 +262,7 @@ public class ClientProxy extends BaseProxy {
         MutableComponent cct = (MutableComponent) Component.nullToEmpty(updateStr);
         cct.withStyle(cs);
 
-        ev.getPlayer().displayClientMessage(cct, true);
+        //ev.getPlayer().displayClientMessage(cct, true);
     }
 
     public void removeBrowser(CefBrowserOsr b) {

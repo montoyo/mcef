@@ -166,7 +166,7 @@ public class RemoteConfig {
         
         JsonElement mcVersions = json.get("latestVersions");
         if(mcVersions != null && mcVersions.isJsonObject()) {
-            JsonElement cVer = mcVersions.getAsJsonObject().get("1.18.2");
+            JsonElement cVer = mcVersions.getAsJsonObject().get("1.19");
 
             // My glibc version is 2.31 :( so newer doesn't work
             
