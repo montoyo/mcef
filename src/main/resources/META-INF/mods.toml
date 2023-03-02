@@ -1,8 +1,8 @@
 modLoader="javafml" #mandatory
 
-loaderVersion="[41,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+loaderVersion="[43,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
 
-license="BSD-3-Clause"
+license="Public Domain"
 
 issueTrackerURL="" #optional
 
@@ -10,7 +10,7 @@ issueTrackerURL="" #optional
 
 modId="forgecef" #mandatory
 
-version="1.1.0" #mandatory
+version="1.0.0" #mandatory
 
 displayName="MCEF" #mandatory
 
@@ -28,13 +28,13 @@ description='''
 [[dependencies.forgecef]] #optional
 modId="forge" #mandatory
 mandatory=true #mandatory
-versionRange="[41,)" #mandatory
+versionRange="[43,)" #mandatory
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.forgecef]]
 modId="minecraft"
 mandatory=true
-versionRange="[1.19,1.20)"
+versionRange="[1.19.2,1.19.3)"
 ordering="NONE"
 side="BOTH"

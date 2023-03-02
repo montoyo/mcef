@@ -13,7 +13,7 @@
     "sources": "https://github.com/Mysticpasta1/mcef-forge"
   },
 
-  "license": "BSD-3-Clause",
+  "license": "Public Domain",
 
   "environment": "*",
   "entrypoints": {
@@ -28,7 +28,7 @@
   "depends": {
     "fabricloader": ">=0.14.8",
     "fabric": "*",
-    "minecraft": "~1.19",
+    "minecraft": "~1.19.2",
     "java": ">=17"
   }
 }
