@@ -73,11 +73,12 @@ public class ClientProxy extends BaseProxy {
     @Override
     public void onInit() {
         super.onInit();
+        IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        eventBus.addListener(this::onInitializeClient);
         MinecraftForge.EVENT_BUS.addListener(this::onTickStart);
         MinecraftForge.EVENT_BUS.addListener(this::onLogin);
     }
 
-    @SubscribeEvent
     public void onInitializeClient(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             RenderSystem.assertOnRenderThread();
