@@ -193,6 +193,21 @@ public class ClientProxy extends BaseProxy {
         System.out.println("Creating CEF browser at url " + url);
 
         if(cefClient == null) {
+            if(cefApp == null) {
+                CefSettings settings = new CefSettings();
+                settings.windowless_rendering_enabled = true;
+                settings.background_color = settings.new ColorType(0, 255, 255, 255);
+                settings.cache_path = (new File(JCEF_ROOT, "cache")).getAbsolutePath();
+                // settings.user_agent = "MCEF"
+
+                CefApp.startup(MCEF.CEF_ARGS);
+                cefApp = CefApp.getInstance(settings);
+
+                // Custom scheme broken on Linux, for now
+                if (!OS.isLinux()) {
+                    CefApp.addAppHandler(appHandler);
+                }
+            }
             cefClient = cefApp.createClient();
         }
 
