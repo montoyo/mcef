@@ -138,7 +138,7 @@ public class CefClient extends CefClientHandler
     }
 
     public CefBrowser createBrowser(String url, boolean isOffscreenRendered, boolean isTransparent,
-            CefRequestContext context) {
+                                    CefRequestContext context) {
         if (isDisposed_)
             throw new IllegalStateException("Can't create browser. CefClient is disposed");
         return CefBrowserFactory.create(this, url, isOffscreenRendered, isTransparent, context);

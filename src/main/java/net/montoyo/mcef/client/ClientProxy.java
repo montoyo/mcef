@@ -190,6 +190,13 @@ public class ClientProxy extends BaseProxy {
         if (VIRTUAL)
             return new VirtualBrowser();
 
+        if(cefClient == null) {
+            if(cefApp == null) {
+                cefApp = CefApp.getInstance();
+            }
+            cefClient = cefApp.createClient();
+        }
+
         System.out.println("Creating CEF browser at url " + url);
 
         CefBrowserOsr ret = (CefBrowserOsr) cefClient.createBrowser(url, true, transp);
