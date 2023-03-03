@@ -10,6 +10,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.montoyo.mcef.BaseProxy;
@@ -70,12 +71,11 @@ public class ClientProxy extends BaseProxy {
     @Override
     public void onInit() {
         super.onInit();
-        IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        eventBus.addListener(this::onInitializeClient);
         MinecraftForge.EVENT_BUS.addListener(this::onTickStart);
         MinecraftForge.EVENT_BUS.addListener(this::onLogin);
     }
 
+    @SubscribeEvent
     public void onInitializeClient(FMLClientSetupEvent event) {
         Minecraft.getInstance().tell(() -> {
             RenderSystem.assertOnRenderThread();
@@ -200,7 +200,6 @@ public class ClientProxy extends BaseProxy {
                 settings.cache_path = (new File(JCEF_ROOT, "cache")).getAbsolutePath();
                 // settings.user_agent = "MCEF"
 
-                CefApp.startup(MCEF.CEF_ARGS);
                 cefApp = CefApp.getInstance(settings);
 
                 // Custom scheme broken on Linux, for now
