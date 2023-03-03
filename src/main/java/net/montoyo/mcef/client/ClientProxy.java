@@ -97,7 +97,7 @@ public class ClientProxy extends BaseProxy {
             RemoteConfig cfg = new RemoteConfig();
             // Forge splash used to run here
             System.out.println("SYSTEM HEADLESS PROPERTY: " + System.getProperty("java.awt.headless"));
-            System.setProperty("java.awt.headless","false"); // local is bugged for me
+            System.setProperty("java.awt.headless", "false"); // local is bugged for me
             ipl = new UpdateFrame();
 
             cfg.load();
@@ -138,8 +138,8 @@ public class ClientProxy extends BaseProxy {
                 }
             }
 
-           // if (VIRTUAL)
-             //   return;
+            // if (VIRTUAL)
+            //   return;
 
             CefSettings settings = new CefSettings();
             settings.windowless_rendering_enabled = true;
@@ -192,11 +192,14 @@ public class ClientProxy extends BaseProxy {
 
         System.out.println("Creating CEF browser at url " + url);
 
-        if (cefClient != null) {
-            CefBrowserOsr ret = (CefBrowserOsr) cefClient.createBrowser(url, true, transp);
-            ret.setCloseAllowed();
-            ret.createImmediately();
-            ret.loadURL("http://localhost:8181");
+        if(cefClient == null) {
+            cefClient = cefApp.createClient();
+        }
+
+        CefBrowserOsr ret = (CefBrowserOsr) cefClient.createBrowser(url, true, transp);
+        ret.setCloseAllowed();
+        ret.createImmediately();
+        ret.loadURL("http://localhost:8181");
 
         /*CefBrowserWr ret2 = (CefBrowserWr) cefClient.createBrowser(url, false, transp);
         ret2.setCloseAllowed();
@@ -204,11 +207,8 @@ public class ClientProxy extends BaseProxy {
         ret2.loadURL("http://localhost:8181");
 
         nogc.add(ret2);*/
-            browsers.add(ret);
-            return ret;
-        } else {
-            return new VirtualBrowser();
-        }
+        browsers.add(ret);
+        return ret;
     }
 
     @Override
