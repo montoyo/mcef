@@ -24,7 +24,7 @@ public class MCEF {
 
     public static MCEF INSTANCE;
 
-    public static BaseProxy PROXY = null;
+    public static BaseProxy PROXY = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> BaseProxy::new);
 
     public MCEF() {
         System.out.println("MCEF Initalizing...");
@@ -32,12 +32,6 @@ public class MCEF {
         Configuration cfg = new Configuration();
 
         INSTANCE = this;
-
-        if(FMLEnvironment.dist.isClient()) {
-            PROXY = new ClientProxy();
-        } else {
-            PROXY = new BaseProxy();
-        }
 
         //Config: main
         SKIP_UPDATES = cfg.getBoolean("skipUpdates", "main", false, "Do not update binaries.");
