@@ -138,8 +138,8 @@ public class ClientProxy extends BaseProxy {
                 }
             }
 
-            if (VIRTUAL)
-                return;
+           // if (VIRTUAL)
+             //   return;
 
             CefSettings settings = new CefSettings();
             settings.windowless_rendering_enabled = true;
