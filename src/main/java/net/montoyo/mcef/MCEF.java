@@ -2,6 +2,7 @@ package net.montoyo.mcef;
 
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.easy_forge_compat.Configuration;
 import net.montoyo.mcef.utilities.Log;
@@ -23,7 +24,7 @@ public class MCEF {
 
     public static MCEF INSTANCE;
 
-    public static BaseProxy PROXY = DistExecutor.<BaseProxy>runForDist(() -> ClientProxy::new, () -> BaseProxy::new);
+    public static BaseProxy PROXY = null;
 
     public MCEF() {
         System.out.println("MCEF Initalizing...");
@@ -31,6 +32,12 @@ public class MCEF {
         Configuration cfg = new Configuration();
 
         INSTANCE = this;
+
+        if(FMLEnvironment.dist.isClient()) {
+            PROXY = new ClientProxy();
+        } else {
+            PROXY = new BaseProxy();
+        }
 
         //Config: main
         SKIP_UPDATES = cfg.getBoolean("skipUpdates", "main", false, "Do not update binaries.");
