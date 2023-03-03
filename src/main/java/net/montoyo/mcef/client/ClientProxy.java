@@ -6,6 +6,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -186,13 +188,29 @@ public class ClientProxy extends BaseProxy {
     }
 
     @Override
+    @OnlyIn(Dist.CLIENT)
     public IBrowser createBrowser(String url, boolean transp) {
         if (VIRTUAL)
             return new VirtualBrowser();
 
         if(cefClient == null) {
             if(cefApp == null) {
-                cefApp = CefApp.getInstance();
+                CefSettings settings = new CefSettings();
+                settings.windowless_rendering_enabled = true;
+                settings.background_color = settings.new ColorType(0, 255, 255, 255);
+                settings.cache_path = (new File(JCEF_ROOT, "cache")).getAbsolutePath();
+                // settings.user_agent = "MCEF"
+
+                if(CefApp.getState() == CefApp.CefAppState.NONE) {
+                    CefApp.startup(MCEF.CEF_ARGS);
+                }
+
+                cefApp = CefApp.getInstance(settings);
+
+                // Custom scheme broken on Linux, for now
+                if (!OS.isLinux()) {
+                    CefApp.addAppHandler(appHandler);
+                }
             }
             cefClient = cefApp.createClient();
         }
