@@ -471,28 +471,26 @@ public class CefApp extends CefAppHandlerAdapter {
      *
      * @param args Command-line arguments massed to main().
      */
-    public static final void startup(String[] args, boolean isClient) {
+    public static final boolean startup(String[] args) {
         String jcefPath = getJcefLibPath();
 
         System.out.println("JCEF Path -> " + jcefPath);
-
-        if (isClient) {
-            if (OS.isWindows()) {
-                System.load(jcefPath + "\\d3dcompiler_47.dll");
-                System.load(jcefPath + "\\libGLESv2.dll");
-                System.load(jcefPath + "\\libEGL.dll");
-                System.load(jcefPath + "\\chrome_elf.dll");
-                System.load(jcefPath + "\\libcef.dll");
-                System.load(jcefPath + "\\jcef.dll");
-            } else if (OS.isMacintosh()) {
-                System.load(jcefPath + "/libjcef.dylib");
-                N_Startup(getCefFrameworkPath(args));
-            } else if (OS.isLinux()) {
-                System.load(jcefPath + "/libcef.so");
-                System.load(jcefPath + "/libjcef.so");
-                N_Startup(null);
-            }
+        if (OS.isWindows()) {
+            System.load(jcefPath + "\\d3dcompiler_47.dll");
+            System.load(jcefPath + "\\libGLESv2.dll");
+            System.load(jcefPath + "\\libEGL.dll");
+            System.load(jcefPath + "\\chrome_elf.dll");
+            System.load(jcefPath + "\\libcef.dll");
+            System.load(jcefPath + "\\jcef.dll");
+        } else if (OS.isMacintosh()) {
+            System.load(jcefPath + "/libjcef.dylib");
+            N_Startup(getCefFrameworkPath(args));
+        } else if (OS.isLinux()) {
+            System.load(jcefPath + "/libcef.so");
+            System.load(jcefPath + "/libjcef.so");
+            N_Startup(null);
         }
+        return false;
     }
 
     private static final String getJcefLibPath() {
