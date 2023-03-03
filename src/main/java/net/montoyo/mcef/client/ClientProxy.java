@@ -77,7 +77,7 @@ public class ClientProxy extends BaseProxy {
 
     @SubscribeEvent
     public void onInitializeClient(FMLClientSetupEvent event) {
-        Minecraft.getInstance().tell(() -> {
+        event.enqueueWork(() -> {
             RenderSystem.assertOnRenderThread();
 
             appHandler.setArgs(MCEF.CEF_ARGS);
