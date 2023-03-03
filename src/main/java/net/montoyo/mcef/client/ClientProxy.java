@@ -192,10 +192,11 @@ public class ClientProxy extends BaseProxy {
 
         System.out.println("Creating CEF browser at url " + url);
 
-        CefBrowserOsr ret = (CefBrowserOsr) cefClient.createBrowser(url, true, transp);
-        ret.setCloseAllowed();
-        ret.createImmediately();
-        ret.loadURL("http://localhost:8181");
+        if (cefClient != null) {
+            CefBrowserOsr ret = (CefBrowserOsr) cefClient.createBrowser(url, true, transp);
+            ret.setCloseAllowed();
+            ret.createImmediately();
+            ret.loadURL("http://localhost:8181");
 
         /*CefBrowserWr ret2 = (CefBrowserWr) cefClient.createBrowser(url, false, transp);
         ret2.setCloseAllowed();
@@ -203,8 +204,11 @@ public class ClientProxy extends BaseProxy {
         ret2.loadURL("http://localhost:8181");
 
         nogc.add(ret2);*/
-        browsers.add(ret);
-        return ret;
+            browsers.add(ret);
+            return ret;
+        } else {
+            return new VirtualBrowser();
+        }
     }
 
     @Override
