@@ -19,6 +19,9 @@ public class FileListing {
     }
 
     public boolean load() {
+        // previously, an exception would be thrown and caught by this
+        // now it doesn't
+        if (!location.exists()) return false;
         try {
             unsafeLoad();
             return true;

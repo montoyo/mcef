@@ -4,6 +4,7 @@
 
 package org.cef;
 
+import net.montoyo.mcef.client.ClientProxy;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefBrowserFactory;
 import org.cef.browser.CefFrame;
@@ -444,7 +445,7 @@ public class CefClient extends CefClientHandler
         if (browser == null) return;
 
         focusedBrowser_ = browser;
-        browser.setFocus(true);
+//        browser.setFocus(true);
         if (focusHandler_ != null) focusHandler_.onGotFocus(browser);
     }
 

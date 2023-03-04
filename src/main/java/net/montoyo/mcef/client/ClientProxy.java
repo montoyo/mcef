@@ -264,18 +264,23 @@ public class ClientProxy extends BaseProxy {
     public boolean isSchemeRegistered(String name) {
         return appHandler.isSchemeRegistered(name);
     }
-
+    
     public void onTickStart(TickEvent.ClientTickEvent event) {
-        mc.getProfiler().push("MCEF");
-
-        if (cefApp != null)
-            cefApp.N_DoMessageLoopWork();
-
-        for (CefBrowserOsr b : browsers)
-            b.mcefUpdate();
-
-        displayHandler.update();
-        mc.getProfiler().pop();
+        // no point in ticking CEF if it doesn't exist, or if there are no browsers
+        if (cefApp == null || browsers.isEmpty()) return;
+        // listen for specific the start tick
+        if (event.phase == TickEvent.Phase.START) {
+            mc.getProfiler().push("MCEF");
+            
+            if (cefApp != null)
+                cefApp.N_DoMessageLoopWork();
+    
+            for (CefBrowserOsr b : browsers)
+                b.mcefUpdate();
+    
+            displayHandler.update();
+            mc.getProfiler().pop();
+        }
     }
 
     public void onLogin(PlayerEvent.PlayerLoggedInEvent ev) {

@@ -414,6 +414,12 @@ public class CefApp extends CefAppHandlerAdapter {
         CefApp.self = null;
     }
 
+    boolean isDoingWork = false;
+    
+    public boolean isDoingWork() {
+        return isDoingWork;
+    }
+    
     /**
      * Perform a single message loop iteration. Used on all platforms except
      * Windows with windowed rendering.
@@ -435,11 +441,13 @@ public class CefApp extends CefAppHandlerAdapter {
                 }
 
                 if (delay_ms <= 0) {
+                    isDoingWork = true;
                     // Execute the work immediately.
                     N_DoMessageLoopWork();
 
                     // Schedule more work later.
                     doMessageLoopWork(kMaxTimerDelay);
+                    isDoingWork = false;
                 } else {
                     long timer_delay_ms = delay_ms;
                     // Never wait longer than the maximum allowed time.
@@ -451,11 +459,13 @@ public class CefApp extends CefAppHandlerAdapter {
                             // Timer has timed out.
                             workTimer_.stop();
                             workTimer_ = null;
-
+    
+                            isDoingWork = true;
                             N_DoMessageLoopWork();
 
                             // Schedule more work later.
                             doMessageLoopWork(kMaxTimerDelay);
+                            isDoingWork = false;
                         }
                     });
                     workTimer_.start();
