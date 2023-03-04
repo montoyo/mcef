@@ -21,3 +21,6 @@ build
 eclipse
 run
 .vscode
+src/main/resources/assets/mcef/cef
+runsrc/main/resources/assets/mcef/cef/windows_amd64/mcef2.json
+runsrc/main/resources/assets/mcef/cefmacos_arm64/mcef2.json
