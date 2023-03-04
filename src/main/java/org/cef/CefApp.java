@@ -15,6 +15,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * Exposes static methods for managing the global CEF context.
@@ -415,11 +416,11 @@ public class CefApp extends CefAppHandlerAdapter {
     }
 
     boolean isDoingWork = false;
-    
+
     public boolean isDoingWork() {
         return isDoingWork;
     }
-    
+
     /**
      * Perform a single message loop iteration. Used on all platforms except
      * Windows with windowed rendering.
@@ -459,7 +460,7 @@ public class CefApp extends CefAppHandlerAdapter {
                             // Timer has timed out.
                             workTimer_.stop();
                             workTimer_ = null;
-    
+
                             isDoingWork = true;
                             N_DoMessageLoopWork();
 
@@ -504,16 +505,32 @@ public class CefApp extends CefAppHandlerAdapter {
     }
 
     private static final String getJcefLibPath() {
-        Path runtimeDir = Paths.get("");
-        final Path jcefPath;
-        if (OS.isWindows() || OS.isLinux()) {
-            jcefPath = runtimeDir.resolve("jcef");
-        } else if (OS.isMacintosh()) {
-            jcefPath = runtimeDir.resolve("jcef/jcef_app.app/Contents/Java");
+        Path jcefPath;
+        if (OS.isWindows()) {
+            if(System.getProperty("os.arch").equals("amd64")) {
+                jcefPath = Paths.get("src/main/resources/assets/mcef/cef/windows_amd64");
+            } else {
+                jcefPath = Paths.get("src/main/resources/assets/mcef/cef/windows_arm64");
+            }
+        } else if (OS.isLinux()) {
+            if(System.getProperty("os.arch").equals("amd64")) {
+                jcefPath = Paths.get("src/main/resources/assets/mcef/cef/linux_amd64");
+            } else {
+                jcefPath = Paths.get("src/main/resources/assets/mcef/cef/linux_arm64");
+            }
         } else {
-            jcefPath = null;
+            return null;
         }
-        return jcefPath != null ? jcefPath.toAbsolutePath().toString() : null;
+
+        if (jcefPath != null) {
+            String ROOT = String.valueOf(jcefPath.toAbsolutePath());
+            if(ROOT.contains("run")) {
+                ROOT = ROOT.replaceAll("run", "");
+            }
+            return ROOT;
+        } else {
+            return null;
+        }
     }
 
     /**

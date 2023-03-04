@@ -12,7 +12,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.montoyo.mcef.BaseProxy;
@@ -41,6 +40,7 @@ import org.cef.handler.CefLifeSpanHandlerAdapter;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -49,6 +49,7 @@ import java.util.regex.Pattern;
 public class ClientProxy extends BaseProxy {
 
     public static String ROOT = ".";
+    public static String ROOT2 = ".";
     public static String JCEF_ROOT = ".";
     public static boolean VIRTUAL = false;
 
@@ -85,16 +86,44 @@ public class ClientProxy extends BaseProxy {
 
             appHandler.setArgs(MCEF.CEF_ARGS);
 
-            ROOT = mc.gameDirectory.getAbsolutePath().replaceAll("\\\\", "/");
+            ROOT = System.getProperty("user.dir");
+            ROOT2 = Minecraft.getInstance().gameDirectory.getAbsolutePath();
+
             if (ROOT.endsWith("."))
                 ROOT = ROOT.substring(0, ROOT.length() - 1);
 
             if (ROOT.endsWith("/"))
                 ROOT = ROOT.substring(0, ROOT.length() - 1);
 
-            JCEF_ROOT = ROOT + "/jcef";
+            if (ROOT2.endsWith("."))
+                ROOT2 = ROOT2.substring(0, ROOT2.length() - 1);
 
-            File fileListing = new File(new File(ROOT), "config");
+            if (ROOT2.endsWith("/"))
+                ROOT2 = ROOT2.substring(0, ROOT2.length() - 1);
+
+            if(ROOT.contains("run")) {
+                ROOT = ROOT.substring(0, ROOT.length() - 3);
+            }
+
+            if (OS.isWindows()) {
+                if(System.getProperty("os.arch").equals("amd64")) {
+                    JCEF_ROOT = ROOT + Paths.get("src/main/resources/assets/mcef/cef/windows_amd64");
+                } else {
+                    JCEF_ROOT = ROOT + Paths.get("src/main/resources/assets/mcef/cef/windows_arm64");
+                }
+            } else if (OS.isLinux()) {
+                if(System.getProperty("os.arch").equals("amd64")) {
+                    JCEF_ROOT = ROOT + Paths.get("src/main/resources/assets/mcef/cef/linux_amd64");
+                } else {
+                    JCEF_ROOT = ROOT + Paths.get("src/main/resources/assets/mcef/cef/linux_arm64");
+                }
+            } else {
+                VIRTUAL = true;
+            }
+
+            System.out.println(JCEF_ROOT);
+
+            File fileListing = new File(new File(ROOT2), "config");
 
             IProgressListener ipl;
             RemoteConfig cfg = new RemoteConfig();
@@ -112,11 +141,11 @@ public class ClientProxy extends BaseProxy {
 
             System.out.println("Updating MCEF missing files... ");
 
-            if (!cfg.downloadMissing(ipl)) {
+            /*if (!cfg.downloadMissing(ipl)) {
                 Log.warning("Going in virtual mode; couldn't download resources.");
                 VIRTUAL = true;
                 return;
-            }
+            }*/
 
             if (!cfg.updateFileListing(fileListing, true))
                 Log.warning("There was a problem while updating file list. Uninstall may not delete all files.");
