@@ -6,7 +6,6 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.Field;
-import java.security.Key;
 
 public class UnsafeExample {
     private static final Unsafe theUnsafe;

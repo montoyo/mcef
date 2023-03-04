@@ -4,6 +4,8 @@
 
 package org.cef.browser;
 
+import net.montoyo.mcef.client.ClientProxy;
+import org.cef.CefApp;
 import org.cef.CefClient;
 import org.cef.browser.CefRequestContext;
 import org.cef.callback.CefDragData;
@@ -451,11 +453,26 @@ abstract class CefBrowser_N extends CefNativeAdapter implements CefBrowser {
             ule.printStackTrace();
         }
     }
+    
+    public void setSafeMode(boolean enabled) {
+        this.safeMode = enabled;
+    }
+    
+    boolean currentFocus = false;
+    boolean safeMode = false;
 
     @Override
     public void setFocus(boolean enable) {
         try {
-            N_SetFocus(enable);
+            // only grab focus if the focus is known to not be active
+            // from my testing, this is a safe optimization
+            // but just incase, setSafeMode exists to disable it
+            // for reference, this alone brings the fps in VR from like 12 (judging by fps graph, feels like 2) to ~40 (judging by feel)
+            if (safeMode || currentFocus != enable) {
+                currentFocus = enable;
+                // for some reason, this method in CEF is extremely poorly optimized
+                N_SetFocus(enable);
+            }
         } catch (UnsatisfiedLinkError ule) {
             ule.printStackTrace();
         }
