@@ -7,7 +7,7 @@ import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.setup.FileListing;
 import net.montoyo.mcef.utilities.IProgressListener;
 import net.montoyo.mcef.utilities.Log;
-import net.montoyo.mcef.utilities.Util;
+import net.montoyo.mcef.utilities.Util2;
 import net.montoyo.mcef.utilities.Version;
 import org.cef.OS;
 
@@ -66,23 +66,21 @@ public class RemoteConfig {
     private JsonObject readConfig() {
         File newCfg = new File(JCEF_ROOT, "mcef2.new");
         File cfgFle = new File(JCEF_ROOT, "mcef2.json");
-        
-        boolean ok = Util.download("config2.json", newCfg, null);
+
+        boolean ok = Util2.download("config2.json", newCfg, null);
 
         if(ok) {
-            Util.delete(cfgFle);
-            
+            Util2.delete(cfgFle);
+
             if(newCfg.renameTo(cfgFle))
                 return readConfig(cfgFle);
             else {
                 Log.warning("Couldn't rename mcef2.new to mcef2.json.");
                 return readConfig(newCfg);
             }
-            
-        } else {
-            Log.warning("Couldn't read remote config. Using local configuration file.");
-            return readConfig(cfgFle);
         }
+
+        return readConfig(cfgFle);
     }
     
     /**

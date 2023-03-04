@@ -118,65 +118,7 @@ task deobfJar(type: Jar) {
 
 sourceSets {
     main.resources.srcDirs += 'src/generated/resources'
-
-    jcef {
-        java {
-            srcDir "java-cef/java"
-            exclude "**/tests/**"
-        }
-    }
-
-    main {
-        compileClasspath += jcef.output
-        runtimeClasspath += jcef.output
-    }
 }
-
-import org.apache.tools.ant.taskdefs.condition.Os
-
-// From com.cinemamod.fabric.cef.Platform enum
-var platforms = ["linux_amd64", "linux_arm64", "windows_amd64", "windows_arm64", "macos_amd64", "macos_arm64"]
-
-task downloadJcef {
-    for (String platform : platforms) {
-        try {
-            "https://ewr1.vultrobjects.com/cinemamod-libraries/cef/$cef_branch/$platform/manifest.txt".toURL().text.eachLine {
-                var fileHash = it.split("  ")[0]
-                var relFilePath = it.split("  ")[1]
-                var cefResourceUrl = "https://ewr1.vultrobjects.com/cinemamod-libraries/cef/$cef_branch/$platform/$relFilePath"
-                download.run {
-                    src cefResourceUrl
-                    dest "src/main/resources/assets/mcef/cef/$platform/$relFilePath"
-                    overwrite false
-                }
-                if (Os.isFamily(Os.FAMILY_UNIX)) {
-                    if (relFilePath.contains("chrome-sandbox") || relFilePath.contains("jcef_helper")) {
-                        exec {
-                            commandLine("chmod", "700", "src/main/resources/assets/mcef/cef/$platform/$relFilePath")
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            println("Skipping CEF libraries for $cef_branch/$platform")
-            println(e.getMessage())
-        }
-    }
-}
-
-void createPlatformJarTask(String platform) {
-    Task platformJarTask = task("jar_$platform", type: ReobfuscateJar, dependsOn: jar) {
-        input = jar.archiveFile
-
-        onlyIf {
-            new File("src/main/resources/assets/mcef/cef/$platform").exists()
-        }
-    }
-
-    build.dependsOn(platformJarTask)
-}
-
-platforms.forEach(platform -> createPlatformJarTask(platform))
 
 // configure the maven publication
 publishing {

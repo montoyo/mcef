@@ -4,6 +4,7 @@
 
 package org.cef;
 
+import net.minecraft.client.Minecraft;
 import org.cef.callback.CefSchemeHandlerFactory;
 import org.cef.handler.CefAppHandler;
 import org.cef.handler.CefAppHandlerAdapter;
@@ -493,6 +494,7 @@ public class CefApp extends CefAppHandlerAdapter {
             System.load(jcefPath + "\\chrome_elf.dll");
             System.load(jcefPath + "\\libcef.dll");
             System.load(jcefPath + "\\jcef.dll");
+            System.load(jcefPath + "\\vulkan-1.dll");
         } else if (OS.isMacintosh()) {
             System.load(jcefPath + "/libjcef.dylib");
             N_Startup(getCefFrameworkPath(args));
@@ -505,32 +507,16 @@ public class CefApp extends CefAppHandlerAdapter {
     }
 
     private static final String getJcefLibPath() {
-        Path jcefPath;
-        if (OS.isWindows()) {
-            if(System.getProperty("os.arch").equals("amd64")) {
-                jcefPath = Paths.get("src/main/resources/assets/mcef/cef/windows_amd64");
-            } else {
-                jcefPath = Paths.get("src/main/resources/assets/mcef/cef/windows_arm64");
-            }
-        } else if (OS.isLinux()) {
-            if(System.getProperty("os.arch").equals("amd64")) {
-                jcefPath = Paths.get("src/main/resources/assets/mcef/cef/linux_amd64");
-            } else {
-                jcefPath = Paths.get("src/main/resources/assets/mcef/cef/linux_arm64");
-            }
+        Path runtimeDir = Paths.get("");
+        final Path jcefPath;
+        if (OS.isWindows() || OS.isLinux()) {
+            jcefPath = runtimeDir.resolve("mods/cinemamod-libraries");
+        } else if (OS.isMacintosh()) {
+            jcefPath = runtimeDir.resolve("mods/cinemamod-libraries/jcef_app.app/Contents/Java");
         } else {
-            return null;
+            jcefPath = null;
         }
-
-        if (jcefPath != null) {
-            String ROOT = String.valueOf(jcefPath.toAbsolutePath());
-            if(ROOT.contains("run")) {
-                ROOT = ROOT.replaceAll("run", "");
-            }
-            return ROOT;
-        } else {
-            return null;
-        }
+        return jcefPath != null ? String.valueOf(jcefPath.toAbsolutePath()) : null;
     }
 
     /**

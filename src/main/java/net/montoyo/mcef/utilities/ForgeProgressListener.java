@@ -14,7 +14,7 @@ public class ForgeProgressListener implements IProgressListener {
 
     @Override
     public void onProgressed(double d) {
-        stepUntil((int) Util.clamp(d, 0.d, 100.d));
+        stepUntil((int) Util2.clamp(d, 0.d, 100.d));
     }
 
     @Override

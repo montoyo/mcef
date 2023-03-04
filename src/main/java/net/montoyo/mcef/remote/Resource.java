@@ -2,11 +2,10 @@ package net.montoyo.mcef.remote;
 
 import java.io.File;
 
-import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.utilities.IProgressListener;
 import net.montoyo.mcef.utilities.Log;
-import net.montoyo.mcef.utilities.Util;
+import net.montoyo.mcef.utilities.Util2;
 
 /**
  * A remote resource. Can be downloaded, extracted and checked.
@@ -73,7 +72,7 @@ public class Resource {
         //ClientProxy.ROOT exists, but this.name might contain some subdirectories that we need to create...
         if(!parent.exists() && !parent.mkdirs())
             Log.warning("Couldn't create directory %s... ignoring this error, but this might cause some issues later...", parent.getAbsolutePath());
-        return Util.download(MCEF.VERSION + '/' + platform + '/' + name + end, dst, shouldExtract, ipl);
+        return Util2.download("cef" + "4896" + '/' + platform + '/' + name + end, dst, shouldExtract, ipl);
     }
     
     /**
@@ -83,8 +82,8 @@ public class Resource {
      * @return true if the operation was successful.
      */
     public boolean extract(IProgressListener ipl) {
-        Util.secure(ipl).onTaskChanged("Extracting " + name);
-        return Util.extract(new File(ClientProxy.JCEF_ROOT, name), new File(ClientProxy.JCEF_ROOT));
+        Util2.secure(ipl).onTaskChanged("Extracting " + name);
+        return Util2.extract(new File(ClientProxy.JCEF_ROOT, name), new File(ClientProxy.JCEF_ROOT));
     }
 
     /**

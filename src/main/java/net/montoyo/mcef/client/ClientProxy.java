@@ -21,26 +21,21 @@ import net.montoyo.mcef.api.IDisplayHandler;
 import net.montoyo.mcef.api.IJSQueryHandler;
 import net.montoyo.mcef.api.IScheme;
 import net.montoyo.mcef.example.ExampleMod;
-import net.montoyo.mcef.remote.RemoteConfig;
-import net.montoyo.mcef.utilities.IProgressListener;
+import net.montoyo.mcef.utilities.CefUtil;
 import net.montoyo.mcef.utilities.Log;
-import net.montoyo.mcef.utilities.Util;
+import net.montoyo.mcef.utilities.Util2;
 import net.montoyo.mcef.virtual.VirtualBrowser;
 import org.cef.CefApp;
 import org.cef.CefClient;
 import org.cef.CefSettings;
 import org.cef.OS;
-import org.cef.browser.CefBrowser;
 import org.cef.browser.CefBrowserOsr;
 import org.cef.browser.CefMessageRouter;
-import org.cef.browser.CefMessageRouter.CefMessageRouterConfig;
 import org.cef.browser.CefRenderer;
-import org.cef.handler.CefLifeSpanHandlerAdapter;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
@@ -49,21 +44,20 @@ import java.util.regex.Pattern;
 public class ClientProxy extends BaseProxy {
 
     public static String ROOT = ".";
-    public static String ROOT2 = ".";
     public static String JCEF_ROOT = ".";
     public static boolean VIRTUAL = false;
 
-    private CefApp cefApp;
-    private CefClient cefClient;
-    private CefMessageRouter cefRouter;
+    public static CefApp cefApp;
+    public static CefClient cefClient;
+    public static CefMessageRouter cefRouter;
     private final ArrayList<CefBrowserOsr> browsers = new ArrayList<>();
     private final ArrayList<Object> nogc = new ArrayList<>();
-    private String updateStr;
-    private final Minecraft mc = Minecraft.getInstance();
-    private final DisplayHandler displayHandler = new DisplayHandler();
-    private final HashMap<String, String> mimeTypeMap = new HashMap<>();
-    private final AppHandler appHandler = new AppHandler();
-    private ExampleMod exampleMod;
+    public static String updateStr;
+    public static final Minecraft mc = Minecraft.getInstance();
+    public static final DisplayHandler displayHandler = new DisplayHandler();
+    public static final HashMap<String, String> mimeTypeMap = new HashMap<>();
+    public static final AppHandler appHandler = new AppHandler();
+    public static ExampleMod exampleMod;
 
     @Override
     public void onPreInit() {
@@ -81,136 +75,9 @@ public class ClientProxy extends BaseProxy {
     }
 
     public void onInitializeClient(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> {
-            RenderSystem.assertOnRenderThread();
-
-            appHandler.setArgs(MCEF.CEF_ARGS);
-
-            ROOT = System.getProperty("user.dir");
-            ROOT2 = Minecraft.getInstance().gameDirectory.getAbsolutePath();
-
-            if (ROOT.endsWith("."))
-                ROOT = ROOT.substring(0, ROOT.length() - 1);
-
-            if (ROOT.endsWith("/"))
-                ROOT = ROOT.substring(0, ROOT.length() - 1);
-
-            if (ROOT2.endsWith("."))
-                ROOT2 = ROOT2.substring(0, ROOT2.length() - 1);
-
-            if (ROOT2.endsWith("/"))
-                ROOT2 = ROOT2.substring(0, ROOT2.length() - 1);
-
-            if(ROOT.contains("run")) {
-                ROOT = ROOT.substring(0, ROOT.length() - 3);
-            }
-
-            if (OS.isWindows()) {
-                if(System.getProperty("os.arch").equals("amd64")) {
-                    JCEF_ROOT = ROOT + Paths.get("src/main/resources/assets/mcef/cef/windows_amd64");
-                } else {
-                    JCEF_ROOT = ROOT + Paths.get("src/main/resources/assets/mcef/cef/windows_arm64");
-                }
-            } else if (OS.isLinux()) {
-                if(System.getProperty("os.arch").equals("amd64")) {
-                    JCEF_ROOT = ROOT + Paths.get("src/main/resources/assets/mcef/cef/linux_amd64");
-                } else {
-                    JCEF_ROOT = ROOT + Paths.get("src/main/resources/assets/mcef/cef/linux_arm64");
-                }
-            } else {
-                VIRTUAL = true;
-            }
-
-            System.out.println(JCEF_ROOT);
-
-            File fileListing = new File(new File(ROOT2), "config");
-
-            IProgressListener ipl;
-            RemoteConfig cfg = new RemoteConfig();
-            // Forge splash used to run here
-            System.out.println("SYSTEM HEADLESS PROPERTY: " + System.getProperty("java.awt.headless"));
-            System.setProperty("java.awt.headless", "false"); // local is bugged for me
-            ipl = new UpdateFrame();
-
-            cfg.load();
-
-            System.out.println("Updating MCEF file listing ");
-
-            if (!cfg.updateFileListing(fileListing, false))
-                Log.warning("There was a problem while establishing file list. Uninstall may not delete all files.");
-
-            System.out.println("Updating MCEF missing files... ");
-
-            /*if (!cfg.downloadMissing(ipl)) {
-                Log.warning("Going in virtual mode; couldn't download resources.");
-                VIRTUAL = true;
-                return;
-            }*/
-
-            if (!cfg.updateFileListing(fileListing, true))
-                Log.warning("There was a problem while updating file list. Uninstall may not delete all files.");
-
-            updateStr = cfg.getUpdateString();
-            ipl.onProgressEnd();
-
-            if (OS.isLinux()) {
-                File subproc = new File(JCEF_ROOT, "jcef_helper");
-
-                // Attempt to make the CEF subprocess executable if not
-                if (!subproc.canExecute()) {
-                    try {
-                        int retCode = Runtime.getRuntime().exec(new String[]{"/usr/bin/chmod", "+x", subproc.getAbsolutePath()}).waitFor();
-
-                        if (retCode != 0)
-                            throw new RuntimeException("chmod exited with code " + retCode);
-                    } catch (Throwable t) {
-                        Log.errorEx("Error while giving execution rights to jcef_helper. MCEF will enter virtual mode. You can fix this by chmoding jcef_helper manually.", t);
-                        VIRTUAL = true;
-                    }
-                }
-            }
-
-            // if (VIRTUAL)
-            //   return;
-
-            CefSettings settings = new CefSettings();
-            settings.windowless_rendering_enabled = true;
-            settings.background_color = settings.new ColorType(0, 255, 255, 255);
-            settings.cache_path = (new File(JCEF_ROOT, "cache")).getAbsolutePath();
-            // settings.user_agent = "MCEF"
-
-            CefApp.startup(MCEF.CEF_ARGS);
-            cefApp = CefApp.getInstance(settings);
-
-            // Custom scheme broken on Linux, for now
-            if (!OS.isLinux()) {
-                CefApp.addAppHandler(appHandler);
-            }
-
-            loadMimeTypeMapping();
-
-            cefClient = cefApp.createClient();
-
-            Log.info(cefApp.getVersion().toString());
-            cefRouter = CefMessageRouter.create(new CefMessageRouterConfig("mcefQuery", "mcefCancel"));
-            cefClient.addMessageRouter(cefRouter);
-            cefClient.addDisplayHandler(displayHandler);
-            cefClient.addLifeSpanHandler(new CefLifeSpanHandlerAdapter() {
-                @Override
-                public boolean doClose(CefBrowser browser) {
-                    browser.close(true);
-                    return false;
-                }
-            });
-
-            // If shutdown patcher fail runs shutdown patcher
-            // removed!
-
-            if (MCEF.ENABLE_EXAMPLE)
-                exampleMod.onInit();
-
-            Log.info("MCEF loaded successfuly.");
-        });
+        if(CefUtil.init) {
+            exampleMod.onInit();
+        }
     }
 
     public CefApp getCefApp() {
@@ -223,15 +90,15 @@ public class ClientProxy extends BaseProxy {
         if (VIRTUAL)
             return new VirtualBrowser();
 
-        if(cefClient == null) {
-            if(cefApp == null) {
+        if (cefClient == null) {
+            if (cefApp == null) {
                 CefSettings settings = new CefSettings();
                 settings.windowless_rendering_enabled = true;
                 settings.background_color = settings.new ColorType(0, 255, 255, 255);
                 settings.cache_path = (new File(JCEF_ROOT, "cache")).getAbsolutePath();
                 // settings.user_agent = "MCEF"
 
-                if(CefApp.getState() == CefApp.CefAppState.NONE) {
+                if (CefApp.getState() == CefApp.CefAppState.NONE) {
                     CefApp.startup(MCEF.CEF_ARGS);
                 }
 
@@ -293,22 +160,24 @@ public class ClientProxy extends BaseProxy {
     public boolean isSchemeRegistered(String name) {
         return appHandler.isSchemeRegistered(name);
     }
-    
+
     public void onTickStart(TickEvent.ClientTickEvent event) {
         // no point in ticking CEF if it doesn't exist, or if there are no browsers
         if (cefApp == null || browsers.isEmpty()) return;
         // listen for specific the start tick
         if (event.phase == TickEvent.Phase.START) {
-            mc.getProfiler().push("MCEF");
-            
-            if (cefApp != null)
-                cefApp.N_DoMessageLoopWork();
-    
-            for (CefBrowserOsr b : browsers)
-                b.mcefUpdate();
-    
-            displayHandler.update();
-            mc.getProfiler().pop();
+            if (CefUtil.isInit()) {
+                mc.getProfiler().push("MCEF");
+
+                if (cefApp != null)
+                    cefApp.N_DoMessageLoopWork();
+
+                for (CefBrowserOsr b : browsers)
+                    b.mcefUpdate();
+
+                displayHandler.update();
+                mc.getProfiler().pop();
+            }
         }
     }
 
@@ -366,7 +235,7 @@ public class ClientProxy extends BaseProxy {
             cefApp.N_Shutdown();
     }
 
-    public void loadMimeTypeMapping() {
+    public static void loadMimeTypeMapping() {
         Pattern p = Pattern.compile("^(\\S+)\\s+(\\S+)\\s*(\\S*)\\s*(\\S*)$");
         String line = "";
         int cLine = 0;
@@ -397,7 +266,7 @@ public class ClientProxy extends BaseProxy {
                 }
             }
 
-            Util.close(br);
+            Util2.close(br);
         } catch (Throwable e) {
             Log.error("[Mime Types] Error while parsing \"%s\" at line %d:", line, cLine);
             e.printStackTrace();

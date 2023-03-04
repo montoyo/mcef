@@ -14,7 +14,7 @@ import javax.swing.UIManager;
 
 import net.montoyo.mcef.utilities.IProgressListener;
 import net.montoyo.mcef.utilities.Log;
-import net.montoyo.mcef.utilities.Util;
+import net.montoyo.mcef.utilities.Util2;
 
 public class UpdateFrame extends JFrame implements IProgressListener {
     
@@ -61,7 +61,7 @@ public class UpdateFrame extends JFrame implements IProgressListener {
 
     @Override
     public void onProgressed(double d) {
-        int val = (int) Util.clamp(d, 0.d, 100.d);
+        int val = (int) Util2.clamp(d, 0.d, 100.d);
         pbar.setValue(val);
     }
 
