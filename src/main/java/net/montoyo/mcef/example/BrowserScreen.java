@@ -207,6 +207,10 @@ public class BrowserScreen extends Screen {
 
         char key = keystr.charAt(keystr.length() - 1);
 
+        if(keystr.equals("Enter")) {
+            key = '\r';
+        }
+
         if (browser != null && !focused) { //Inject events into browser
             System.out.println("Sent keystroke " + keystr);
             if (pressed)
@@ -214,6 +218,8 @@ public class BrowserScreen extends Screen {
             else
                 browser.injectKeyReleasedByKeyCode(keyCode, key, modifiers);
 
+            if(key == '\r')
+                browser.injectKeyTyped(key, 0);
             return true; // Something did happen
         }
 

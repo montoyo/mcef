@@ -211,8 +211,8 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         if (keyCode == GLFW_KEY_LEFT_CONTROL) return '\uFFFF';
         if (keyCode == GLFW_KEY_RIGHT_CONTROL) return '\uFFFF';
         switch (keyCode) {
-            case GLFW_KEY_ENTER:
-                return 13;
+            case GLFW_KEY_ENTER, GLFW_KEY_KP_ENTER, VK_ENTER:
+                return '\r';
             case GLFW_KEY_SPACE:
                 return 32;
             case GLFW_KEY_BACKSPACE:
@@ -253,7 +253,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
             case GLFW_KEY_PAGE_UP -> 73;
             case GLFW_KEY_END -> 79;
             case GLFW_KEY_HOME -> 71;
-            case GLFW_KEY_ENTER -> 28;
+            case VK_ENTER, GLFW_KEY_ENTER, GLFW_KEY_KP_ENTER -> 28;
             default -> GLFW.glfwGetKeyScancode(key);
         };
     }
@@ -318,15 +318,21 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         }
         
         char c = (char) key;
-        key = remapKeycode(key, (char) key, mods);
+        int keyRemapped = remapKeycode(key, (char) key, mods);
         if(key != VK_UNDEFINED) {
             switch (key) {
                 case GLFW_KEY_BACKSPACE, GLFW_KEY_HOME, GLFW_KEY_END, GLFW_KEY_PAGE_UP, GLFW_KEY_PAGE_DOWN, GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_KP_4, GLFW_KEY_KP_8, GLFW_KEY_KP_6, GLFW_KEY_KP_2, GLFW_KEY_PRINT_SCREEN, GLFW_KEY_SCROLL_LOCK, GLFW_KEY_CAPS_LOCK, GLFW_KEY_NUM_LOCK, GLFW_KEY_PAUSE, GLFW_KEY_INSERT -> {
-                    KeyEvent ev = UnsafeExample.makeEvent(dc_, key, CHAR_UNDEFINED, KEY_LOCATION_UNKNOWN, KEY_TYPED,0, remapModifiers(mods), mapScanCode(key, c));
+                    KeyEvent ev = UnsafeExample.makeEvent(dc_, keyRemapped, CHAR_UNDEFINED, KEY_LOCATION_UNKNOWN, KEY_TYPED,0, remapModifiers(mods), mapScanCode(keyRemapped, c));
                     sendKeyEvent(ev);
                 }
+
+                case VK_ENTER, GLFW_KEY_ENTER, GLFW_KEY_KP_ENTER -> {
+                    KeyEvent ev = UnsafeExample.makeEvent(dc_, key, '\r', KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, remapModifiers(mods), mapScanCode(key, c));
+                    sendKeyEvent(ev);
+                }
+
                 default -> {
-                    KeyEvent ev = UnsafeExample.makeEvent(dc_, key, c, KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, remapModifiers(mods), mapScanCode(key, c));
+                    KeyEvent ev = UnsafeExample.makeEvent(dc_, keyRemapped, c, KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, remapModifiers(mods), mapScanCode(keyRemapped, c));
                     sendKeyEvent(ev);
                 }
             }
