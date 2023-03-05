@@ -11,6 +11,7 @@ import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.API;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.MCEFApi;
+import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.client.UnsafeExample;
 import org.cef.browser.CefBrowserOsr;
 import org.lwjgl.glfw.GLFW;
@@ -153,8 +154,9 @@ public class BrowserScreen extends Screen {
     @Override
     public void onClose() {
         //Make sure to close the browser when you don't need it anymore.
-        if (!ExampleMod.INSTANCE.hasBackup() && browser != null)
+        if (!ExampleMod.INSTANCE.hasBackup() && browser != null) {
             browser.close();
+        }
 
         // Keyboard.enableRepeatEvents(false);
         super.onClose();
@@ -208,9 +210,9 @@ public class BrowserScreen extends Screen {
         if (browser != null && !focused) { //Inject events into browser
             System.out.println("Sent keystroke " + keystr);
             if (pressed)
-                browser.injectKeyPressedByKeyCode(keyCode, key, 0);
+                browser.injectKeyPressedByKeyCode(keyCode, key, modifiers);
             else
-                browser.injectKeyReleasedByKeyCode(keyCode, key, 0);
+                browser.injectKeyReleasedByKeyCode(keyCode, key, modifiers);
 
             return true; // Something did happen
         }
@@ -232,7 +234,13 @@ public class BrowserScreen extends Screen {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         return this.mouseChanged(mouseX, mouseY, button, 0, 0, 0, false) || super.mouseReleased(mouseX, mouseY, button);
     }
-
+    
+    @Override
+    public void mouseMoved(double mouseX, double mouseY) {
+        this.mouseChanged(mouseX, mouseY, -1, 0, 0, 0, false);
+        super.mouseMoved(mouseX, mouseY);
+    }
+    
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         return this.mouseChanged(mouseX, mouseY, button, deltaX, deltaY, 0, true) || super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
@@ -240,7 +248,7 @@ public class BrowserScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        return this.mouseChanged(mouseX, mouseY, -1, 0, 0, 0, false) || super.mouseScrolled(mouseX, mouseY, amount);
+        return this.mouseChanged(mouseX, mouseY, -1, 0, 0, amount, false) || super.mouseScrolled(mouseX, mouseY, amount);
     }
 
     public boolean mouseChanged(double mouseX, double mouseY, int btn, double deltaX, double deltaY, double scrollAmount, boolean pressed) {
@@ -251,10 +259,10 @@ public class BrowserScreen extends Screen {
         if (browser != null) { //Inject events into browser. TODO: Handle mods & leaving.
             int y = scaleY(sy - 20); //Don't forget to flip Y axis.
 
-            System.out.println("Dest coords " + sx + " " + y + " button " + btn + " " + pressed);
+//            System.out.println("Dest coords " + sx + " " + y + " button " + btn + " " + pressed);
 
             if (wheel != 0)
-                browser.injectMouseWheel(sx, y, 0, wheel, 0);
+                browser.injectMouseWheel(sx, y, (hasControlDown() && ! hasAltDown() && !hasShiftDown()) ? GLFW.GLFW_MOD_CONTROL : 0, wheel, 0);
             else if (btn == -1)
                 browser.injectMouseMove(sx, y, 0, y < 0);
             else

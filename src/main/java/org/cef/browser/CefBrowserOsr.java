@@ -5,6 +5,7 @@
 package org.cef.browser;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IStringVisitor;
@@ -18,6 +19,7 @@ import org.cef.callback.CefDragData;
 import org.cef.handler.CefRenderHandler;
 import org.cef.handler.CefScreenInfo;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 import java.awt.event.KeyEvent;
@@ -26,6 +28,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -157,58 +160,104 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
     public void injectMouseButton(int x, int y, int mods, int btn, boolean pressed, int ccnt) {
         MouseEvent ev = new MouseEvent(dc_, pressed ? MouseEvent.MOUSE_PRESSED : MouseEvent.MOUSE_RELEASED, 0, mods, x, y, ccnt, false, btn);
         sendMouseEvent(ev);
+        
+        // if I don't have this here, then the text position indicator thing doesn't work
+        // using setSafeMode to ensure that it works properly
+        setSafeMode(true);
+        setFocus(true);
+        setSafeMode(false);
     }
-
-    @Override
-    public void injectKeyTyped(int key, int mods) {
-        if(key != VK_UNDEFINED) {
-            switch (key) {
-                case GLFW_KEY_BACKSPACE, GLFW_KEY_HOME, GLFW_KEY_END, GLFW_KEY_PAGE_UP, GLFW_KEY_PAGE_DOWN, GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_KP_4, GLFW_KEY_KP_8, GLFW_KEY_KP_6, GLFW_KEY_KP_2, GLFW_KEY_PRINT_SCREEN, GLFW_KEY_SCROLL_LOCK, GLFW_KEY_CAPS_LOCK, GLFW_KEY_NUM_LOCK, GLFW_KEY_PAUSE, GLFW_KEY_INSERT -> {
-                    KeyEvent ev = new UnsafeExample().makeEvent(dc_, key, CHAR_UNDEFINED, KEY_LOCATION_UNKNOWN, KEY_TYPED,0, mods);
-                    sendKeyEvent(ev);
-                }
-                default -> {
-                    KeyEvent ev = new UnsafeExample().makeEvent(dc_, key, (char) key, KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, mods);
-                    sendKeyEvent(ev);
-                }
-            }
-        }
+    
+    public int remapModifiers(int mods) {
+        int vkMods = 0;
+        if ((mods & GLFW_MOD_CONTROL) != 0) vkMods |= KeyEvent.CTRL_DOWN_MASK;
+        if ((mods & GLFW_MOD_ALT) != 0) vkMods |= KeyEvent.ALT_DOWN_MASK;
+        if ((mods & GLFW_MOD_SHIFT) != 0) vkMods |= KeyEvent.SHIFT_DOWN_MASK;
+        if ((mods & GLFW_MOD_SUPER) != 0) vkMods |= KeyEvent.META_DOWN_MASK;
+        return vkMods;
     }
-
-    public static int remapKeycode(int kc, char c) {
+    
+    private static final Map<Integer, Character> WORST_HACK = new HashMap<>();
+    
+    /**
+     * Maps keys from GLFW to what CEF expects
+     * @param kc the key code
+     * @param c the character
+     * @param mod any modifiers
+     * @return a remapped key code which CEF will accept
+     */
+    public static int remapKeycode(int kc, char c, int mod) {
         switch (kc) {
             // Unable to remap
-            case GLFW_KEY_BACKSPACE:
-                return KeyEvent.VK_BACK_SPACE;
-            case GLFW_KEY_DELETE:
-                return KeyEvent.VK_DELETE;
-            case GLFW_KEY_DOWN:
-                return KeyEvent.VK_DOWN;
-            case GLFW_KEY_ENTER:
-                return KeyEvent.VK_ENTER;
             case GLFW_KEY_ESCAPE:
                 return KeyEvent.VK_ESCAPE;
-            case GLFW_KEY_LEFT:
-                return KeyEvent.VK_LEFT;
-            case GLFW_KEY_RIGHT:
-                return KeyEvent.VK_RIGHT;
             case GLFW_KEY_TAB:
                 return KeyEvent.VK_TAB;
-            case GLFW_KEY_UP:
-                return KeyEvent.VK_UP;
-            case GLFW_KEY_PAGE_UP:
-                return KeyEvent.VK_PAGE_UP;
-            case GLFW_KEY_PAGE_DOWN:
-                return KeyEvent.VK_PAGE_DOWN;
-            case GLFW_KEY_END:
-                return GLFW_KEY_END;
-            case GLFW_KEY_HOME:
-                return GLFW_KEY_HOME;
             default:
-                return c;
+                int ck = getChar(kc, 0, mod);
+                if (ck == 0) return c;
+                return ck;
         }
     }
-
+    
+    /**
+     * internal method for {@link CefBrowserOsr#remapKeycode(int, char, int)}
+     * @param keyCode the key code
+     * @param scanCode (unused)
+     * @param mod any modifiers
+     * @return a remapped keycode
+     */
+    public static int getChar(int keyCode, int scanCode, int mod) {
+        if (keyCode == GLFW_KEY_LEFT_CONTROL) return '\uFFFF';
+        if (keyCode == GLFW_KEY_RIGHT_CONTROL) return '\uFFFF';
+        switch (keyCode) {
+            case GLFW_KEY_ENTER:
+                return 13;
+            case GLFW_KEY_SPACE:
+                return 32;
+            case GLFW_KEY_BACKSPACE:
+                return 8;
+            case GLFW_KEY_DELETE:
+                return '\u007F';
+            case GLFW_KEY_LEFT:
+            case GLFW_KEY_RIGHT:
+            case GLFW_KEY_UP:
+            case GLFW_KEY_DOWN:
+            case GLFW_KEY_PAGE_DOWN:
+            case GLFW_KEY_PAGE_UP:
+            case GLFW_KEY_HOME:
+            case GLFW_KEY_END:
+                return '\uFFFF';
+        }
+        String keystr = GLFW.glfwGetKeyName(keyCode, scanCode);
+        if(keystr == null){
+            keystr = "\0";
+        } else if(keystr.length() == 0){
+            return -1;
+        }
+//        if((mod & GLFW_MOD_SHIFT) != 0) {
+//            keystr = keystr.toUpperCase(Locale.ROOT);
+//        }
+        return keyCode;
+    }
+    
+    private long mapScanCode(int key, char c) {
+        if (key == GLFW_KEY_LEFT_CONTROL || key == GLFW_KEY_RIGHT_CONTROL) return 29;
+        return switch (key) {
+            case GLFW_KEY_DELETE -> 83;
+            case GLFW_KEY_LEFT -> 75;
+            case GLFW_KEY_DOWN -> 80;
+            case GLFW_KEY_UP -> 72;
+            case GLFW_KEY_RIGHT -> 77;
+            case GLFW_KEY_PAGE_DOWN -> 81;
+            case GLFW_KEY_PAGE_UP -> 73;
+            case GLFW_KEY_END -> 79;
+            case GLFW_KEY_HOME -> 71;
+            case GLFW_KEY_ENTER -> 28;
+            default -> GLFW.glfwGetKeyScancode(key);
+        };
+    }
+    
     @Override
     public void injectKeyPressedByKeyCode(int key, char c, int mods) {
         if (c != '\0') {
@@ -216,24 +265,87 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
                 WORST_HACK.put(key, c);
             }
         }
+    
+        // keyboard shortcut handling
+        if (mods == GLFW_MOD_CONTROL) {
+            if (key == GLFW_KEY_R) {
+                reload();
+                return;
+            } else if (key == GLFW_KEY_EQUAL) {
+                if (getZoomLevel() < 9) setZoomLevel(getZoomLevel() + 1);
+                return;
+            } else if (key == GLFW_KEY_MINUS) {
+                if (getZoomLevel() > -9) setZoomLevel(getZoomLevel() - 1);
+                return;
+            } else if (key == GLFW_KEY_0) {
+                setZoomLevel(0);
+                return;
+            }
+        } else if (mods == GLFW_MOD_ALT) {
+            if (key == GLFW_KEY_LEFT && canGoBack()) {
+                goBack();
+                return;
+            } else if (key == GLFW_KEY_RIGHT && canGoForward()) {
+                goForward();
+                return;
+            }
+        }
 
         switch (key) {
             case GLFW_KEY_BACKSPACE, GLFW_KEY_HOME, GLFW_KEY_END, GLFW_KEY_PAGE_UP, GLFW_KEY_PAGE_DOWN, GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_KP_4, GLFW_KEY_KP_8, GLFW_KEY_KP_6, GLFW_KEY_KP_2, GLFW_KEY_PRINT_SCREEN, GLFW_KEY_SCROLL_LOCK, GLFW_KEY_CAPS_LOCK, GLFW_KEY_NUM_LOCK, GLFW_KEY_PAUSE, GLFW_KEY_INSERT -> {
-                KeyEvent ev = new KeyEvent(dc_, KEY_PRESSED, 0, mods, remapKeycode(key, CHAR_UNDEFINED), CHAR_UNDEFINED);
+                KeyEvent ev = UnsafeExample.makeEvent(dc_, remapKeycode(key, CHAR_UNDEFINED, mods), CHAR_UNDEFINED, KEY_LOCATION_UNKNOWN, KEY_PRESSED, 0, remapModifiers(mods), mapScanCode(key, c));
                 sendKeyEvent(ev);
             }
 
             default -> {
-                KeyEvent ev = new KeyEvent(dc_, KEY_PRESSED, 0, mods, remapKeycode(key, c), c);
+                KeyEvent ev = UnsafeExample.makeEvent(dc_, remapKeycode(key, c, mods), c, KEY_LOCATION_UNKNOWN, KEY_PRESSED, 0, remapModifiers(mods), mapScanCode(key, c));
                 sendKeyEvent(ev);
             }
         }
     }
-
-    private static final Map<Integer, Character> WORST_HACK = new HashMap<>();
+    
+    @Override
+    public void injectKeyTyped(int key, int mods) {
+        // keyboard shortcuts should not be handled
+        if (mods == GLFW_MOD_CONTROL) {
+            if (key == GLFW_KEY_R) return;
+            else if (key == GLFW_KEY_EQUAL) return;
+            else if (key == GLFW_KEY_MINUS) return;
+            else if (key == GLFW_KEY_0) return;
+        } else if (mods == GLFW_MOD_ALT) {
+            if (key == GLFW_KEY_LEFT && canGoBack()) return;
+            else if (key == GLFW_KEY_RIGHT && canGoForward()) return;
+        }
+        
+        char c = (char) key;
+        key = remapKeycode(key, (char) key, mods);
+        if(key != VK_UNDEFINED) {
+            switch (key) {
+                case GLFW_KEY_BACKSPACE, GLFW_KEY_HOME, GLFW_KEY_END, GLFW_KEY_PAGE_UP, GLFW_KEY_PAGE_DOWN, GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_KP_4, GLFW_KEY_KP_8, GLFW_KEY_KP_6, GLFW_KEY_KP_2, GLFW_KEY_PRINT_SCREEN, GLFW_KEY_SCROLL_LOCK, GLFW_KEY_CAPS_LOCK, GLFW_KEY_NUM_LOCK, GLFW_KEY_PAUSE, GLFW_KEY_INSERT -> {
+                    KeyEvent ev = UnsafeExample.makeEvent(dc_, key, CHAR_UNDEFINED, KEY_LOCATION_UNKNOWN, KEY_TYPED,0, remapModifiers(mods), mapScanCode(key, c));
+                    sendKeyEvent(ev);
+                }
+                default -> {
+                    KeyEvent ev = UnsafeExample.makeEvent(dc_, key, c, KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, remapModifiers(mods), mapScanCode(key, c));
+                    sendKeyEvent(ev);
+                }
+            }
+        }
+    }
 
     @Override
     public void injectKeyReleasedByKeyCode(int key, char c, int mods) {
+        // keyboard shortcuts should not be handled
+        if (mods == GLFW_MOD_CONTROL) {
+            if (key == GLFW_KEY_R) return;
+            else if (key == GLFW_KEY_EQUAL) return;
+            else if (key == GLFW_KEY_MINUS) return;
+            else if (key == GLFW_KEY_0) return;
+        } else if (mods == GLFW_MOD_ALT) {
+            if (key == GLFW_KEY_LEFT && canGoBack()) return;
+            else if (key == GLFW_KEY_RIGHT && canGoForward()) return;
+        }
+        
         if (c == '\0') {
             synchronized (WORST_HACK) {
                 c = WORST_HACK.getOrDefault(key, '\0');
@@ -242,12 +354,12 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 
         switch (key) {
             case GLFW_KEY_BACKSPACE, GLFW_KEY_HOME, GLFW_KEY_END, GLFW_KEY_PAGE_UP, GLFW_KEY_PAGE_DOWN, GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_KP_4, GLFW_KEY_KP_8, GLFW_KEY_KP_6, GLFW_KEY_KP_2, GLFW_KEY_PRINT_SCREEN, GLFW_KEY_SCROLL_LOCK, GLFW_KEY_CAPS_LOCK, GLFW_KEY_NUM_LOCK, GLFW_KEY_PAUSE, GLFW_KEY_INSERT -> {
-                KeyEvent ev = new KeyEvent(dc_, KEY_RELEASED, 0, mods, remapKeycode(key, CHAR_UNDEFINED), CHAR_UNDEFINED);
+                KeyEvent ev = UnsafeExample.makeEvent(dc_, remapKeycode(key, CHAR_UNDEFINED, mods), c, KEY_LOCATION_UNKNOWN, KEY_RELEASED, 0, remapModifiers(mods), mapScanCode(key, c));
                 sendKeyEvent(ev);
             }
 
             default -> {
-                KeyEvent ev = new KeyEvent(dc_, KEY_RELEASED, 0, mods, remapKeycode(key, c), c);
+                KeyEvent ev = UnsafeExample.makeEvent(dc_, remapKeycode(key, c, mods), c, KEY_LOCATION_UNKNOWN, KEY_RELEASED, 0, remapModifiers(mods), mapScanCode(key, c));
                 sendKeyEvent(ev);
             }
         }
@@ -255,6 +367,17 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 
     @Override
     public void injectMouseWheel(int x, int y, int mods, int amount, int rot) {
+        if (mods == GLFW_MOD_CONTROL) {
+            if (amount > 0) {
+                if (getZoomLevel() < 9) setZoomLevel(getZoomLevel() + 1);
+            } else {
+                if (getZoomLevel() > -9) setZoomLevel(getZoomLevel() - 1);
+            }
+            return;
+        }
+        
+        amount *= 3;
+        rot = 32;
         MouseWheelEvent ev = new MouseWheelEvent(dc_, MouseEvent.MOUSE_WHEEL, 0, mods, x, y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, amount, rot);
         sendMouseWheelEvent(ev);
     }
