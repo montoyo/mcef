@@ -39,7 +39,9 @@ public final class CefUtil {
 
         appHandler.setArgs(MCEF.CEF_ARGS);
 
-        ROOT = clientProxy.mc.gameDirectory.getAbsolutePath().replaceAll("\\\\", "/");
+        ROOT = System.getProperty("user.dir").replaceAll("\\\\", "/");
+
+        System.out.println(ROOT);
 
         JCEF_ROOT = ROOT + "/jcef";
 
