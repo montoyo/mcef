@@ -1,7 +1,7 @@
 package net.montoyo.mcef.mixins;
 
+import net.minecraft.client.main.Main;
 import net.minecraft.client.resources.AssetIndex;
-import net.minecraft.client.resources.ClientPackSource;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.utilities.CefUtil;
 import net.montoyo.mcef.utilities.Log;
@@ -18,7 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@Mixin(ClientPackSource.class)
+@Mixin(Main.class)
 public class CefInitMixin {
 
     private static void setupLibraryPath() {
@@ -37,8 +37,8 @@ public class CefInitMixin {
         System.setProperty("cinemamod.libraries.path", cinemaModLibrariesPath.toAbsolutePath().toString());
     }
 
-    @Inject(at = @At(value = "TAIL"), method = "<init>")
-    private void cefInit(File p_118553_, AssetIndex p_118554_, CallbackInfo ci) {
+    @Inject(at = @At(value = "TAIL"), method = "main")
+    private static void cefInit(String[] p_129642_, CallbackInfo ci) {
         setupLibraryPath();
 
         MCEFDownloader.main(new String[]{});
