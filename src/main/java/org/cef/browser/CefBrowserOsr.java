@@ -59,11 +59,11 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
     private MouseEvent lastMouseEvent = new MouseEvent(dc_, MouseEvent.MOUSE_MOVED, 0, 0, 0, 0, 0, false);
     public static boolean CLEANUP = true;
 
-    CefBrowserOsr(CefClient client, String url, boolean transparent, CefRequestContext context) {
+    public CefBrowserOsr(CefClient client, String url, boolean transparent, CefRequestContext context) {
         this(client, url, transparent, context, null, null);
     }
 
-    private CefBrowserOsr(CefClient client, String url, boolean transparent,
+    public CefBrowserOsr(CefClient client, String url, boolean transparent,
                           CefRequestContext context, CefBrowserOsr parent, Point inspectAt) {
         super(client, url, context, parent, inspectAt);
         isTransparent_ = transparent;
