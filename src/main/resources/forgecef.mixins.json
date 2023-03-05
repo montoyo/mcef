@@ -7,7 +7,6 @@
   "mixins": [
   ],
   "client": [
-    "CefInitMixin"
   ],
   "injectors": {
     "defaultRequire": 1
