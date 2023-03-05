@@ -9,6 +9,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.montoyo.mcef.BaseProxy;
 import net.montoyo.mcef.MCEF;
@@ -41,6 +43,7 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Mod.EventBusSubscriber(Dist.CLIENT)
 public class ClientProxy extends BaseProxy {
 
     public static String ROOT = ".";
@@ -65,115 +68,114 @@ public class ClientProxy extends BaseProxy {
         exampleMod.onPreInit(); //Do it even if example mod is disabled because it registers the "mod://" scheme
     }
 
+    @SubscribeEvent
     public void onInitializeClient(FMLClientSetupEvent event) {
-        event.enqueueWork(() -> {
-            mc = Minecraft.getInstance();
-            MCEF.setupLibraryPath();
+        mc = Minecraft.getInstance();
+        MCEF.setupLibraryPath();
 
-            MCEFDownloader.main(new String[]{});
+        MCEFDownloader.main(new String[]{});
 
-            // TEMP HACK
+        // TEMP HACK
+        if (OS.isLinux()) {
+            System.load("/usr/lib/jvm/java-17-openjdk-17.0.3.0.7-1.fc36.x86_64/lib/libjawt.so");
+        }
+
+        if (OS.isWindows() || OS.isLinux()) {
+            appHandler.setArgs(MCEF.CEF_ARGS);
+
+            ROOT = System.getProperty("user.dir").replaceAll("\\\\", "/");
+
+            System.out.println(ROOT);
+
+            JCEF_ROOT = ROOT + "/jcef";
+
+            if (ROOT.endsWith("."))
+                ROOT = ROOT.substring(0, ROOT.length() - 1);
+
+            if (ROOT.endsWith("/"))
+                ROOT = ROOT.substring(0, ROOT.length() - 1);
+
+            File fileListing = new File(new File(ROOT), "config");
+
+            IProgressListener ipl;
+            RemoteConfig cfg = new RemoteConfig();
+            // Forge splash used to run here
+            System.out.println("SYSTEM HEADLESS PROPERTY: " + System.getProperty("java.awt.headless"));
+            System.setProperty("java.awt.headless", "false"); // local is bugged for me
+            ipl = new UpdateFrame();
+
+            cfg.load();
+
+            System.out.println("Updating MCEF file listing ");
+
+            if (!cfg.updateFileListing(fileListing, false))
+                Log.warning("There was a problem while establishing file list. Uninstall may not delete all files.");
+
+            if (!cfg.updateFileListing(fileListing, true))
+                Log.warning("There was a problem while updating file list. Uninstall may not delete all files.");
+
+            updateStr = cfg.getUpdateString();
+            ipl.onProgressEnd();
+
             if (OS.isLinux()) {
-                System.load("/usr/lib/jvm/java-17-openjdk-17.0.3.0.7-1.fc36.x86_64/lib/libjawt.so");
-            }
+                File subproc = new File(JCEF_ROOT, "jcef_helper");
 
-            if (OS.isWindows() || OS.isLinux()) {
-                appHandler.setArgs(MCEF.CEF_ARGS);
+                // Attempt to make the CEF subprocess executable if not
+                if (!subproc.canExecute()) {
+                    try {
+                        int retCode = Runtime.getRuntime().exec(new String[]{"/usr/bin/chmod", "+x", subproc.getAbsolutePath()}).waitFor();
 
-                ROOT = System.getProperty("user.dir").replaceAll("\\\\", "/");
-
-                System.out.println(ROOT);
-
-                JCEF_ROOT = ROOT + "/jcef";
-
-                if (ROOT.endsWith("."))
-                    ROOT = ROOT.substring(0, ROOT.length() - 1);
-
-                if (ROOT.endsWith("/"))
-                    ROOT = ROOT.substring(0, ROOT.length() - 1);
-
-                File fileListing = new File(new File(ROOT), "config");
-
-                IProgressListener ipl;
-                RemoteConfig cfg = new RemoteConfig();
-                // Forge splash used to run here
-                System.out.println("SYSTEM HEADLESS PROPERTY: " + System.getProperty("java.awt.headless"));
-                System.setProperty("java.awt.headless", "false"); // local is bugged for me
-                ipl = new UpdateFrame();
-
-                cfg.load();
-
-                System.out.println("Updating MCEF file listing ");
-
-                if (!cfg.updateFileListing(fileListing, false))
-                    Log.warning("There was a problem while establishing file list. Uninstall may not delete all files.");
-
-                if (!cfg.updateFileListing(fileListing, true))
-                    Log.warning("There was a problem while updating file list. Uninstall may not delete all files.");
-
-                updateStr = cfg.getUpdateString();
-                ipl.onProgressEnd();
-
-                if (OS.isLinux()) {
-                    File subproc = new File(JCEF_ROOT, "jcef_helper");
-
-                    // Attempt to make the CEF subprocess executable if not
-                    if (!subproc.canExecute()) {
-                        try {
-                            int retCode = Runtime.getRuntime().exec(new String[]{"/usr/bin/chmod", "+x", subproc.getAbsolutePath()}).waitFor();
-
-                            if (retCode != 0)
-                                throw new RuntimeException("chmod exited with code " + retCode);
-                        } catch (Throwable t) {
-                            Log.errorEx("Error while giving execution rights to jcef_helper. MCEF will enter virtual mode. You can fix this by chmoding jcef_helper manually.", t);
-                            VIRTUAL = true;
-                        }
+                        if (retCode != 0)
+                            throw new RuntimeException("chmod exited with code " + retCode);
+                    } catch (Throwable t) {
+                        Log.errorEx("Error while giving execution rights to jcef_helper. MCEF will enter virtual mode. You can fix this by chmoding jcef_helper manually.", t);
+                        VIRTUAL = true;
                     }
                 }
-
-                //if (VIRTUAL)
-                //  return false;
-
-                CefSettings settings = new CefSettings();
-                settings.windowless_rendering_enabled = true;
-                settings.background_color = settings.new ColorType(0, 255, 255, 255);
-                settings.cache_path = (new File(JCEF_ROOT, "cache")).getAbsolutePath();
-                // settings.user_agent = "MCEF"
-
-                CefApp.startup(MCEF.CEF_ARGS);
-                cefApp = CefApp.getInstance(settings);
-
-                // Custom scheme broken on Linux, for now
-                if (!OS.isLinux()) {
-                    CefApp.addAppHandler(appHandler);
-                }
-
-                loadMimeTypeMapping();
-
-                cefClient = cefApp.createClient();
-
-                Log.info(cefApp.getVersion().toString());
-                cefRouter = CefMessageRouter.create(new CefMessageRouter.CefMessageRouterConfig("mcefQuery", "mcefCancel"));
-                cefClient.addMessageRouter(cefRouter);
-                cefClient.addDisplayHandler(displayHandler);
-                cefClient.addLifeSpanHandler(new CefLifeSpanHandlerAdapter() {
-                    @Override
-                    public boolean doClose(CefBrowser browser) {
-                        browser.close(true);
-                        return false;
-                    }
-                });
-
-                // If shutdown patcher fail runs shutdown patcher
-                // removed!
-
-                Log.info("MCEF loaded successfuly.");
-
-                if (MCEF.ENABLE_EXAMPLE) {
-                    exampleMod.onInit(mc);
-                }
             }
-        });
+
+            //if (VIRTUAL)
+            //  return false;
+
+            CefSettings settings = new CefSettings();
+            settings.windowless_rendering_enabled = true;
+            settings.background_color = settings.new ColorType(0, 255, 255, 255);
+            settings.cache_path = (new File(JCEF_ROOT, "cache")).getAbsolutePath();
+            // settings.user_agent = "MCEF"
+
+            CefApp.startup(MCEF.CEF_ARGS);
+            cefApp = CefApp.getInstance(settings);
+
+            // Custom scheme broken on Linux, for now
+            if (!OS.isLinux()) {
+                CefApp.addAppHandler(appHandler);
+            }
+
+            loadMimeTypeMapping();
+
+            cefClient = cefApp.createClient();
+
+            Log.info(cefApp.getVersion().toString());
+            cefRouter = CefMessageRouter.create(new CefMessageRouter.CefMessageRouterConfig("mcefQuery", "mcefCancel"));
+            cefClient.addMessageRouter(cefRouter);
+            cefClient.addDisplayHandler(displayHandler);
+            cefClient.addLifeSpanHandler(new CefLifeSpanHandlerAdapter() {
+                @Override
+                public boolean doClose(CefBrowser browser) {
+                    browser.close(true);
+                    return false;
+                }
+            });
+
+            // If shutdown patcher fail runs shutdown patcher
+            // removed!
+
+            Log.info("MCEF loaded successfuly.");
+
+            if (MCEF.ENABLE_EXAMPLE) {
+                exampleMod.onInit(mc);
+            }
+        }
     }
 
     public CefApp getCefApp() {
