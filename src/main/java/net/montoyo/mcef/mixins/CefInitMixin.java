@@ -1,8 +1,7 @@
 package net.montoyo.mcef.mixins;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.main.GameConfig;
-import net.minecraft.client.main.Main;
+import net.minecraft.client.resources.AssetIndex;
+import net.minecraft.client.resources.ClientPackSource;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.utilities.CefUtil;
 import net.montoyo.mcef.utilities.Log;
@@ -13,12 +12,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@Mixin(Main.class)
+@Mixin(ClientPackSource.class)
 public class CefInitMixin {
 
     private static void setupLibraryPath() {
@@ -37,8 +37,8 @@ public class CefInitMixin {
         System.setProperty("cinemamod.libraries.path", cinemaModLibrariesPath.toAbsolutePath().toString());
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;finishInitialization()V"), method = "m_239872_")
-    private static void cefInit(String[] p_239873_, boolean p_239874_, CallbackInfo ci) {
+    @Inject(at = @At(value = "TAIL"), method = "<init>")
+    private void cefInit(File p_118553_, AssetIndex p_118554_, CallbackInfo ci) {
         setupLibraryPath();
 
         MCEFDownloader.main(new String[]{});
