@@ -68,7 +68,6 @@ public class ClientProxy extends BaseProxy {
     }
 
     public void onInitializeClient(FMLClientSetupEvent event) {
-        mc = Minecraft.getInstance();
         MCEF.setupLibraryPath();
 
         MCEFDownloader.main(new String[]{});
@@ -169,6 +168,8 @@ public class ClientProxy extends BaseProxy {
             // removed!
 
             Log.info("MCEF loaded successfuly.");
+
+            mc = Minecraft.getInstance();
 
             if (MCEF.ENABLE_EXAMPLE) {
                 exampleMod.onInit(mc);
