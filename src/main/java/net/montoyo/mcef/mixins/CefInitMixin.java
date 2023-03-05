@@ -1,6 +1,7 @@
 package net.montoyo.mcef.mixins;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.main.GameConfig;
 import net.montoyo.mcef.utilities.CefUtil;
 import net.montoyo.mcef.utilities.Log;
 import net.montoyo.mcef.utilities.MCEFDownloader;
@@ -8,6 +9,7 @@ import org.cef.OS;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.io.IOException;
@@ -34,8 +36,8 @@ public class CefInitMixin {
         System.setProperty("cinemamod.libraries.path", cinemaModLibrariesPath.toAbsolutePath().toString());
     }
 
-    @Inject(at = @At("HEAD"), method = "checkIs64Bit", remap = false)
-    private static void cefInit(CallbackInfoReturnable<Boolean> cir) {
+    @Inject(at = @At("TAIL"), method = "<init>")
+    private void cefInit(GameConfig p_91084_, CallbackInfo ci) {
         setupLibraryPath();
 
         MCEFDownloader.main(new String[]{});
