@@ -1,7 +1,4 @@
-import net.minecraftforge.gradle.patcher.tasks.ReobfuscateJar
-
 plugins {
-    id "de.undercouch.download" version "5.3.0"
     id 'eclipse'
     id 'maven-publish'
     id 'net.minecraftforge.gradle' version '5.1.+'
@@ -63,7 +60,7 @@ minecraft {
     }
 }
 
-repositories {
+repositories{
     maven {
         name = "CurseMaven"
         url = "https://www.cursemaven.com"
@@ -79,18 +76,22 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
+sourceSets {
+    main.resources.srcDirs += 'src/generated/resources'
+}
+
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
     manifest {
         attributes([
-                "Specification-Title"     : "mcef",
-                "Specification-Vendor"    : "forgecef",
-                "Specification-Version"   : "1", // We are version 1 of ourselves
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : "${version}",
-                "Implementation-Vendor"   : "forgecef",
+                "Specification-Title": "mcef",
+                "Specification-Vendor": "forgecef",
+                "Specification-Version": "1", // We are version 1 of ourselves
+                "Implementation-Title": project.name,
+                "Implementation-Version": "${version}",
+                "Implementation-Vendor" :"forgecef",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "MixinConfigs"            : "forgecef.mixins.json"
+                "MixinConfigs": "forgecef.mixins.json"
         ])
     }
 }
@@ -104,6 +105,18 @@ def reobfArtifact = artifacts.add('default', reobfFile) {
     type 'jar'
     builtBy 'reobfJar'
 }
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact reobfArtifact
+        }
+    }
+    repositories {
+        maven {
+            url "file:///${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
 
 apply plugin: 'org.spongepowered.mixin'
 
@@ -114,25 +127,4 @@ mixin {
 task deobfJar(type: Jar) {
     from sourceSets.main.output
     classifier = 'deobf'
-}
-
-sourceSets {
-    main.resources.srcDirs += 'src/generated/resources'
-}
-
-// configure the maven publication
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
-
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-        // Add repositories to publish to here.
-        // Notice: This block does NOT have the same function as the block in the top level.
-        // The repositories here will be used for publishing your artifact, not for
-        // retrieving dependencies.
-    }
 }
