@@ -36,7 +36,7 @@ public class CefInitMixin {
         System.setProperty("cinemamod.libraries.path", cinemaModLibrariesPath.toAbsolutePath().toString());
     }
 
-    @Inject(at = @At("TAIL"), method = "<init>")
+    @Inject(at = @At("RETURN"), method = "<init>")
     private void cefInit(GameConfig p_91084_, CallbackInfo ci) {
         setupLibraryPath();
 
