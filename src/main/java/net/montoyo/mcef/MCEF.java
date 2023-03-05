@@ -63,6 +63,8 @@ public class MCEF {
         CHECK_VRAM_LEAK = cfg.getBoolean("checkForVRAMLeak", "debug", false, "Track allocated OpenGL textures to make sure there's no leak");
         cfg.save();
 
+        PROXY.onPreInit();
+
         setupLibraryPath();
 
         MCEFDownloader.main(new String[]{});
@@ -80,7 +82,6 @@ public class MCEF {
             }
         }
 
-        PROXY.onPreInit();
         this.onInit(); // old init
     }
 
