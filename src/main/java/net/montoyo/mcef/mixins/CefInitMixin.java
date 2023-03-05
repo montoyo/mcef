@@ -2,6 +2,7 @@ package net.montoyo.mcef.mixins;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
+import net.minecraft.client.main.Main;
 import net.montoyo.mcef.utilities.CefUtil;
 import net.montoyo.mcef.utilities.Log;
 import net.montoyo.mcef.utilities.MCEFDownloader;
@@ -10,14 +11,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@Mixin(Minecraft.class)
+@Mixin(Main.class)
 public class CefInitMixin {
 
     private static void setupLibraryPath() {
@@ -36,8 +36,8 @@ public class CefInitMixin {
         System.setProperty("cinemamod.libraries.path", cinemaModLibrariesPath.toAbsolutePath().toString());
     }
 
-    @Inject(at = @At("RETURN"), method = "<init>")
-    private void cefInit(GameConfig p_91084_, CallbackInfo ci) {
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;renderOnThread()Z"), method = "m_239872_")
+    private static void cefInit(String[] p_239873_, boolean p_239874_, CallbackInfo ci) {
         setupLibraryPath();
 
         MCEFDownloader.main(new String[]{});
