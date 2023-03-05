@@ -1,15 +1,21 @@
 package net.montoyo.mcef;
 
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.easy_forge_compat.Configuration;
+import net.montoyo.mcef.utilities.CefUtil;
 import net.montoyo.mcef.utilities.Log;
+import net.montoyo.mcef.utilities.MCEFDownloader;
+import org.cef.OS;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Mod("forgecef")
 public class MCEF {
@@ -57,6 +63,23 @@ public class MCEF {
         CHECK_VRAM_LEAK = cfg.getBoolean("checkForVRAMLeak", "debug", false, "Track allocated OpenGL textures to make sure there's no leak");
         cfg.save();
 
+        setupLibraryPath();
+
+        MCEFDownloader.main(new String[]{});
+
+        // TEMP HACK
+        if (OS.isLinux()) {
+            System.load("/usr/lib/jvm/java-17-openjdk-17.0.3.0.7-1.fc36.x86_64/lib/libjawt.so");
+        }
+
+        if (OS.isWindows() || OS.isLinux()) {
+            if (CefUtil.init(new ClientProxy())) {
+                Log.info("Chromium Embedded Framework initialized");
+            } else {
+                Log.warning("Could not initialize Chromium Embedded Framework");
+            }
+        }
+
         PROXY.onPreInit();
         this.onInit(); // old init
     }
@@ -77,4 +100,19 @@ public class MCEF {
         PROXY.onShutdown();
     }
 
+    private static void setupLibraryPath() {
+        Path minecraftPath = Paths.get("");
+        Path modsPath = minecraftPath.resolve("mods");
+        Path cinemaModLibrariesPath = modsPath.resolve("cinemamod-libraries");
+
+        if (Files.notExists(cinemaModLibrariesPath)) {
+            try {
+                Files.createDirectory(cinemaModLibrariesPath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.setProperty("cinemamod.libraries.path", cinemaModLibrariesPath.toAbsolutePath().toString());
+    }
 }
