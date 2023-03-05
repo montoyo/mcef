@@ -260,23 +260,22 @@ public class ClientProxy extends BaseProxy {
     public void onTickStart(TickEvent.ClientTickEvent event) {
         Minecraft mc = this.mc;
         //can't tick with no minecraft
-        if(mc == null) return;
+        if (mc == null) return;
         // no point in ticking CEF if it doesn't exist, or if there are no browsers
         if (cefApp == null || browsers.isEmpty()) return;
         // listen for specific the start tick
         if (event.phase == TickEvent.Phase.START) {
-            if (CefUtil.isInit()) {
-                mc.getProfiler().push("MCEF");
 
-                if (cefApp != null)
-                    cefApp.N_DoMessageLoopWork();
+            mc.getProfiler().push("MCEF");
 
-                for (CefBrowserOsr b : browsers)
-                    b.mcefUpdate();
+            if (cefApp != null)
+                cefApp.N_DoMessageLoopWork();
 
-                displayHandler.update();
-                mc.getProfiler().pop();
-            }
+            for (CefBrowserOsr b : browsers)
+                b.mcefUpdate();
+
+            displayHandler.update();
+            mc.getProfiler().pop();
         }
     }
 
