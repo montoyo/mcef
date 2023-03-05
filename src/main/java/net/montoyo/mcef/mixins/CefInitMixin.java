@@ -34,7 +34,7 @@ public class CefInitMixin {
         System.setProperty("cinemamod.libraries.path", cinemaModLibrariesPath.toAbsolutePath().toString());
     }
 
-    @Inject(at = @At("HEAD"), method = "checkIs64Bit")
+    @Inject(at = @At("HEAD"), method = "checkIs64Bit", remap = false)
     private static void cefInit(CallbackInfoReturnable<Boolean> cir) {
         setupLibraryPath();
 
