@@ -37,7 +37,7 @@ public class CefInitMixin {
         System.setProperty("cinemamod.libraries.path", cinemaModLibrariesPath.toAbsolutePath().toString());
     }
 
-    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;renderOnThread()Z"), method = "m_239872_")
+    @Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;finishInitialization()V"), method = "m_239872_")
     private static void cefInit(String[] p_239873_, boolean p_239874_, CallbackInfo ci) {
         setupLibraryPath();
 
