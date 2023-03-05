@@ -65,23 +65,6 @@ public class MCEF {
 
         PROXY.onPreInit();
 
-        setupLibraryPath();
-
-        MCEFDownloader.main(new String[]{});
-
-        // TEMP HACK
-        if (OS.isLinux()) {
-            System.load("/usr/lib/jvm/java-17-openjdk-17.0.3.0.7-1.fc36.x86_64/lib/libjawt.so");
-        }
-
-        if (OS.isWindows() || OS.isLinux()) {
-            if (CefUtil.init(new ClientProxy())) {
-                Log.info("Chromium Embedded Framework initialized");
-            } else {
-                Log.warning("Could not initialize Chromium Embedded Framework");
-            }
-        }
-
         this.onInit(); // old init
     }
 
@@ -101,7 +84,7 @@ public class MCEF {
         PROXY.onShutdown();
     }
 
-    private static void setupLibraryPath() {
+    public static void setupLibraryPath() {
         Path minecraftPath = Paths.get("");
         Path modsPath = minecraftPath.resolve("mods");
         Path cinemaModLibrariesPath = modsPath.resolve("cinemamod-libraries");

@@ -23,6 +23,7 @@ import net.montoyo.mcef.api.IScheme;
 import net.montoyo.mcef.example.ExampleMod;
 import net.montoyo.mcef.utilities.CefUtil;
 import net.montoyo.mcef.utilities.Log;
+import net.montoyo.mcef.utilities.MCEFDownloader;
 import net.montoyo.mcef.utilities.Util2;
 import net.montoyo.mcef.virtual.VirtualBrowser;
 import org.cef.CefApp;
@@ -68,6 +69,23 @@ public class ClientProxy extends BaseProxy {
     public void onInitializeClient(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             mc = Minecraft.getInstance();
+            MCEF.setupLibraryPath();
+
+            MCEFDownloader.main(new String[]{});
+
+            // TEMP HACK
+            if (OS.isLinux()) {
+                System.load("/usr/lib/jvm/java-17-openjdk-17.0.3.0.7-1.fc36.x86_64/lib/libjawt.so");
+            }
+
+            if (OS.isWindows() || OS.isLinux()) {
+                if (CefUtil.init(new ClientProxy())) {
+                    Log.info("Chromium Embedded Framework initialized");
+                } else {
+                    Log.warning("Could not initialize Chromium Embedded Framework");
+                }
+            }
+
             if (MCEF.ENABLE_EXAMPLE) {
                 exampleMod.onInit(mc);
             }
