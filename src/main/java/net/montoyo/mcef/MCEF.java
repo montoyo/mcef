@@ -7,10 +7,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.easy_forge_compat.Configuration;
-import net.montoyo.mcef.utilities.CefUtil;
 import net.montoyo.mcef.utilities.Log;
-import net.montoyo.mcef.utilities.MCEFDownloader;
-import org.cef.OS;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -1,6 +1,5 @@
 package net.montoyo.mcef.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -8,12 +7,9 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.montoyo.mcef.BaseProxy;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.IBrowser;
@@ -21,7 +17,8 @@ import net.montoyo.mcef.api.IDisplayHandler;
 import net.montoyo.mcef.api.IJSQueryHandler;
 import net.montoyo.mcef.api.IScheme;
 import net.montoyo.mcef.example.ExampleMod;
-import net.montoyo.mcef.utilities.CefUtil;
+import net.montoyo.mcef.remote.RemoteConfig;
+import net.montoyo.mcef.utilities.IProgressListener;
 import net.montoyo.mcef.utilities.Log;
 import net.montoyo.mcef.utilities.MCEFDownloader;
 import net.montoyo.mcef.utilities.Util2;
@@ -30,9 +27,11 @@ import org.cef.CefApp;
 import org.cef.CefClient;
 import org.cef.CefSettings;
 import org.cef.OS;
+import org.cef.browser.CefBrowser;
 import org.cef.browser.CefBrowserOsr;
 import org.cef.browser.CefMessageRouter;
 import org.cef.browser.CefRenderer;
+import org.cef.handler.CefLifeSpanHandlerAdapter;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -79,15 +78,100 @@ public class ClientProxy extends BaseProxy {
             }
 
             if (OS.isWindows() || OS.isLinux()) {
-                if (CefUtil.init(new ClientProxy())) {
-                    Log.info("Chromium Embedded Framework initialized");
-                } else {
-                    Log.warning("Could not initialize Chromium Embedded Framework");
-                }
-            }
+                appHandler.setArgs(MCEF.CEF_ARGS);
 
-            if (MCEF.ENABLE_EXAMPLE) {
-                exampleMod.onInit(mc);
+                ROOT = System.getProperty("user.dir").replaceAll("\\\\", "/");
+
+                System.out.println(ROOT);
+
+                JCEF_ROOT = ROOT + "/jcef";
+
+                if (ROOT.endsWith("."))
+                    ROOT = ROOT.substring(0, ROOT.length() - 1);
+
+                if (ROOT.endsWith("/"))
+                    ROOT = ROOT.substring(0, ROOT.length() - 1);
+
+                File fileListing = new File(new File(ROOT), "config");
+
+                IProgressListener ipl;
+                RemoteConfig cfg = new RemoteConfig();
+                // Forge splash used to run here
+                System.out.println("SYSTEM HEADLESS PROPERTY: " + System.getProperty("java.awt.headless"));
+                System.setProperty("java.awt.headless", "false"); // local is bugged for me
+                ipl = new UpdateFrame();
+
+                cfg.load();
+
+                System.out.println("Updating MCEF file listing ");
+
+                if (!cfg.updateFileListing(fileListing, false))
+                    Log.warning("There was a problem while establishing file list. Uninstall may not delete all files.");
+
+                if (!cfg.updateFileListing(fileListing, true))
+                    Log.warning("There was a problem while updating file list. Uninstall may not delete all files.");
+
+                updateStr = cfg.getUpdateString();
+                ipl.onProgressEnd();
+
+                if (OS.isLinux()) {
+                    File subproc = new File(JCEF_ROOT, "jcef_helper");
+
+                    // Attempt to make the CEF subprocess executable if not
+                    if (!subproc.canExecute()) {
+                        try {
+                            int retCode = Runtime.getRuntime().exec(new String[]{"/usr/bin/chmod", "+x", subproc.getAbsolutePath()}).waitFor();
+
+                            if (retCode != 0)
+                                throw new RuntimeException("chmod exited with code " + retCode);
+                        } catch (Throwable t) {
+                            Log.errorEx("Error while giving execution rights to jcef_helper. MCEF will enter virtual mode. You can fix this by chmoding jcef_helper manually.", t);
+                            VIRTUAL = true;
+                        }
+                    }
+                }
+
+                //if (VIRTUAL)
+                //  return false;
+
+                CefSettings settings = new CefSettings();
+                settings.windowless_rendering_enabled = true;
+                settings.background_color = settings.new ColorType(0, 255, 255, 255);
+                settings.cache_path = (new File(JCEF_ROOT, "cache")).getAbsolutePath();
+                // settings.user_agent = "MCEF"
+
+                CefApp.startup(MCEF.CEF_ARGS);
+                cefApp = CefApp.getInstance(settings);
+
+                // Custom scheme broken on Linux, for now
+                if (!OS.isLinux()) {
+                    CefApp.addAppHandler(appHandler);
+                }
+
+                loadMimeTypeMapping();
+
+                cefClient = cefApp.createClient();
+
+                Log.info(cefApp.getVersion().toString());
+                cefRouter = CefMessageRouter.create(new CefMessageRouter.CefMessageRouterConfig("mcefQuery", "mcefCancel"));
+                cefClient.addMessageRouter(cefRouter);
+                cefClient.addDisplayHandler(displayHandler);
+                cefClient.addLifeSpanHandler(new CefLifeSpanHandlerAdapter() {
+                    @Override
+                    public boolean doClose(CefBrowser browser) {
+                        browser.close(true);
+                        return false;
+                    }
+                });
+
+                // If shutdown patcher fail runs shutdown patcher
+                // removed!
+
+                Log.info("MCEF loaded successfuly.");
+
+                if (MCEF.ENABLE_EXAMPLE) {
+                    exampleMod.onInit(mc);
+                }
             }
         });
     }
