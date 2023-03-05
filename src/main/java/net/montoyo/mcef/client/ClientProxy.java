@@ -53,7 +53,6 @@ public class ClientProxy extends BaseProxy {
     private static ArrayList<CefBrowserOsr> browsers = new ArrayList<>();
     private static ArrayList<Object> nogc = new ArrayList<>();
     public String updateStr;
-    public final Minecraft mc = Minecraft.getInstance();
     public final DisplayHandler displayHandler = new DisplayHandler();
     public static final HashMap<String, String> mimeTypeMap = new HashMap<>();
     public final AppHandler appHandler = new AppHandler();
@@ -153,6 +152,7 @@ public class ClientProxy extends BaseProxy {
     }
 
     public void onTickStart(TickEvent.ClientTickEvent event) {
+        Minecraft mc = Minecraft.getInstance();
         // no point in ticking CEF if it doesn't exist, or if there are no browsers
         if (cefApp == null || browsers.isEmpty()) return;
         // listen for specific the start tick

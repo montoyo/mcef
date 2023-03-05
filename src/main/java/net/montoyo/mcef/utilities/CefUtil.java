@@ -1,6 +1,5 @@
 package net.montoyo.mcef.utilities;
 
-import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.montoyo.mcef.MCEF;
