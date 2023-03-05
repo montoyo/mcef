@@ -1,11 +1,18 @@
 package net.montoyo.mcef;
 
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.easy_forge_compat.Configuration;
 import net.montoyo.mcef.utilities.Log;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @Mod("forgecef")
 public class MCEF {
@@ -46,7 +53,7 @@ public class MCEF {
             FORCE_MIRROR = mirror;
 
         //Config: exampleBrowser
-        ENABLE_EXAMPLE = cfg.getBoolean("enable", "exampleBrowser", true, "Set this to false if you don't want to enable the F10 browser.");
+        ENABLE_EXAMPLE = false; //Set this to false if you don't want to enable the F10 browser.
         HOME_PAGE = cfg.getString("home", "exampleBrowser", "https://google.com", "The home page of the F10 browser.");
 
         //Config: debug
@@ -54,11 +61,19 @@ public class MCEF {
         cfg.save();
 
         PROXY.onPreInit();
+
         this.onInit(); // old init
     }
 
     public void onInit() {
-        PROXY.onInit();
+        if (PROXY instanceof ClientProxy clientProxy) {
+            IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
+            eventBus.addListener(clientProxy::onInitializeClient);
+            MinecraftForge.EVENT_BUS.addListener(clientProxy::onTickStart);
+            MinecraftForge.EVENT_BUS.addListener(clientProxy::onLogin);
+        } else {
+            Log.info("MCEF is running on server. Nothing to do.");
+        }
     }
 
     //Called by mixin
@@ -66,4 +81,19 @@ public class MCEF {
         PROXY.onShutdown();
     }
 
+    public static void setupLibraryPath() {
+        Path minecraftPath = Paths.get("");
+        Path modsPath = minecraftPath.resolve("mods");
+        Path cinemaModLibrariesPath = modsPath.resolve("cinemamod-libraries");
+
+        if (Files.notExists(cinemaModLibrariesPath)) {
+            try {
+                Files.createDirectory(cinemaModLibrariesPath);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.setProperty("cinemamod.libraries.path", cinemaModLibrariesPath.toAbsolutePath().toString());
+    }
 }

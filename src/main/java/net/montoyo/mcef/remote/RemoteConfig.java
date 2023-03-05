@@ -1,7 +1,6 @@
 package net.montoyo.mcef.remote;
 
 import com.google.gson.*;
-import net.minecraft.client.Minecraft;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.setup.FileListing;
@@ -160,8 +159,6 @@ public class RemoteConfig {
             }
         }
 
-        String actualVersion = String.valueOf(Minecraft.getInstance().getGame().getVersion());
-        
         JsonElement mcVersions = json.get("latestVersions");
         if(mcVersions != null && mcVersions.isJsonObject()) {
             JsonElement cVer = mcVersions.getAsJsonObject().get("1.19");
