@@ -57,6 +57,7 @@ public class ClientProxy extends BaseProxy {
     public static final HashMap<String, String> mimeTypeMap = new HashMap<>();
     public final AppHandler appHandler = new AppHandler();
     public ExampleMod exampleMod;
+    public Minecraft mc;
 
     @Override
     public void onPreInit() {
@@ -65,9 +66,12 @@ public class ClientProxy extends BaseProxy {
     }
 
     public void onInitializeClient(FMLClientSetupEvent event) {
-        if(CefUtil.isInit()) {
-            exampleMod.onInit();
-        }
+        event.enqueueWork(() -> {
+            if (CefUtil.isInit()) {
+                exampleMod.onInit();
+                mc = Minecraft.getInstance();
+            }
+        });
     }
 
     public CefApp getCefApp() {
@@ -152,7 +156,9 @@ public class ClientProxy extends BaseProxy {
     }
 
     public void onTickStart(TickEvent.ClientTickEvent event) {
-        Minecraft mc = Minecraft.getInstance();
+        Minecraft mc = this.mc;
+        //can't tick with no minecraft
+        if(mc == null) return;
         // no point in ticking CEF if it doesn't exist, or if there are no browsers
         if (cefApp == null || browsers.isEmpty()) return;
         // listen for specific the start tick
