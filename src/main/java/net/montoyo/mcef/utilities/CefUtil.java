@@ -27,19 +27,19 @@ public final class CefUtil {
     public static boolean init;
 
     @OnlyIn(Dist.CLIENT)
-    public static boolean init() {
-        AppHandler appHandler = ClientProxy.appHandler;
+    public static boolean init(ClientProxy clientProxy) {
+        AppHandler appHandler = clientProxy.appHandler;
         CefApp cefApp;
         CefMessageRouter cefRouter;
         CefClient cefClient;
         String ROOT;
         String JCEF_ROOT;
         boolean VIRTUAL = false;
-        DisplayHandler displayHandler = ClientProxy.displayHandler;
+        DisplayHandler displayHandler = clientProxy.displayHandler;
 
         appHandler.setArgs(MCEF.CEF_ARGS);
 
-        ROOT = ClientProxy.mc.gameDirectory.getAbsolutePath().replaceAll("\\\\", "/");
+        ROOT = clientProxy.mc.gameDirectory.getAbsolutePath().replaceAll("\\\\", "/");
 
         JCEF_ROOT = ROOT + "/jcef";
 
@@ -68,7 +68,7 @@ public final class CefUtil {
         if (!cfg.updateFileListing(fileListing, true))
             Log.warning("There was a problem while updating file list. Uninstall may not delete all files.");
 
-        ClientProxy.updateStr = cfg.getUpdateString();
+        clientProxy.updateStr = cfg.getUpdateString();
         ipl.onProgressEnd();
 
         if (OS.isLinux()) {
@@ -105,7 +105,7 @@ public final class CefUtil {
             CefApp.addAppHandler(appHandler);
         }
 
-        ClientProxy.loadMimeTypeMapping();
+        clientProxy.loadMimeTypeMapping();
 
         cefClient = cefApp.createClient();
 

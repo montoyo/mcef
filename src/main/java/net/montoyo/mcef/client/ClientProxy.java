@@ -50,14 +50,14 @@ public class ClientProxy extends BaseProxy {
     public static CefApp cefApp;
     public static CefClient cefClient;
     public static CefMessageRouter cefRouter;
-    private final ArrayList<CefBrowserOsr> browsers = new ArrayList<>();
-    private final ArrayList<Object> nogc = new ArrayList<>();
-    public static String updateStr;
-    public static final Minecraft mc = Minecraft.getInstance();
-    public static final DisplayHandler displayHandler = new DisplayHandler();
+    private static ArrayList<CefBrowserOsr> browsers = new ArrayList<>();
+    private static ArrayList<Object> nogc = new ArrayList<>();
+    public String updateStr;
+    public final Minecraft mc = Minecraft.getInstance();
+    public final DisplayHandler displayHandler = new DisplayHandler();
     public static final HashMap<String, String> mimeTypeMap = new HashMap<>();
-    public static final AppHandler appHandler = new AppHandler();
-    public static ExampleMod exampleMod;
+    public final AppHandler appHandler = new AppHandler();
+    public ExampleMod exampleMod;
 
     @Override
     public void onPreInit() {
@@ -65,17 +65,8 @@ public class ClientProxy extends BaseProxy {
         exampleMod.onPreInit(); //Do it even if example mod is disabled because it registers the "mod://" scheme
     }
 
-    @Override
-    public void onInit() {
-        super.onInit();
-        IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        eventBus.addListener(this::onInitializeClient);
-        MinecraftForge.EVENT_BUS.addListener(this::onTickStart);
-        MinecraftForge.EVENT_BUS.addListener(this::onLogin);
-    }
-
     public void onInitializeClient(FMLClientSetupEvent event) {
-        if(CefUtil.init) {
+        if(CefUtil.isInit()) {
             exampleMod.onInit();
         }
     }

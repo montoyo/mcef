@@ -1,7 +1,11 @@
 package net.montoyo.mcef;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.easy_forge_compat.Configuration;
@@ -58,7 +62,14 @@ public class MCEF {
     }
 
     public void onInit() {
-        PROXY.onInit();
+        if (PROXY instanceof ClientProxy clientProxy) {
+            IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
+            eventBus.addListener(clientProxy::onInitializeClient);
+            MinecraftForge.EVENT_BUS.addListener(clientProxy::onTickStart);
+            MinecraftForge.EVENT_BUS.addListener(clientProxy::onLogin);
+        } else {
+            Log.info("MCEF is running on server. Nothing to do.");
+        }
     }
 
     //Called by mixin

@@ -3,6 +3,7 @@ package net.montoyo.mcef.mixins;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.main.Main;
+import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.utilities.CefUtil;
 import net.montoyo.mcef.utilities.Log;
 import net.montoyo.mcef.utilities.MCEFDownloader;
@@ -48,7 +49,7 @@ public class CefInitMixin {
         }
 
         if (OS.isWindows() || OS.isLinux()) {
-            if (CefUtil.init()) {
+            if (CefUtil.init(new ClientProxy())) {
                 Log.info("Chromium Embedded Framework initialized");
             } else {
                 Log.warning("Could not initialize Chromium Embedded Framework");
