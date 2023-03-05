@@ -67,6 +67,8 @@ public class MCEF {
 
     public void onInit() {
         if (PROXY instanceof ClientProxy clientProxy) {
+            IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
+            eventBus.addListener(clientProxy::onInitializeClient);
             MinecraftForge.EVENT_BUS.addListener(clientProxy::onTickStart);
             MinecraftForge.EVENT_BUS.addListener(clientProxy::onLogin);
         } else {

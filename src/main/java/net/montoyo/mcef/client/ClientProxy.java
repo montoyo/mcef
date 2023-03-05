@@ -43,7 +43,6 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Mod.EventBusSubscriber(Dist.CLIENT)
 public class ClientProxy extends BaseProxy {
 
     public static String ROOT = ".";
@@ -68,7 +67,6 @@ public class ClientProxy extends BaseProxy {
         exampleMod.onPreInit(); //Do it even if example mod is disabled because it registers the "mod://" scheme
     }
 
-    @SubscribeEvent
     public void onInitializeClient(FMLClientSetupEvent event) {
         mc = Minecraft.getInstance();
         MCEF.setupLibraryPath();
