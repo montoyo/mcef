@@ -7,6 +7,10 @@ public class BaseProxy implements API {
 
     public void onPreInit() {
     }
+    
+    public void onInit() {
+        Log.info("MCEF is running on server. Nothing to do.");
+    }
 
     @Override
     public IBrowser createBrowser(String url, boolean transparent) {

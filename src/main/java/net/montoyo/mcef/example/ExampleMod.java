@@ -23,8 +23,8 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
 
     public ScreenCfg hudBrowser = null;
     public KeyMapping key = new KeyMapping("Open Browser", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_F10, "key.categories.misc");
-    private BrowserScreen backup = null;
     private Minecraft mc = Minecraft.getInstance();
+    private BrowserScreen backup = null;
     private API api;
 
     public API getAPI() {
@@ -42,6 +42,7 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
     
     public void onInit() {
         INSTANCE = this;
+        
         // Register key binding via fabric api
         //ClientRegistry.registerKeyBinding(key);
         // We used to register to event bus here
