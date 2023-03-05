@@ -50,7 +50,7 @@ public class MCEF {
             FORCE_MIRROR = mirror;
 
         //Config: exampleBrowser
-        ENABLE_EXAMPLE = cfg.getBoolean("enable", "exampleBrowser", true, "Set this to false if you don't want to enable the F10 browser.");
+        ENABLE_EXAMPLE = false; //Set this to false if you don't want to enable the F10 browser.
         HOME_PAGE = cfg.getString("home", "exampleBrowser", "https://google.com", "The home page of the F10 browser.");
 
         //Config: debug

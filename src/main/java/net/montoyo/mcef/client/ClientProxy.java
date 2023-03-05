@@ -67,10 +67,10 @@ public class ClientProxy extends BaseProxy {
 
     public void onInitializeClient(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
-            if (CefUtil.isInit()) {
+            if (MCEF.ENABLE_EXAMPLE) {
                 exampleMod.onInit();
-                mc = Minecraft.getInstance();
             }
+            mc = Minecraft.getInstance();
         });
     }
 
