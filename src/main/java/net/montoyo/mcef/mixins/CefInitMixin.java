@@ -40,8 +40,8 @@ public class CefInitMixin {
         System.setProperty("cinemamod.libraries.path", cinemaModLibrariesPath.toAbsolutePath().toString());
     }
 
-    @Inject(at = @At("TAIL"), method = "main")
-    private static void cefInit(String[] p_129642_, CallbackInfo ci) {
+    @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;renderOnThread()Z"), method = "run")
+    private static void cefInit(String[] p_239873_, boolean p_239874_, CallbackInfo ci) {
         setupLibraryPath();
 
         MCEFDownloader.main(new String[]{});
