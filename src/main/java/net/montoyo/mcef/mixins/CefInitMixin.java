@@ -19,7 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-@Mixin(Minecraft.class)
+@Mixin(Main.class)
 public class CefInitMixin {
 
     @Shadow @Final private static Logger LOGGER;
@@ -40,8 +40,8 @@ public class CefInitMixin {
         System.setProperty("cinemamod.libraries.path", cinemaModLibrariesPath.toAbsolutePath().toString());
     }
 
-    @Inject(at = @At("HEAD"), method = "checkIs64Bit")
-    private static void cefInit(CallbackInfoReturnable<Boolean> cir) {
+    @Inject(at = @At("TAIL"), method = "main")
+    private static void cefInit(String[] p_129642_, CallbackInfo ci) {
         setupLibraryPath();
 
         MCEFDownloader.main(new String[]{});
