@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.montoyo.mcef.api.*;
+import net.montoyo.mcef.utilities.CefUtil;
 import net.montoyo.mcef.utilities.Log;
 import org.lwjgl.glfw.GLFW;
 
@@ -31,28 +32,28 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
         return api;
     }
 
-    public void onPreInit() {
+    public void onCefInit(CefInitEvent event) {
         //Grab the API and make sure it isn't null.
-        api = MCEFApi.getAPI();
+        api = event.getApi();
         if(api == null)
             return;
-
-        api.registerScheme("mod", ModScheme.class, true, false, false, true, true, false, false);
-    }
     
-    public void onInit() {
-        INSTANCE = this;
+        api.registerScheme("mod", ModScheme.class, true, false, false, true, true, false, false);
         
-        // Register key binding via fabric api
-        //ClientRegistry.registerKeyBinding(key);
-        // We used to register to event bus here
-        if(api != null) {
-            //Register this class to handle onAddressChange and onQuery events
-            api.registerDisplayHandler(this);
-            api.registerJSQueryHandler(this);
+        if (event.ranInit()) {
+            INSTANCE = this;
+    
+            // Register key binding via fabric api
+            //ClientRegistry.registerKeyBinding(key);
+            // We used to register to event bus here
+            if(api != null) {
+                //Register this class to handle onAddressChange and onQuery events
+                api.registerDisplayHandler(this);
+                api.registerJSQueryHandler(this);
+            }
+            MinecraftForge.EVENT_BUS.register(this);
+            MinecraftForge.EVENT_BUS.addListener(this::onTickStart);
         }
-        MinecraftForge.EVENT_BUS.register(this);
-        MinecraftForge.EVENT_BUS.addListener(this::onTickStart);
     }
     
     public void setBackup(BrowserScreen bu) {
@@ -64,6 +65,8 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
     }
     
     public void showScreen(String url) {
+        if (!CefUtil.init) return;
+        
         if(mc.screen instanceof BrowserScreen)
             ((BrowserScreen) mc.screen).loadURL(url);
         else if(hasBackup()) {

@@ -170,7 +170,7 @@ public class Util2 {
         String err = "Couldn't download " + dst.getName() + "!";
         
         ph = secure(ph);
-        ph.onTaskChanged("Downloading " + dst.getName());
+        ph.onTaskChanged("2:Downloading " + dst.getName());
         
         SizedInputStream sis = openStream(res, err);
         if(sis == null)
