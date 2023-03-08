@@ -57,27 +57,14 @@ public class ClientProxy extends BaseProxy {
     public static final DisplayHandler displayHandler = new DisplayHandler();
     public static final HashMap<String, String> mimeTypeMap = new HashMap<>();
     public static final AppHandler appHandler = new AppHandler();
-    public static ExampleMod exampleMod;
-
-    @Override
-    public void onPreInit() {
-        exampleMod = new ExampleMod();
-        exampleMod.onPreInit(); //Do it even if example mod is disabled because it registers the "mod://" scheme
-    }
+    public static ExampleMod exampleMod = new ExampleMod();
 
     @Override
     public void onInit() {
         super.onInit();
-        IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        eventBus.addListener(this::onInitializeClient);
         MinecraftForge.EVENT_BUS.addListener(this::onTickStart);
         MinecraftForge.EVENT_BUS.addListener(this::onLogin);
-    }
-
-    public void onInitializeClient(FMLClientSetupEvent event) {
-        if(CefUtil.init) {
-            exampleMod.onInit();
-        }
+        MinecraftForge.EVENT_BUS.addListener(exampleMod::onCefInit);
     }
 
     public CefApp getCefApp() {

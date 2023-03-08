@@ -2,6 +2,7 @@ package net.montoyo.mcef.utilities;
 
 import io.sigpipe.jbsdiff.InvalidHeaderException;
 import io.sigpipe.jbsdiff.ui.FileUI;
+import net.montoyo.mcef.client.init.CefInitMenu;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.io.FileUtils;
 
@@ -16,21 +17,13 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
-public class MCEFDownloader extends Thread {
+public class MCEFDownloader {
 
     private Properties versions;
-    private final JFrame frame;
-    private final JLabel taskLabel;
-    private final JLabel jcefVersionLabel;
-    private final JLabel fileLabel;
-    private final JProgressBar progressBar;
+    private final IProgressListener listener;
 
-    public MCEFDownloader(JFrame frame, JLabel taskLabel, JLabel jcefVersionLabel, JLabel fileLabel, JProgressBar progressBar) {
-        this.frame = frame;
-        this.taskLabel = taskLabel;
-        this.jcefVersionLabel = jcefVersionLabel;
-        this.fileLabel = fileLabel;
-        this.progressBar = progressBar;
+    public MCEFDownloader(IProgressListener listener) {
+        this.listener = listener;
     }
 
     private Map<String, String> fetchFileManifest(String url) throws IOException {
@@ -97,8 +90,7 @@ public class MCEFDownloader extends Thread {
 
     private void downloadLibFile(String remotePath, String relPath) throws IOException {
         Path librariesPath = Paths.get(System.getProperty("cinemamod.libraries.path"));
-        fileLabel.setText("Downloading " + remotePath);
-        System.out.println(fileLabel.getText());
+        listener.onTaskChanged("3:Downloading " + remotePath);
         File localFile = new File(librariesPath + relPath);
         FileUtils.copyURLToFile(new URL(remotePath), localFile);
 
@@ -112,8 +104,7 @@ public class MCEFDownloader extends Thread {
 
     private void patchLibFile(String relPath) throws CompressorException, IOException, InvalidHeaderException {
         Path librariesPath = Paths.get(System.getProperty("cinemamod.libraries.path"));
-        fileLabel.setText("Patching " + relPath);
-        System.out.println(fileLabel.getText());
+        listener.onTaskChanged("3:Patching " + relPath);
         File libFile = new File(librariesPath + relPath);
         File patchFile = new File(libFile + ".diff");
         FileUI.patch(libFile, libFile, patchFile);
@@ -135,19 +126,18 @@ public class MCEFDownloader extends Thread {
         for (Map.Entry<String, String> entry : jcefPatchedManifest.entrySet()) {
             fileCount++;
 
-            int value = (int) ((fileCount / (double) jcefPatchedManifest.size()) * 100);
+            double value = ((fileCount / (double) jcefPatchedManifest.size()));
 
-            progressBar.setValue(value);
+            listener.onProgressed(value);
 
             String sha1hash = entry.getKey();
             String filePath = entry.getValue();
 
-            fileLabel.setText("Found " + filePath.substring(1)); // substring to remove leading "/"
+            listener.onTaskChanged("2:Found " + filePath.substring(1)); // substring to remove leading "/"
 
             if (!ensureLibFile(sha1hash, filePath)) {
                 // Download the unpatched JCEF library file
                 String remotePath = Resource.getJcefUrl(cefBranch, platform) + filePath;
-                fileLabel.setText(remotePath);
                 downloadLibFile(remotePath, filePath);
 
                 // Check if the file has a patch
@@ -169,9 +159,8 @@ public class MCEFDownloader extends Thread {
         }
     }
 
-    @Override
     public void run() {
-        taskLabel.setText("Fetching mod version info...");
+        listener.onTaskChanged("1:Fetching mod version info...");
 
         try {
             fetchVersions();
@@ -181,7 +170,7 @@ public class MCEFDownloader extends Thread {
 
         System.out.println("MCEF library versions " + versions.toString());
 
-        jcefVersionLabel.setText("Current MCEF branch: " + versions.getProperty("jcef"));
+        listener.onTaskChanged("2:Current MCEF branch: " + versions.getProperty("jcef"));
 
         final String platform;
 
@@ -197,16 +186,13 @@ public class MCEFDownloader extends Thread {
             platform = "unknown";
         }
 
-        taskLabel.setText("Verifying library files...");
+        listener.onTaskChanged("3:Verifying library files...");
 
         try {
             ensureJcef(versions.getProperty("jcef"), platform);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        frame.setVisible(false);
-        frame.dispose();
     }
 
     public static void main(String[] args) {
@@ -215,68 +201,13 @@ public class MCEFDownloader extends Thread {
             return;
         }
 
-        System.setProperty("java.awt.headless", "false");
-
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException | UnsupportedLookAndFeelException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
         }
 
-        JFrame frame = new JFrame();
-        frame.setSize(600, 250);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new GridLayout(3, 1));
-
-        // Task panel
-        JPanel taskPanel = new JPanel();
-        taskPanel.setLayout(new FlowLayout());
-
-        JLabel nameLabel = new JLabel("MCEF");
-        taskPanel.add(nameLabel);
-
-        JLabel taskLabel = new JLabel("Setting up...");
-        taskPanel.add(taskLabel);
-
-        mainPanel.add(taskPanel);
-
-        // Progress panel
-        JPanel progressPanel = new JPanel();
-        progressPanel.setLayout(new FlowLayout());
-
-        JLabel fileLabel = new JLabel();
-        progressPanel.add(fileLabel);
-
-        JProgressBar progressBar = new JProgressBar(1, 100);
-        progressBar.setValue(0);
-        progressPanel.add(progressBar);
-
-        mainPanel.add(progressPanel);
-
-        // Version panel
-        JPanel versionPanel = new JPanel();
-        versionPanel.setLayout(new FlowLayout());
-
-        JLabel jcefVersionLabel = new JLabel();
-        versionPanel.add(jcefVersionLabel);
-
-        mainPanel.add(versionPanel);
-
-        frame.add(mainPanel);
-        frame.setVisible(true);
-
-        MCEFDownloader downloader = new MCEFDownloader(frame, taskLabel, jcefVersionLabel, fileLabel, progressBar);
-        downloader.start();
-
-        try {
-            downloader.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        System.setProperty("java.awt.headless", "true");
+        MCEFDownloader downloader = new MCEFDownloader(CefInitMenu.listener);
+        downloader.run(); // already runs on another thread; doesn't need a third one, especially not one that it's just gonna join to immediately after
     }
-
 }

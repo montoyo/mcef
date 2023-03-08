@@ -163,9 +163,13 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         
         // if I don't have this here, then the text position indicator thing doesn't work
         // using setSafeMode to ensure that it works properly
-        setSafeMode(true);
-        setFocus(true);
-        setSafeMode(false);
+        if (!safeMode) {
+            setSafeMode(true);
+            setFocus(true);
+            setSafeMode(false);
+        } else {
+            setFocus(true);
+        }
     }
     
     public int remapModifiers(int mods) {
