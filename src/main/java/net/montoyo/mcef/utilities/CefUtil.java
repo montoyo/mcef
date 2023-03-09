@@ -156,6 +156,8 @@ public final class CefUtil {
     
     private static final Logger LOGGER = LogUtils.getLogger();
 
+    private static boolean ran = false;
+
     public static void runInit() {
         // TEMP HACK
         if (OS.isLinux()) {
@@ -163,12 +165,16 @@ public final class CefUtil {
         }
     
         if (OS.isWindows() || OS.isLinux()) {
-            if (CefUtil.init()) {
-                MinecraftForge.EVENT_BUS.post(new CefInitEvent(true));
-                LOGGER.info("Chromium Embedded Framework initialized");
-            } else {
-                MinecraftForge.EVENT_BUS.post(new CefInitEvent(false));
-                LOGGER.warn("Could not initialize Chromium Embedded Framework");
+            if(!ran) {
+                if (CefUtil.init()) {
+                    MinecraftForge.EVENT_BUS.post(new CefInitEvent(true));
+                    ran = true;
+                    LOGGER.info("Chromium Embedded Framework initialized");
+                } else {
+                    MinecraftForge.EVENT_BUS.post(new CefInitEvent(false));
+                    ran = true;
+                    LOGGER.warn("Could not initialize Chromium Embedded Framework");
+                }
             }
         }
     }
