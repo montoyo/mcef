@@ -16,18 +16,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Minecraft.class)
 public class MainMenuMixin {
-
-    @Inject(at = @At("HEAD"), method = "setScreen", cancellable = true)
-    private void cefInit(Screen p_91153_, CallbackInfo ci) {
-        if (p_91153_ instanceof TitleScreen ts) {
-            
-            if (!CefUtil.isReady()) {
-                Minecraft.getInstance().setScreen(new CefInitMenu(ts));
-                ci.cancel();
-                return;
-            }
-
-            CefUtil.runInit();
-        }
-    }
+	@Unique
+	private static boolean hasInit = false;
+	
+	@Inject(at = @At("HEAD"), method = "setScreen", cancellable = true)
+	private void cefInit(Screen p_91153_, CallbackInfo ci) {
+		if (p_91153_ instanceof TitleScreen ts) {
+			
+			if (!hasInit) {
+				hasInit = true;
+				if (!CefUtil.isReady()) {
+					Minecraft.getInstance().setScreen(new CefInitMenu(ts));
+					ci.cancel();
+					return;
+				}
+				
+				CefUtil.runInit();
+			}
+		}
+	}
 }

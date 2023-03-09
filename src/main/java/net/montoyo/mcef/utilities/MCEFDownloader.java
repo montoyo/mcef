@@ -209,5 +209,6 @@ public class MCEFDownloader {
 
         MCEFDownloader downloader = new MCEFDownloader(CefInitMenu.listener);
         downloader.run(); // already runs on another thread; doesn't need a third one, especially not one that it's just gonna join to immediately after
+        downloader.listener.onProgressEnd();
     }
 }
