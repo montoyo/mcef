@@ -151,6 +151,8 @@ public final class CefUtil {
     }
     
     public static void setReady() {
+        IProgressListener ipl = CefInitMenu.listener;
+        ipl.onProgressEnd();
         ready = true;
     }
     
