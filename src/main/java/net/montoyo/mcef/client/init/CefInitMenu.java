@@ -11,13 +11,15 @@ import net.minecraft.network.chat.Component;
 import net.montoyo.mcef.utilities.CefUtil;
 import net.montoyo.mcef.utilities.IProgressListener;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class CefInitMenu extends Screen {
 	// TODO:
 	
 	private static String[] text = new String[]{"", "", ""};
 	
 	private static double progress = 0;
-	private static int isDone = 0;
+	private static AtomicInteger isDone = new AtomicInteger(0);
 	
 	public static final IProgressListener listener = new IProgressListener() {
 		@Override
@@ -34,7 +36,7 @@ public class CefInitMenu extends Screen {
 		
 		@Override
 		public void onProgressEnd() {
-			isDone++;
+			isDone.addAndGet(1);
 		}
 	};
 	
@@ -122,7 +124,7 @@ public class CefInitMenu extends Screen {
 	
 	@Override
 	public void tick() {
-		if (isDone == 1) {
+		if (isDone.get() == 1) {
 			Minecraft.getInstance().setScreen(menu);
 			CefUtil.runInit();
 		}
