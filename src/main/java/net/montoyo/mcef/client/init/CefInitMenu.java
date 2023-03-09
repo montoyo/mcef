@@ -3,10 +3,12 @@ package net.montoyo.mcef.client.init;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
+import net.montoyo.mcef.utilities.CefUtil;
 import net.montoyo.mcef.utilities.IProgressListener;
 
 public class CefInitMenu extends Screen {
@@ -121,8 +123,8 @@ public class CefInitMenu extends Screen {
 	@Override
 	public void tick() {
 		if (isDone == 2) {
-//			Minecraft.getInstance().setScreen(menu);
-//			CefUtil.runInit();
+			Minecraft.getInstance().setScreen(menu);
+			CefUtil.runInit();
 		}
 	}
 }
