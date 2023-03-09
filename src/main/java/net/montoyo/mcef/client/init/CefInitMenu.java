@@ -122,7 +122,7 @@ public class CefInitMenu extends Screen {
 	
 	@Override
 	public void tick() {
-		if (isDone == 2) {
+		if (isDone == 1) {
 			Minecraft.getInstance().setScreen(menu);
 			CefUtil.runInit();
 		}
