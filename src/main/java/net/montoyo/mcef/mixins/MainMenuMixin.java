@@ -24,6 +24,7 @@ public class MainMenuMixin {
             if (!CefUtil.isReady()) {
                 Minecraft.getInstance().setScreen(new CefInitMenu(ts));
                 ci.cancel();
+                return;
             }
 
             CefUtil.runInit();

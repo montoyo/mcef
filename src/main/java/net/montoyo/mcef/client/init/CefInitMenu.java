@@ -19,7 +19,7 @@ public class CefInitMenu extends Screen {
 	private static String[] text = new String[]{"", "", ""};
 	
 	private static double progress = 0;
-	private static AtomicInteger isDone = new AtomicInteger(0);
+	private static int isDone = 0;
 	
 	public static final IProgressListener listener = new IProgressListener() {
 		@Override
@@ -36,7 +36,7 @@ public class CefInitMenu extends Screen {
 		
 		@Override
 		public void onProgressEnd() {
-			isDone.addAndGet(1);
+			isDone++;
 		}
 	};
 	
@@ -124,7 +124,7 @@ public class CefInitMenu extends Screen {
 	
 	@Override
 	public void tick() {
-		if (isDone.get() == 1) {
+		if (isDone == 1 || CefUtil.isInit()) {
 			Minecraft.getInstance().setScreen(menu);
 			CefUtil.runInit();
 		}

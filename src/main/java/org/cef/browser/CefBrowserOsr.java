@@ -22,6 +22,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -64,7 +65,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
     }
 
     public CefBrowserOsr(CefClient client, String url, boolean transparent,
-                          CefRequestContext context, CefBrowserOsr parent, Point inspectAt) {
+                         CefRequestContext context, CefBrowserOsr parent, Point inspectAt) {
         super(client, url, context, parent, inspectAt);
         isTransparent_ = transparent;
         renderer_ = new CefRenderer(transparent);
@@ -158,9 +159,14 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 
     @Override
     public void injectMouseButton(int x, int y, int mods, int btn, boolean pressed, int ccnt) {
-        MouseEvent ev = new MouseEvent(dc_, pressed ? MouseEvent.MOUSE_PRESSED : MouseEvent.MOUSE_RELEASED, 0, mods, x, y, ccnt, false, btn);
-        sendMouseEvent(ev);
-        
+        if(btn != 3) {
+            MouseEvent ev = new MouseEvent(dc_, pressed ? MouseEvent.MOUSE_PRESSED : MouseEvent.MOUSE_RELEASED, 0, mods, x, y, ccnt, false, btn);
+            sendMouseEvent(ev);
+        } else {
+            MouseEvent ev = new MouseEvent(dc_, pressed ? MouseEvent.MOUSE_PRESSED : MouseEvent.MOUSE_RELEASED, 0, InputEvent.BUTTON3_DOWN_MASK, x, y, ccnt, false, MouseEvent.BUTTON3);
+            sendMouseEvent(ev);
+        }
+
         // if I don't have this here, then the text position indicator thing doesn't work
         // using setSafeMode to ensure that it works properly
         if (!safeMode) {
@@ -171,7 +177,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
             setFocus(true);
         }
     }
-    
+
     public int remapModifiers(int mods) {
         int vkMods = 0;
         if ((mods & GLFW_MOD_CONTROL) != 0) vkMods |= KeyEvent.CTRL_DOWN_MASK;
@@ -180,13 +186,14 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         if ((mods & GLFW_MOD_SUPER) != 0) vkMods |= KeyEvent.META_DOWN_MASK;
         return vkMods;
     }
-    
+
     private static final Map<Integer, Character> WORST_HACK = new HashMap<>();
-    
+
     /**
      * Maps keys from GLFW to what CEF expects
-     * @param kc the key code
-     * @param c the character
+     *
+     * @param kc  the key code
+     * @param c   the character
      * @param mod any modifiers
      * @return a remapped key code which CEF will accept
      */
@@ -203,12 +210,13 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
                 return ck;
         }
     }
-    
+
     /**
      * internal method for {@link CefBrowserOsr#remapKeycode(int, char, int)}
-     * @param keyCode the key code
+     *
+     * @param keyCode  the key code
      * @param scanCode (unused)
-     * @param mod any modifiers
+     * @param mod      any modifiers
      * @return a remapped keycode
      */
     public static int getChar(int keyCode, int scanCode, int mod) {
@@ -234,9 +242,9 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
                 return '\uFFFF';
         }
         String keystr = GLFW.glfwGetKeyName(keyCode, scanCode);
-        if(keystr == null){
+        if (keystr == null) {
             keystr = "\0";
-        } else if(keystr.length() == 0){
+        } else if (keystr.length() == 0) {
             return -1;
         }
 //        if((mod & GLFW_MOD_SHIFT) != 0) {
@@ -244,7 +252,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 //        }
         return keyCode;
     }
-    
+
     private long mapScanCode(int key, char c) {
         if (key == GLFW_KEY_LEFT_CONTROL || key == GLFW_KEY_RIGHT_CONTROL) return 29;
         return switch (key) {
@@ -261,7 +269,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
             default -> GLFW.glfwGetKeyScancode(key);
         };
     }
-    
+
     @Override
     public void injectKeyPressedByKeyCode(int key, char c, int mods) {
         if (c != '\0') {
@@ -269,7 +277,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
                 WORST_HACK.put(key, c);
             }
         }
-    
+
         // keyboard shortcut handling
         if (mods == GLFW_MOD_CONTROL) {
             if (key == GLFW_KEY_R) {
@@ -307,7 +315,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
             }
         }
     }
-    
+
     @Override
     public void injectKeyTyped(int key, int mods) {
         // keyboard shortcuts should not be handled
@@ -320,13 +328,13 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
             if (key == GLFW_KEY_LEFT && canGoBack()) return;
             else if (key == GLFW_KEY_RIGHT && canGoForward()) return;
         }
-        
+
         char c = (char) key;
         int keyRemapped = remapKeycode(key, (char) key, mods);
-        if(key != VK_UNDEFINED) {
+        if (key != VK_UNDEFINED) {
             switch (key) {
                 case GLFW_KEY_BACKSPACE, GLFW_KEY_HOME, GLFW_KEY_END, GLFW_KEY_PAGE_UP, GLFW_KEY_PAGE_DOWN, GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_KP_4, GLFW_KEY_KP_8, GLFW_KEY_KP_6, GLFW_KEY_KP_2, GLFW_KEY_PRINT_SCREEN, GLFW_KEY_SCROLL_LOCK, GLFW_KEY_CAPS_LOCK, GLFW_KEY_NUM_LOCK, GLFW_KEY_PAUSE, GLFW_KEY_INSERT -> {
-                    KeyEvent ev = UnsafeExample.makeEvent(dc_, keyRemapped, CHAR_UNDEFINED, KEY_LOCATION_UNKNOWN, KEY_TYPED,0, remapModifiers(mods), mapScanCode(keyRemapped, c));
+                    KeyEvent ev = UnsafeExample.makeEvent(dc_, keyRemapped, CHAR_UNDEFINED, KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, remapModifiers(mods), mapScanCode(keyRemapped, c));
                     sendKeyEvent(ev);
                 }
 
@@ -355,7 +363,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
             if (key == GLFW_KEY_LEFT && canGoBack()) return;
             else if (key == GLFW_KEY_RIGHT && canGoForward()) return;
         }
-        
+
         if (c == '\0') {
             synchronized (WORST_HACK) {
                 c = WORST_HACK.getOrDefault(key, '\0');
@@ -385,7 +393,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
             }
             return;
         }
-        
+
         amount *= 3;
         rot = 32;
         MouseWheelEvent ev = new MouseWheelEvent(dc_, MouseEvent.MOUSE_WHEEL, 0, mods, x, y, 0, false, MouseWheelEvent.WHEEL_UNIT_SCROLL, amount, rot);
@@ -460,7 +468,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
                 renderer_.onPaint(false, paintData.dirtyRects, paintData.buffer, paintData.width, paintData.height, paintData.fullReRender);
                 paintData.hasFrame = false;
                 paintData.fullReRender = false;
-            }else {
+            } else {
 
             }
         }
