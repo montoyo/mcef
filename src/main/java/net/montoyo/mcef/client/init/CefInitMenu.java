@@ -18,6 +18,7 @@ public class CefInitMenu extends Screen {
 	
 	private static String[] text = new String[]{"", "", ""};
 	
+	private boolean finishedFirstPhase = false;
 	private static double progress = 0;
 	private static int isDone = 0;
 	
@@ -124,9 +125,25 @@ public class CefInitMenu extends Screen {
 	
 	@Override
 	public void tick() {
-		if (isDone == 1 || CefUtil.isInit()) {
+		if (isDone == 1 && !finishedFirstPhase) {
+			finishedFirstPhase = true;
+			// truthfully, this doesn't need to run on a second thread
+			// but in the case that it does go slow enough, this allows the menu to show the progress of this method
+			Thread td = new Thread(CefUtil::runInit);
+			td.start();
+		} else if (isDone == 2) {
+			onClose();
 			Minecraft.getInstance().setScreen(menu);
-			CefUtil.runInit();
 		}
+	}
+	
+	@Override
+	public boolean shouldCloseOnEsc() {
+		return false;
+	}
+	
+	@Override
+	public boolean isPauseScreen() {
+		return true;
 	}
 }
