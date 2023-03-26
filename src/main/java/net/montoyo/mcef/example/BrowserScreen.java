@@ -3,7 +3,7 @@ package net.montoyo.mcef.example;
 import net.minecraft.client.renderer.GlStateManager;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.utilities.Log;
-import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL4ES1.1.4;
 import org.lwjgl.input.Keyboard;
 import org.lwjgl.input.Mouse;
 
