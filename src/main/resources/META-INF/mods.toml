@@ -10,7 +10,7 @@ issueTrackerURL="" #optional
 
 modId="forgecef" #mandatory
 
-version="1.0.0" #mandatory
+version="1.2.3" #mandatory
 
 displayName="MCEF" #mandatory
 
@@ -20,7 +20,7 @@ logoFile= "" #optional
 
 credits="" #optional
 
-authors="Mysticpasta1, WaterPicker, Montoyo, javaarchive" #optional
+authors="Mysticpasta1, WaterPicker, GiantLuigi4, Montoyo, javaarchive" #optional
 
 description='''
 '''
