@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 
 /**
  * An object representing an HTTP(S) mirror to download the resources from.
@@ -92,13 +93,16 @@ public final class Mirror {
      * @throws MalformedURLException if the mirror's URL is invalid or if name is invalid.
      * @throws IOException if an I/O exception occurs.
      */
-    public HttpURLConnection getResource(String name) throws MalformedURLException, IOException {
-        HttpURLConnection ret = (HttpURLConnection) (new URL(url + '/' + name)).openConnection();
-        ret.setConnectTimeout(30000);
-        ret.setReadTimeout(15000);
-        ret.setRequestProperty("User-Agent", "MCEF");
-
-        return ret;
+    public URLConnection getResource(String name) throws MalformedURLException, IOException {
+        if (url.startsWith("file://")) {
+            return (new URL(url + '/' + name)).openConnection();
+        } else {
+            HttpURLConnection ret = (HttpURLConnection) (new URL(url + '/' + name)).openConnection();
+            ret.setConnectTimeout(30000);
+            ret.setReadTimeout(15000);
+            ret.setRequestProperty("User-Agent", "MCEF");
+    
+            return ret;
+        }
     }
-
 }

@@ -1,17 +1,22 @@
-package net.montoyo.mcef.utilities;
+package net.montoyo.mcef.utilities.download;
 
 import io.sigpipe.jbsdiff.InvalidHeaderException;
 import io.sigpipe.jbsdiff.ui.FileUI;
+import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.client.init.CefInitMenu;
+import net.montoyo.mcef.utilities.IProgressListener;
+import net.montoyo.mcef.utilities.Resource;
+import net.montoyo.mcef.utilities.Util;
 import org.apache.commons.compress.compressors.CompressorException;
 import org.apache.commons.io.FileUtils;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
@@ -27,29 +32,58 @@ public class MCEFDownloader {
     }
 
     private Map<String, String> fetchFileManifest(String url) throws IOException {
+        FileOutputStream outputStream = null;
+        if (MCEF.writeMirrorData) {
+            String path = url.substring("https://cinemamod-libraries.ewr1.vultrobjects.com/".length());
+            File dst = new File("data/" + path);
+            if (!dst.exists()) dst.getParentFile().mkdirs();
+            outputStream = new FileOutputStream(dst);
+        }
+        
         // sha1sum, filename
         Map<String, String> manifest = new HashMap<>();
         try (InputStream inputStream = new URL(url).openStream()) {
             try (Scanner scanner = new Scanner(inputStream)) {
                 while (scanner.hasNextLine()) {
                     String line = scanner.nextLine();
+                    
+                    if (outputStream != null) {
+                        outputStream.write((line + "\n").getBytes(StandardCharsets.UTF_8));
+                    }
+                    
                     String sha1hash = line.split(" ")[0];
                     String filePath = line.split(" ")[2].substring(1); // substring to remove the leading "."
                     manifest.put(sha1hash, filePath);
                 }
             }
         }
+        
+        if (outputStream != null) {
+            outputStream.flush();
+            outputStream.close();
+        }
+        
         return manifest;
     }
 
     private void fetchVersions() throws IOException {
         versions = new Properties();
-
+    
+        FileOutputStream outputStream = null;
+        if (MCEF.writeMirrorData) {
+            File dst = new File("data/versions.txt");
+            if (!dst.exists()) dst.getParentFile().mkdirs();
+            outputStream = new FileOutputStream(dst);
+        }
+        
         URL versionsURL = new URL(Resource.CINEMAMOD_VERSIONS_URL);
         try (InputStream inputStream = versionsURL.openStream()) {
             try (Scanner scanner = new Scanner(inputStream)) {
                 while (scanner.hasNextLine()) {
                     String line = scanner.nextLine();
+                    if (outputStream != null)
+                        outputStream.write((line + "\n").getBytes(StandardCharsets.UTF_8));
+                    
                     try {
                         String library = line.split(" ")[0];
                         String version = line.split(" ")[1];
@@ -59,6 +93,11 @@ public class MCEFDownloader {
                     }
                 }
             }
+        }
+        
+        if (outputStream != null) {
+            outputStream.flush();
+            outputStream.close();
         }
     }
 
@@ -87,15 +126,20 @@ public class MCEFDownloader {
 
         return result;
     }
+    
+    String osProp = System.getProperty("os.name");
 
     private void downloadLibFile(String remotePath, String relPath) throws IOException {
         Path librariesPath = Paths.get(System.getProperty("cinemamod.libraries.path"));
         listener.onTaskChanged("3:Downloading " + remotePath);
         File localFile = new File(librariesPath + relPath);
         FileUtils.copyURLToFile(new URL(remotePath), localFile);
+        
+        if (MCEF.writeMirrorData)
+            FileUtils.copyFile(localFile, new File("data/" + remotePath.substring("https://cinemamod-libraries.ewr1.vultrobjects.com/".length())));
 
         // set appropriate files as executable on linux
-        if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("linux")) {
+        if (osProp.toLowerCase(Locale.ROOT).contains("linux")) {
             if (localFile.toString().contains("chrome-sandbox") || localFile.toString().contains("jcef_helper")) {
                 Util.makeExecNix(localFile);
             }
@@ -117,10 +161,19 @@ public class MCEFDownloader {
         String jcefPatchedManifestUrlString = Resource.getJcefPatchesUrl(cefBranch, platform) + "/patched-manifest.txt";
         // manifest of the .diff JCEF patch files
         String jcefPatchesManifestUrlString = Resource.getJcefPatchesUrl(cefBranch, platform) + "/manifest.txt";
-
-        Map<String, String> jcefManifest = fetchFileManifest(jcefManifestUrlString);
-        Map<String, String> jcefPatchedManifest = fetchFileManifest(jcefPatchedManifestUrlString);
-        Map<String, String> patchesManifest = fetchFileManifest(jcefPatchesManifestUrlString);
+    
+        Map<String, String> jcefManifest;
+        Map<String, String> jcefPatchedManifest;
+        Map<String, String> patchesManifest;
+        if (!MCEF.skipVersionCheck) {
+            jcefManifest = fetchFileManifest(jcefManifestUrlString);
+            jcefPatchedManifest = fetchFileManifest(jcefPatchedManifestUrlString);
+            patchesManifest = fetchFileManifest(jcefPatchesManifestUrlString);
+        } else {
+            jcefManifest = new HashMap<>();
+            jcefPatchedManifest = new HashMap<>();
+            patchesManifest = new HashMap<>();
+        }
 
         int fileCount = 0;
         for (Map.Entry<String, String> entry : jcefPatchedManifest.entrySet()) {
@@ -160,10 +213,18 @@ public class MCEFDownloader {
     }
 
     public void run() {
+        if (ModernDownload.download(listener)) {
+            return;
+        }
+        
         listener.onTaskChanged("1:Fetching mod version info...");
 
         try {
-            fetchVersions();
+            if (!MCEF.skipVersionCheck) {
+                fetchVersions();
+            } else {
+                versions = new Properties();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -173,9 +234,9 @@ public class MCEFDownloader {
         listener.onTaskChanged("2:Current MCEF branch: " + versions.getProperty("jcef"));
 
         final String platform;
-
-        String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
-
+    
+        String os = osProp.toLowerCase(Locale.ROOT);
+    
         if (os.contains("win")) {
             platform = "win64";
         } else if (os.contains("mac")) {

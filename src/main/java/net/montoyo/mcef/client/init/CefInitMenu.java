@@ -127,11 +127,8 @@ public class CefInitMenu extends Screen {
 	public void tick() {
 		if (isDone == 1 && !finishedFirstPhase) {
 			finishedFirstPhase = true;
-			// truthfully, this doesn't need to run on a second thread
-			// but in the case that it does go slow enough, this allows the menu to show the progress of this method
-			Thread td = new Thread(CefUtil::runInit);
-			td.start();
-		} else if (isDone == 2) {
+			CefUtil.runInit();
+			
 			onClose();
 			Minecraft.getInstance().setScreen(menu);
 		}

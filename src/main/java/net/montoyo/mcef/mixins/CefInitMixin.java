@@ -3,7 +3,7 @@ package net.montoyo.mcef.mixins;
 import net.minecraft.client.resources.AssetIndex;
 import net.minecraft.client.resources.ClientPackSource;
 import net.montoyo.mcef.utilities.CefUtil;
-import net.montoyo.mcef.utilities.MCEFDownloader;
+import net.montoyo.mcef.utilities.download.MCEFDownloader;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

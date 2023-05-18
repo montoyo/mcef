@@ -25,8 +25,10 @@ public class MCEF {
     public static MCEF INSTANCE;
 
     public static BaseProxy PROXY = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> BaseProxy::new);
-
-    public MCEF() {
+    public static boolean skipVersionCheck = false;
+	public static boolean writeMirrorData = false;
+	
+	public MCEF() {
         System.out.println("MCEF Initalizing...");
         Log.info("Loading MCEF config...");
         Configuration cfg = new Configuration();
