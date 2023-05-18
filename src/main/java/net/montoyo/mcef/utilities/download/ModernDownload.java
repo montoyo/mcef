@@ -114,12 +114,14 @@ public class ModernDownload {
 			}
 		}
 		
-		try {
-			FileOutputStream outputStream = new FileOutputStream(info);
-			// TODO: actually write data, lol
-			outputStream.close();
-		} catch (Throwable err) {
-			err.printStackTrace();
+		if (downloaded) {
+			try {
+				FileOutputStream outputStream = new FileOutputStream(info);
+				// TODO: actually write data, lol
+				outputStream.close();
+			} catch (Throwable err) {
+				err.printStackTrace();
+			}
 		}
 		
 		return downloaded;
