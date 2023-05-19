@@ -3,6 +3,7 @@ package net.montoyo.mcef.remote;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.utilities.Log;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
@@ -14,9 +15,16 @@ import java.util.Random;
  * @author montoyo
  */
 public class MirrorManager {
-
+//    private static String getSelfhost() {
+//        String text = new File("").getAbsolutePath().replace("\\", "/");
+//        if (text.endsWith("/")) text = text.substring(0, text.length() - 1);
+//        return text + "/data";
+//    }
+    
     private static final Mirror[] defaultMirrors = new Mirror[] {
-            new Mirror("ds58-mcef-mirror", "https://ds58-mcef-mirror.ewr1.vultrobjects.com", Mirror.FLAG_SECURE)
+            new Mirror("ds58-mcef-mirror", "https://ds58-mcef-mirror.ewr1.vultrobjects.com", Mirror.FLAG_SECURE),
+//            new Mirror("montoyo_ancient", "https://montoyo.net/jcef/", Mirror.FLAG_SECURE),
+//            new Mirror("self", "file://" + getSelfhost(), Mirror.FLAG_SECURE),
     };
 
     /**

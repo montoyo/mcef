@@ -161,7 +161,12 @@ public final class CefUtil {
     public static void runInit() {
         // TEMP HACK
         if (OS.isLinux()) {
-            System.load("/usr/lib/jvm/java-17-openjdk-17.0.3.0.7-1.fc36.x86_64/lib/libjawt.so");
+            // https://stackoverflow.com/a/61860951
+            String jvmPath = ProcessHandle.current().info().command().orElseThrow();
+            jvmPath = jvmPath.replace("\\", "/");
+            jvmPath = jvmPath.substring(0, jvmPath.lastIndexOf("/") - 4);
+            
+            System.load(jvmPath + "/lib/libjawt.so");
         }
     
         if (OS.isWindows() || OS.isLinux()) {
