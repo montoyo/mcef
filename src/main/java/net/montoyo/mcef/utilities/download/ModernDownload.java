@@ -1,5 +1,6 @@
 package net.montoyo.mcef.utilities.download;
 
+import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.utilities.IProgressListener;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -46,7 +47,10 @@ public class ModernDownload {
 		boolean downloaded = false;
 		
 		listener.onTaskChanged("2:Download");
-		for (String urlStr : urls) {
+		String[] allUrls = new String[urls.length + MCEF.FALLBACK_URLS_GIT.length];
+		System.arraycopy(urls, 0, allUrls, 0, urls.length);
+		System.arraycopy(MCEF.FALLBACK_URLS_GIT, 0, allUrls, urls.length, MCEF.FALLBACK_URLS_GIT.length);
+		for (String urlStr : allUrls) {
 			String[] split = urlStr.split(":", 2);
 			
 			try {

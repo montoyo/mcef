@@ -2,6 +2,7 @@ package net.montoyo.mcef.mixins;
 
 import net.minecraft.client.resources.AssetIndex;
 import net.minecraft.client.resources.ClientPackSource;
+import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.utilities.CefUtil;
 import net.montoyo.mcef.utilities.download.MCEFDownloader;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,6 +36,7 @@ public class CefInitMixin {
 	
 	@Inject(at = @At("TAIL"), method = "<init>")
 	private void cefInit(File p_118553_, AssetIndex p_118554_, CallbackInfo ci) {
+		MCEF.ensureConfig();
 		setupLibraryPath();
 		
 		Thread td = new Thread(() -> {

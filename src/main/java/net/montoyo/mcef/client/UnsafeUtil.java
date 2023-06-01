@@ -8,7 +8,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.lang.reflect.Field;
 
-public class UnsafeExample {
+public class UnsafeUtil {
     private static final Unsafe theUnsafe;
 
     private static final Field keyCode;
@@ -78,5 +78,21 @@ public class UnsafeExample {
             theUnsafe.putLong(event, offsetScanCode, scanCode);
         }
         return event;
+    }
+    
+    public static long getHandle(Field f) {
+        return theUnsafe.staticFieldOffset(f);
+    }
+    
+    public static Object getBase(Field f) {
+        return theUnsafe.staticFieldBase(f);
+    }
+    
+    public static void setBoolean(Object base, long handle, boolean v) {
+        theUnsafe.putBoolean(base, handle, v);
+    }
+    
+    public static void setObject(Object base, long handle, String v) {
+        theUnsafe.putObject(base, handle, v);
     }
 }

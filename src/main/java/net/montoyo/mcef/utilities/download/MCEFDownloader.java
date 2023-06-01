@@ -213,9 +213,9 @@ public class MCEFDownloader {
     }
 
     public void run() {
-        if (ModernDownload.download(listener)) {
-            return;
-        }
+        if (MCEF.FAVOR_GIT)
+            if (ModernDownload.download(listener))
+                return;
         
         listener.onTaskChanged("1:Fetching mod version info...");
 

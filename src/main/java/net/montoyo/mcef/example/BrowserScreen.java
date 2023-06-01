@@ -11,15 +11,7 @@ import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.API;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.MCEFApi;
-import net.montoyo.mcef.client.ClientProxy;
-import net.montoyo.mcef.client.UnsafeExample;
-import org.cef.browser.CefBrowserOsr;
 import org.lwjgl.glfw.GLFW;
-
-import javax.swing.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.util.Arrays;
 
 public class BrowserScreen extends Screen {
 

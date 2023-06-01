@@ -5,13 +5,12 @@
 package org.cef.browser;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IStringVisitor;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.client.StringVisitor;
-import net.montoyo.mcef.client.UnsafeExample;
+import net.montoyo.mcef.client.UnsafeUtil;
 import net.montoyo.mcef.utilities.Log;
 import org.apache.commons.lang3.NotImplementedException;
 import org.cef.CefClient;
@@ -29,7 +28,6 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -305,12 +303,12 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 
         switch (key) {
             case GLFW_KEY_BACKSPACE, GLFW_KEY_HOME, GLFW_KEY_END, GLFW_KEY_PAGE_UP, GLFW_KEY_PAGE_DOWN, GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_KP_4, GLFW_KEY_KP_8, GLFW_KEY_KP_6, GLFW_KEY_KP_2, GLFW_KEY_PRINT_SCREEN, GLFW_KEY_SCROLL_LOCK, GLFW_KEY_CAPS_LOCK, GLFW_KEY_NUM_LOCK, GLFW_KEY_PAUSE, GLFW_KEY_INSERT -> {
-                KeyEvent ev = UnsafeExample.makeEvent(dc_, remapKeycode(key, CHAR_UNDEFINED, mods), CHAR_UNDEFINED, KEY_LOCATION_UNKNOWN, KEY_PRESSED, 0, remapModifiers(mods), mapScanCode(key, c));
+                KeyEvent ev = UnsafeUtil.makeEvent(dc_, remapKeycode(key, CHAR_UNDEFINED, mods), CHAR_UNDEFINED, KEY_LOCATION_UNKNOWN, KEY_PRESSED, 0, remapModifiers(mods), mapScanCode(key, c));
                 sendKeyEvent(ev);
             }
 
             default -> {
-                KeyEvent ev = UnsafeExample.makeEvent(dc_, remapKeycode(key, c, mods), c, KEY_LOCATION_UNKNOWN, KEY_PRESSED, 0, remapModifiers(mods), mapScanCode(key, c));
+                KeyEvent ev = UnsafeUtil.makeEvent(dc_, remapKeycode(key, c, mods), c, KEY_LOCATION_UNKNOWN, KEY_PRESSED, 0, remapModifiers(mods), mapScanCode(key, c));
                 sendKeyEvent(ev);
             }
         }
@@ -334,17 +332,17 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         if (key != VK_UNDEFINED) {
             switch (key) {
                 case GLFW_KEY_BACKSPACE, GLFW_KEY_HOME, GLFW_KEY_END, GLFW_KEY_PAGE_UP, GLFW_KEY_PAGE_DOWN, GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_KP_4, GLFW_KEY_KP_8, GLFW_KEY_KP_6, GLFW_KEY_KP_2, GLFW_KEY_PRINT_SCREEN, GLFW_KEY_SCROLL_LOCK, GLFW_KEY_CAPS_LOCK, GLFW_KEY_NUM_LOCK, GLFW_KEY_PAUSE, GLFW_KEY_INSERT -> {
-                    KeyEvent ev = UnsafeExample.makeEvent(dc_, keyRemapped, CHAR_UNDEFINED, KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, remapModifiers(mods), mapScanCode(keyRemapped, c));
+                    KeyEvent ev = UnsafeUtil.makeEvent(dc_, keyRemapped, CHAR_UNDEFINED, KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, remapModifiers(mods), mapScanCode(keyRemapped, c));
                     sendKeyEvent(ev);
                 }
 
                 case VK_ENTER, GLFW_KEY_ENTER, GLFW_KEY_KP_ENTER -> {
-                    KeyEvent ev = UnsafeExample.makeEvent(dc_, key, '\r', KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, remapModifiers(mods), mapScanCode(key, c));
+                    KeyEvent ev = UnsafeUtil.makeEvent(dc_, key, '\r', KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, remapModifiers(mods), mapScanCode(key, c));
                     sendKeyEvent(ev);
                 }
 
                 default -> {
-                    KeyEvent ev = UnsafeExample.makeEvent(dc_, keyRemapped, c, KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, remapModifiers(mods), mapScanCode(keyRemapped, c));
+                    KeyEvent ev = UnsafeUtil.makeEvent(dc_, keyRemapped, c, KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, remapModifiers(mods), mapScanCode(keyRemapped, c));
                     sendKeyEvent(ev);
                 }
             }
@@ -372,12 +370,12 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 
         switch (key) {
             case GLFW_KEY_BACKSPACE, GLFW_KEY_HOME, GLFW_KEY_END, GLFW_KEY_PAGE_UP, GLFW_KEY_PAGE_DOWN, GLFW_KEY_UP, GLFW_KEY_DOWN, GLFW_KEY_LEFT, GLFW_KEY_RIGHT, GLFW_KEY_KP_4, GLFW_KEY_KP_8, GLFW_KEY_KP_6, GLFW_KEY_KP_2, GLFW_KEY_PRINT_SCREEN, GLFW_KEY_SCROLL_LOCK, GLFW_KEY_CAPS_LOCK, GLFW_KEY_NUM_LOCK, GLFW_KEY_PAUSE, GLFW_KEY_INSERT -> {
-                KeyEvent ev = UnsafeExample.makeEvent(dc_, remapKeycode(key, CHAR_UNDEFINED, mods), c, KEY_LOCATION_UNKNOWN, KEY_RELEASED, 0, remapModifiers(mods), mapScanCode(key, c));
+                KeyEvent ev = UnsafeUtil.makeEvent(dc_, remapKeycode(key, CHAR_UNDEFINED, mods), c, KEY_LOCATION_UNKNOWN, KEY_RELEASED, 0, remapModifiers(mods), mapScanCode(key, c));
                 sendKeyEvent(ev);
             }
 
             default -> {
-                KeyEvent ev = UnsafeExample.makeEvent(dc_, remapKeycode(key, c, mods), c, KEY_LOCATION_UNKNOWN, KEY_RELEASED, 0, remapModifiers(mods), mapScanCode(key, c));
+                KeyEvent ev = UnsafeUtil.makeEvent(dc_, remapKeycode(key, c, mods), c, KEY_LOCATION_UNKNOWN, KEY_RELEASED, 0, remapModifiers(mods), mapScanCode(key, c));
                 sendKeyEvent(ev);
             }
         }
