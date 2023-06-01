@@ -192,7 +192,6 @@ public class BrowserScreen extends Screen {
         InputConstants.Key iuKey = InputConstants.getKey(keyCode, scanCode);
         String keystr = iuKey.getDisplayName().getString();
         // String keystr = GLFW.glfwGetKeyName(keyCode, scanCode);
-        System.out.println("KEY STR " + keystr);
         if (keystr.length() == 0) {
             return false;
         }
@@ -204,7 +203,6 @@ public class BrowserScreen extends Screen {
         }
 
         if (browser != null && !focused) { //Inject events into browser
-            System.out.println("Sent keystroke " + keystr);
             if (pressed)
                 browser.injectKeyPressedByKeyCode(keyCode, key, modifiers);
             else

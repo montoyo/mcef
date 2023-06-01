@@ -466,15 +466,14 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
                 renderer_.onPaint(false, paintData.dirtyRects, paintData.buffer, paintData.width, paintData.height, paintData.fullReRender);
                 paintData.hasFrame = false;
                 paintData.fullReRender = false;
-            } else {
-
             }
         }
 
         //So sadly this is the only way I could get around the "youtube not rendering video if the mouse doesn't move bug"
         //Even the test browser from the original JCEF library doesn't fix this...
         //What I hope, however, is that it doesn't redraw the entire browser... otherwise I could just call "invalidate"
-        sendMouseEvent(lastMouseEvent);
+        // luigi: this seems to be unnecessary now
+//        sendMouseEvent(lastMouseEvent);
     }
 
     @Override
