@@ -16,10 +16,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.montoyo.mcef.BaseProxy;
 import net.montoyo.mcef.MCEF;
-import net.montoyo.mcef.api.IBrowser;
-import net.montoyo.mcef.api.IDisplayHandler;
-import net.montoyo.mcef.api.IJSQueryHandler;
-import net.montoyo.mcef.api.IScheme;
+import net.montoyo.mcef.api.*;
 import net.montoyo.mcef.example.ExampleMod;
 import net.montoyo.mcef.utilities.CefUtil;
 import net.montoyo.mcef.utilities.Log;
@@ -97,6 +94,7 @@ public class ClientProxy extends BaseProxy {
                 }
             }
             cefClient = cefApp.createClient();
+            MinecraftForge.EVENT_BUS.post(new CefClientCreationEvent(cefClient));
         }
 
         System.out.println("Creating CEF browser at url " + url);

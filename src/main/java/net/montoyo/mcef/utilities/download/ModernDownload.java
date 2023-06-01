@@ -16,7 +16,7 @@ import java.util.zip.GZIPInputStream;
 
 public class ModernDownload {
 	protected static final String[] urls = new String[]{
-//			"cinemamod:https://github.com/CinemaMod/cinemamod-jcefbuild/releases/download/1.0.8/",
+			"cinemamod:https://github.com/CinemaMod/cinemamod-jcefbuild/releases/download/1.0.8/",
 			"jcefmvn:https://github.com/jcefmaven/jcefbuild/releases/download/1.0.46/",
 	};
 	
@@ -63,7 +63,7 @@ public class ModernDownload {
 		String[] allUrls = new String[urls.length + MCEF.FALLBACK_URLS_GIT.length];
 		allUrls[0] = urls[0];
 		System.arraycopy(MCEF.FALLBACK_URLS_GIT, 0, allUrls, 1, MCEF.FALLBACK_URLS_GIT.length);
-//		allUrls[allUrls.length - 1] = urls[1];
+		allUrls[allUrls.length - 1] = urls[1];
 		
 		String urlSelected = null;
 		
