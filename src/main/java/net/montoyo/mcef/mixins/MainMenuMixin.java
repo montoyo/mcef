@@ -31,13 +31,6 @@ public class MainMenuMixin {
 					return;
 				}
 				
-//				while (!CefUtil.isReady()) {
-//					try {
-//						Thread.sleep(0);
-//					} catch (Throwable err) {
-//					}
-//				}
-				
 				CefUtil.runInit();
 			}
 		}

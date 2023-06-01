@@ -217,6 +217,8 @@ public class MCEFDownloader {
             if (ModernDownload.download(listener))
                 return;
         
+        if (true) throw new RuntimeException();
+        
         listener.onTaskChanged("1:Fetching mod version info...");
 
         try {
