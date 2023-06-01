@@ -259,10 +259,9 @@ public class BrowserScreen extends Screen {
 
             if (wheel != 0)
                 browser.injectMouseWheel(sx, y, (hasControlDown() && ! hasAltDown() && !hasShiftDown()) ? GLFW.GLFW_MOD_CONTROL : 0, wheel, 0);
-            else if (btn == -1)
+            if (btn == -1)
                 browser.injectMouseMove(sx, y, 0, y < 0);
-            else
-                browser.injectMouseButton(sx, y, 0, btn + 1, pressed, 1);
+            browser.injectMouseButton(sx, y, 0, btn + 1, pressed, 1);
         }
 
         if (mouseY <= 20) { //Forward events to GUI.

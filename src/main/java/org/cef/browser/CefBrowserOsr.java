@@ -5,6 +5,7 @@
 package org.cef.browser;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IStringVisitor;
@@ -476,8 +477,34 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 //        sendMouseEvent(lastMouseEvent);
     }
 
+    private static HashMap<Integer, Long> CURSORS = new HashMap<>();
+    
+    public static long getCursor(int type) {
+        if (CURSORS.containsKey(type)) return CURSORS.get(type);
+        
+        long cur = GLFW.glfwCreateStandardCursor(switch (type) {
+            // TODO: I know this isn't all there is
+            case 1 -> GLFW_CROSSHAIR_CURSOR;
+            case 2 -> GLFW_IBEAM_CURSOR;
+            case 8, 9 -> GLFW_RESIZE_NS_CURSOR;
+            case 10, 11 -> GLFW_RESIZE_EW_CURSOR;
+            case 4, 7 -> GLFW_RESIZE_NESW_CURSOR;
+            case 5, 6 -> GLFW_RESIZE_NWSE_CURSOR;
+            case 12 -> GLFW_HAND_CURSOR;
+            case 13 -> GLFW_RESIZE_ALL_CURSOR;
+            default -> 0;
+        });
+        CURSORS.put(type, cur);
+        return cur;
+    }
+    
     @Override
     public boolean onCursorChange(CefBrowser browser, final int cursorType) {
+        GLFW.glfwSetCursor(
+                Minecraft.getInstance().getWindow().getWindow(),
+                getCursor(cursorType)
+        );
+        
         return true;
     }
 
