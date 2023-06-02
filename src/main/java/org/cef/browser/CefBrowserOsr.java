@@ -498,8 +498,16 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         return cur;
     }
     
+    boolean canChangeCursor = false;
+    
+    public void allowCursorChanges(boolean value) {
+        canChangeCursor = value;
+    }
+    
     @Override
     public boolean onCursorChange(CefBrowser browser, final int cursorType) {
+        if (!canChangeCursor) return true;
+        
         GLFW.glfwSetCursor(
                 Minecraft.getInstance().getWindow().getWindow(),
                 getCursor(cursorType)
