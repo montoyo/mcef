@@ -1,5 +1,6 @@
 package net.montoyo.mcef.utilities.download;
 
+import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.utilities.IProgressListener;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -7,6 +8,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -18,13 +20,25 @@ public class ModernDownload {
 			"jcefmvn:https://github.com/jcefmaven/jcefbuild/releases/download/1.0.46/",
 	};
 	
+	static double toMB(int src) {
+		return ((int) (src * 1e-5)) / 10d;
+	}
+	
 	public static boolean download(IProgressListener listener) {
 		listener.onTaskChanged("1:Downloading from Git");
 		
 		Path librariesPath = Paths.get(System.getProperty("cinemamod.libraries.path"));
 		File info = new File(librariesPath + "/info.txt");
-		if (info.exists())
-			return true;
+		String existing = "";
+		if (info.exists()) {
+			try {
+				InputStream fis = new FileInputStream(info);
+				existing = new String(fis.readAllBytes());
+				fis.close();
+			} catch (Throwable err) {
+				err.printStackTrace();
+			}
+		}
 		
 		String os = System.getProperty("os.name").toLowerCase(Locale.ROOT);
 		
@@ -45,8 +59,19 @@ public class ModernDownload {
 		
 		boolean downloaded = false;
 		
-		listener.onTaskChanged("2:Download");
-		for (String urlStr : urls) {
+		listener.onTaskChanged("2:Downloading");
+		String[] allUrls = new String[urls.length + MCEF.FALLBACK_URLS_GIT.length];
+		allUrls[0] = urls[0];
+		System.arraycopy(MCEF.FALLBACK_URLS_GIT, 0, allUrls, 1, MCEF.FALLBACK_URLS_GIT.length);
+		allUrls[allUrls.length - 1] = urls[1];
+		
+		String urlSelected = null;
+		
+		for (String urlStr : allUrls) {
+			// if the highest priority url is the currently installed version, then don't download anything
+			if (existing.equals(urlStr))
+				return true;
+			
 			String[] split = urlStr.split(":", 2);
 			
 			try {
@@ -60,9 +85,19 @@ public class ModernDownload {
 				{ // codeblock so the debugger can exist
 					URL url = new URL(split[1] + platform + ".tar.gz");
 					URLConnection connection = url.openConnection();
+					int len = connection.getContentLength();
 					InputStream stream = connection.getInputStream();
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					baos.write(stream.readAllBytes());
+					
+					byte[] buf = new byte[16384];
+					int incr;
+					int progress = 0;
+					while ((incr = stream.read(buf)) != -1) {
+						progress += incr;
+						listener.onTaskChanged("3:" + split[0] + " (" + toMB(progress) + "MB of " + toMB(len) + "MB)");
+						baos.write(buf, 0, incr);
+						listener.onProgressed(progress / (double) len);
+					}
 					stream.close();
 					
 					tarArchive =
@@ -108,6 +143,7 @@ public class ModernDownload {
 					}
 				}
 				
+				urlSelected = urlStr;
 				downloaded = true;
 				break;
 			} catch (Throwable ignored) {
@@ -117,7 +153,7 @@ public class ModernDownload {
 		if (downloaded) {
 			try {
 				FileOutputStream outputStream = new FileOutputStream(info);
-				// TODO: actually write data, lol
+				outputStream.write(urlSelected.getBytes(StandardCharsets.UTF_8));
 				outputStream.close();
 			} catch (Throwable err) {
 				err.printStackTrace();

@@ -176,6 +176,8 @@ public final class CefUtil {
                     ran = true;
                     LOGGER.info("Chromium Embedded Framework initialized");
                 } else {
+                    ClientProxy.VIRTUAL = true;
+                    
                     MinecraftForge.EVENT_BUS.post(new CefInitEvent(false));
                     ran = true;
                     LOGGER.warn("Could not initialize Chromium Embedded Framework");
