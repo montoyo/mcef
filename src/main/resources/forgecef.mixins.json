@@ -8,7 +8,8 @@
   ],
   "client": [
     "CefInitMixin",
-    "MainMenuMixin"
+    "MainMenuMixin",
+    "MinecraftMixin"
   ],
   "injectors": {
     "defaultRequire": 1

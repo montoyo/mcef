@@ -4,6 +4,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.montoyo.mcef.api.IBrowser;
 import net.montoyo.mcef.api.IStringVisitor;
 
+import java.util.function.Consumer;
+
 public class VirtualBrowser implements IBrowser {
 
     @Override
@@ -77,5 +79,12 @@ public class VirtualBrowser implements IBrowser {
     public boolean isPageLoading() {
         return true;
     }
-
+    
+    @Override
+    public void allowCursorChanges(boolean value) {
+    }
+    
+    @Override
+    public void addCursorChangeListener(Consumer<Integer> listener) {
+    }
 }

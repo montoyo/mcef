@@ -12,6 +12,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.montoyo.mcef.BaseProxy;
@@ -147,22 +148,27 @@ public class ClientProxy extends BaseProxy {
     }
 
     public void onTickStart(TickEvent.ClientTickEvent event) {
+        if (!MCEF.HIGH_FPS)
+            // listen for specifically the start of the tick
+            if (event.phase == TickEvent.Phase.START)
+                onFrame();
+    }
+    
+    public void onFrame() {
         // no point in ticking CEF if it doesn't exist, or if there are no browsers
         if (cefApp == null || browsers.isEmpty()) return;
-        // listen for specific the start tick
-        if (event.phase == TickEvent.Phase.START) {
-            if (CefUtil.isInit()) {
-                mc.getProfiler().push("MCEF");
+        
+        if (CefUtil.isInit()) {
+            mc.getProfiler().push("MCEF");
 
-                if (cefApp != null)
-                    cefApp.N_DoMessageLoopWork();
+            if (cefApp != null)
+                cefApp.N_DoMessageLoopWork();
 
-                for (CefBrowserOsr b : browsers)
-                    b.mcefUpdate();
+            for (CefBrowserOsr b : browsers)
+                b.mcefUpdate();
 
-                displayHandler.update();
-                mc.getProfiler().pop();
-            }
+            displayHandler.update();
+            mc.getProfiler().pop();
         }
     }
 

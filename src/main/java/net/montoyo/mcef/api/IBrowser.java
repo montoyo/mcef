@@ -2,6 +2,8 @@ package net.montoyo.mcef.api;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import java.util.function.Consumer;
+
 public interface IBrowser {
     
     /**
@@ -136,5 +138,17 @@ public interface IBrowser {
      * @return true if the page is still being loaded, false otherwise.
      */
     boolean isPageLoading();
-
+    
+    /**
+     * @param value Whether or not the browser is allowed to change the game's cursor
+     */
+    void allowCursorChanges(boolean value);
+    
+    /**
+     * Adds a hook for when the cursor changes
+     * this hook will be regardless of if cursor changes are allowed
+     *
+     * @param listener the hook
+     */
+    void addCursorChangeListener(Consumer<Integer> listener);
 }

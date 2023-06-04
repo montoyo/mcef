@@ -12,18 +12,21 @@ public class MCEF {
 	
 	public static final String VERSION = "1.33";
 	public static boolean ENABLE_EXAMPLE;
-	public static boolean SKIP_UPDATES;
-	public static boolean WARN_UPDATES;
-	public static String FORCE_MIRROR = null;
 	public static String HOME_PAGE;
 	public static String[] CEF_ARGS = new String[0];
 	public static boolean CHECK_VRAM_LEAK;
 	public static boolean SHUTDOWN_JCEF;
+	
+	// download options
+	public static boolean SKIP_UPDATES;
+	public static boolean WARN_UPDATES;
+	public static String FORCE_MIRROR = null;
 	public static boolean SECURE_MIRRORS_ONLY;
-	
 	public static boolean FAVOR_GIT;
-	
 	public static String[] FALLBACK_URLS_GIT;
+	
+	public static boolean HIGH_FPS;
+	public static boolean ZERO_BUFFER;
 	
 	public static MCEF INSTANCE;
 	
@@ -72,6 +75,9 @@ public class MCEF {
 			
 			//Config: debug
 			cfg.getBoolean("checkForVRAMLeak", "debug", false, "Track allocated OpenGL textures to make sure there's no leak", MCEF.class.getDeclaredField("CHECK_VRAM_LEAK"));
+			
+			cfg.getBoolean("high_fps", "render", true, "If this is true, MCEF ticks at the start of each frame (Runs at the game's FPS)\nIf this is false, MCEF ticks at the start of each tick (Runs at 20 fps)", MCEF.class.getDeclaredField("HIGH_FPS"));
+			cfg.getBoolean("zero_buffer", "render", true, "Zeros out the graphical information buffer before drawing to the screen; makes the game run slower, but may reduce graphical glitches", MCEF.class.getDeclaredField("ZERO_BUFFER"));
 		} catch (Throwable err) {
 			err.printStackTrace();
 		}

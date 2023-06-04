@@ -31,6 +31,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 import static java.awt.event.KeyEvent.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -444,7 +445,8 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
                 if (paintData.buffer == null || size != paintData.buffer.capacity()) //This only happens when the browser gets resized
                     paintData.buffer = BufferUtils.createByteBuffer(size);
 
-                BufferUtils.zeroBuffer(paintData.buffer);
+                if (MCEF.ZERO_BUFFER)
+                    BufferUtils.zeroBuffer(paintData.buffer);
 
                 paintData.buffer.position(0);
                 paintData.buffer.limit(buffer.limit());
@@ -499,13 +501,26 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
     }
     
     boolean canChangeCursor = false;
+    int currentCursor;
     
     public void allowCursorChanges(boolean value) {
         canChangeCursor = value;
+        if (value) onCursorChange(this, currentCursor);
+    }
+    
+    Consumer<Integer> onCursorChanged = (i) -> {
+    };
+    
+    @Override
+    public void addCursorChangeListener(Consumer<Integer> listener) {
+        onCursorChanged = listener;
     }
     
     @Override
     public boolean onCursorChange(CefBrowser browser, final int cursorType) {
+        onCursorChanged.accept(cursorType);
+        currentCursor = cursorType;
+    
         if (!canChangeCursor) return true;
         
         GLFW.glfwSetCursor(
