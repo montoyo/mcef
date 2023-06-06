@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.montoyo.mcef.api.*;
+import net.montoyo.mcef.api.CefInitEvent;
 import net.montoyo.mcef.utilities.CefUtil;
 import net.montoyo.mcef.utilities.Log;
 import org.lwjgl.glfw.GLFW;
@@ -147,11 +148,8 @@ public class ExampleMod implements IDisplayHandler, IJSQueryHandler {
     @Override
     public void cancelQuery(IBrowser b, long queryId) {
     }
-
-
-    /*public void onDrawHUD(RenderGameOverlayEvent.Post ev) {
-        if(hudBrowser != null)
-            hudBrowser.drawTexture(new MatrixStack(), 0, 0, 0, 0, 20, 20);
-    }*/
-
+    
+    public void onInit() {
+        MinecraftForge.EVENT_BUS.addListener(this::onCefInit);
+    }
 }

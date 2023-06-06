@@ -1,6 +1,5 @@
 package net.montoyo.mcef.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -11,13 +10,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.montoyo.mcef.BaseProxy;
 import net.montoyo.mcef.MCEF;
 import net.montoyo.mcef.api.*;
+import net.montoyo.mcef.api.CefClientCreationEvent;
 import net.montoyo.mcef.example.ExampleMod;
 import net.montoyo.mcef.utilities.CefUtil;
 import net.montoyo.mcef.utilities.Log;
@@ -62,7 +58,7 @@ public class ClientProxy extends BaseProxy {
         super.onInit();
         MinecraftForge.EVENT_BUS.addListener(this::onTickStart);
         MinecraftForge.EVENT_BUS.addListener(this::onLogin);
-        MinecraftForge.EVENT_BUS.addListener(exampleMod::onCefInit);
+        exampleMod.onInit();
     }
 
     public CefApp getCefApp() {

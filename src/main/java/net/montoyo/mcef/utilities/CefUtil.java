@@ -9,7 +9,6 @@ import net.montoyo.mcef.api.CefInitEvent;
 import net.montoyo.mcef.client.AppHandler;
 import net.montoyo.mcef.client.ClientProxy;
 import net.montoyo.mcef.client.DisplayHandler;
-import net.montoyo.mcef.client.UpdateFrame;
 import net.montoyo.mcef.client.init.CefInitMenu;
 import net.montoyo.mcef.remote.RemoteConfig;
 import org.cef.CefApp;
@@ -104,7 +103,7 @@ public final class CefUtil {
         settings.background_color = settings.new ColorType(0, 255, 255, 255);
         settings.cache_path = (new File(JCEF_ROOT, "cache")).getAbsolutePath();
         // settings.user_agent = "MCEF"
-
+    
         CefApp.startup(MCEF.CEF_ARGS);
         cefApp = CefApp.getInstance(settings);
 
@@ -114,8 +113,12 @@ public final class CefUtil {
         }
 
         ClientProxy.loadMimeTypeMapping();
-
+    
+        // temporarily store the cef app so that the initialization code can get it
+        ClientProxy.cefApp = cefApp;
         cefClient = cefApp.createClient();
+        // set it back to null so that some extra init can happen later on
+        ClientProxy.cefApp = null;
 
         Log.info(cefApp.getVersion().toString());
         cefRouter = CefMessageRouter.create(new CefMessageRouter.CefMessageRouterConfig("mcefQuery", "mcefCancel"));

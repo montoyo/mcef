@@ -45,11 +45,18 @@ public class AppHandler extends CefAppHandlerAdapter {
         }
 
     }
+    
+    boolean registered = false;
 
     private final HashMap<String, SchemeData> schemeMap = new HashMap<>();
 
     public void registerScheme(String name, Class<? extends IScheme> cls, boolean std, boolean local, boolean dispIsolated, boolean secure, boolean corsEnabled, boolean cspBypassing, boolean fetchEnabled) {
         schemeMap.put(name, new SchemeData(cls, std, local, dispIsolated, secure, corsEnabled, cspBypassing, fetchEnabled));
+        
+        if (registered) {
+            CefApp app = CefApp.getInstance();
+            app.registerSchemeHandlerFactory(name, "", new SchemeHandlerFactory(schemeMap.get(name).cls));
+        }
     }
 
     public boolean isSchemeRegistered(String name) {
@@ -58,6 +65,8 @@ public class AppHandler extends CefAppHandlerAdapter {
     
     @Override
     public void onRegisterCustomSchemes(CefSchemeRegistrar reg) {
+        registered = true;
+        
         int cnt = 0;
 
         for(Map.Entry<String, SchemeData> entry : schemeMap.entrySet()) {
