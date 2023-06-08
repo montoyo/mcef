@@ -38,6 +38,7 @@ public final class CefUtil {
         CefClient cefClient;
         String ROOT;
         String JCEF_ROOT;
+        String LIBS_ROOT;
         boolean VIRTUAL = false;
         DisplayHandler displayHandler = ClientProxy.displayHandler;
 
@@ -46,6 +47,7 @@ public final class CefUtil {
         ROOT = ClientProxy.mc.gameDirectory.getAbsolutePath().replaceAll("\\\\", "/");
 
         JCEF_ROOT = ROOT + "/jcef";
+        LIBS_ROOT = ROOT + "/mods/cinemamod-libraries";
 
         if (ROOT.endsWith("."))
             ROOT = ROOT.substring(0, ROOT.length() - 1);
@@ -79,19 +81,37 @@ public final class CefUtil {
         ipl.onProgressEnd();
 
         if (OS.isLinux()) {
-            File subproc = new File(JCEF_ROOT, "jcef_helper");
-
-            // Attempt to make the CEF subprocess executable if not
-            if (!subproc.canExecute()) {
-                try {
-                    int retCode = Runtime.getRuntime().exec(new String[]{"/usr/bin/chmod", "+x", subproc.getAbsolutePath()}).waitFor();
-
-                    if (retCode != 0)
-                        throw new RuntimeException("chmod exited with code " + retCode);
-                } catch (Throwable t) {
-                    Log.errorEx("Error while giving execution rights to jcef_helper. MCEF will enter virtual mode. You can fix this by chmoding jcef_helper manually.", t);
-                    VIRTUAL = true;
+            File[] subprocs = new File[] {
+                    new File(LIBS_ROOT, "jcef_helper"),
+                    new File(JCEF_ROOT, "jcef_helper")
+            };
+    
+            boolean anyPassed = false;
+            
+            Throwable te = null;
+            
+            for (File subproc : subprocs) {
+                // Attempt to make the CEF subprocess executable if not
+                if (!subproc.canExecute()) {
+                    try {
+                        int retCode = Runtime.getRuntime().exec(new String[]{"/usr/bin/chmod", "+x", subproc.getAbsolutePath()}).waitFor();
+            
+                        if (retCode == 0) {
+                            anyPassed = true;
+                            break;
+                        }
+                    } catch (Throwable t) {
+                        te = t;
+                    }
                 }
+            }
+            
+            if (!anyPassed) {
+                if (te != null)
+                    Log.errorEx("Error while giving execution rights to jcef_helper. MCEF will enter virtual mode. You can fix this by chmoding jcef_helper manually.", te);
+                else
+                    Log.error("Error while giving execution rights to jcef_helper. MCEF will enter virtual mode. You can fix this by chmoding jcef_helper manually.");
+                VIRTUAL = true;
             }
         }
 
