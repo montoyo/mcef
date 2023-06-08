@@ -159,7 +159,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 
     @Override
     public void injectMouseButton(int x, int y, int mods, int btn, boolean pressed, int ccnt) {
-        if(btn != 3) {
+        if (btn != 3) {
             MouseEvent ev = new MouseEvent(dc_, pressed ? MouseEvent.MOUSE_PRESSED : MouseEvent.MOUSE_RELEASED, 0, mods, x, y, ccnt, false, btn);
             sendMouseEvent(ev);
         } else {
@@ -180,10 +180,10 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
 
     public int remapModifiers(int mods) {
         int vkMods = 0;
-        if ((mods & GLFW_MOD_CONTROL) != 0) vkMods |= KeyEvent.CTRL_DOWN_MASK;
-        if ((mods & GLFW_MOD_ALT) != 0) vkMods |= KeyEvent.ALT_DOWN_MASK;
-        if ((mods & GLFW_MOD_SHIFT) != 0) vkMods |= KeyEvent.SHIFT_DOWN_MASK;
-        if ((mods & GLFW_MOD_SUPER) != 0) vkMods |= KeyEvent.META_DOWN_MASK;
+        if ((mods & GLFW_MOD_CONTROL) != 0) vkMods |= KeyEvent.CTRL_DOWN_MASK | KeyEvent.CTRL_MASK;
+        if ((mods & GLFW_MOD_ALT) != 0) vkMods |= KeyEvent.ALT_DOWN_MASK | KeyEvent.ALT_MASK;
+        if ((mods & GLFW_MOD_SHIFT) != 0) vkMods |= KeyEvent.SHIFT_DOWN_MASK | KeyEvent.SHIFT_MASK;
+        if ((mods & GLFW_MOD_SUPER) != 0) vkMods |= KeyEvent.META_DOWN_MASK | KeyEvent.META_MASK;
         return vkMods;
     }
 
@@ -224,7 +224,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
         if (keyCode == GLFW_KEY_RIGHT_CONTROL) return '\uFFFF';
         switch (keyCode) {
             case GLFW_KEY_ENTER, GLFW_KEY_KP_ENTER, VK_ENTER:
-                return '\r';
+                return '\n';
             case GLFW_KEY_SPACE:
                 return 32;
             case GLFW_KEY_BACKSPACE:
@@ -310,7 +310,14 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
             }
 
             default -> {
-                KeyEvent ev = UnsafeUtil.makeEvent(dc_, remapKeycode(key, c, mods), c, KEY_LOCATION_UNKNOWN, KEY_PRESSED, 0, remapModifiers(mods), mapScanCode(key, c));
+                int raw = key;
+                if (c == '\n') raw = 13;
+                
+                KeyEvent ev = UnsafeUtil.makeEvent(dc_, remapKeycode(key, c, mods), c, KEY_LOCATION_UNKNOWN, KEY_PRESSED, 0, remapModifiers(mods), mapScanCode(key, c), raw);
+                if (ev.getKeyChar() == '\n') {
+                    System.out.println(ev);
+                }
+                
                 sendKeyEvent(ev);
             }
         }
@@ -328,7 +335,7 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
             if (key == GLFW_KEY_LEFT && canGoBack()) return;
             else if (key == GLFW_KEY_RIGHT && canGoForward()) return;
         }
-
+        
         char c = (char) key;
         int keyRemapped = remapKeycode(key, (char) key, mods);
         if (key != VK_UNDEFINED) {
@@ -339,7 +346,10 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
                 }
 
                 case VK_ENTER, GLFW_KEY_ENTER, GLFW_KEY_KP_ENTER -> {
-                    KeyEvent ev = UnsafeUtil.makeEvent(dc_, key, '\r', KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, remapModifiers(mods), mapScanCode(key, c));
+                    int raw = key;
+                    if (c == '\n') raw = 13;
+                    
+                    KeyEvent ev = UnsafeUtil.makeEvent(dc_, key, '\n', KEY_LOCATION_UNKNOWN, KEY_TYPED, 0, remapModifiers(mods), mapScanCode(key, c), raw);
                     sendKeyEvent(ev);
                 }
 
