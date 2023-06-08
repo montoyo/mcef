@@ -103,6 +103,9 @@ public final class CefUtil {
                     } catch (Throwable t) {
                         te = t;
                     }
+                } else {
+                    anyPassed = true;
+                    break;
                 }
             }
             
