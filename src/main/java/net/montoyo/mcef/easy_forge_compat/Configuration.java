@@ -47,6 +47,7 @@ public class Configuration {
 				value::get,
 				(v) -> UnsafeUtil.setBoolean(base, handle, (boolean) v)
 		));
+		UnsafeUtil.setBoolean(base, handle, defaultValue);
 		configBuilder.pop();
 	}
 	
@@ -59,6 +60,7 @@ public class Configuration {
 				value::get,
 				(v) -> valueConsumer.accept((String) v)
 		));
+		valueConsumer.accept(defaultValue);
 		configBuilder.pop();
 	}
 	
@@ -111,11 +113,6 @@ public class Configuration {
 				outputStream.write(writer.writeToString(cfg).getBytes(StandardCharsets.UTF_8));
 				outputStream.flush();
 				outputStream.close();
-				
-				spec.correct(cfg);
-				spec.setConfig(cfg);
-				
-				spec.save();
 			}
 		} catch (Throwable err) {
 			err.printStackTrace();

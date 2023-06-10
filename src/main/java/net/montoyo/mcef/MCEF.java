@@ -33,6 +33,7 @@ public class MCEF {
 	public static BaseProxy PROXY = DistExecutor.safeRunForDist(() -> ClientProxy::new, () -> BaseProxy::new);
 	public static boolean skipVersionCheck = false;
 	public static boolean writeMirrorData = false;
+	public static boolean downloadedFromGit = false;
 	
 	private static boolean wroteConfig = false;
 	

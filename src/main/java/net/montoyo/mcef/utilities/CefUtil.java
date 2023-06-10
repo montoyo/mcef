@@ -63,7 +63,8 @@ public final class CefUtil {
     
         ipl.onProgressed(0);
         ipl.onTaskChanged("1:Load Config");
-        cfg.load();
+        if (!MCEF.FAVOR_GIT || !MCEF.downloadedFromGit)
+            cfg.load();
         ipl.onProgressed(0.25);
     
         System.out.println("Updating MCEF file listing ");
