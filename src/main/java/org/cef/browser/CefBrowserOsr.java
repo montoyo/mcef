@@ -241,19 +241,18 @@ public class CefBrowserOsr extends CefBrowser_N implements CefRenderHandler, IBr
             case GLFW_KEY_END:
                 return '\uFFFF';
         }
-        String keystr = GLFW.glfwGetKeyName(keyCode, scanCode);
-        if (keystr == null) {
-            keystr = "\0";
-        } else if (keystr.length() == 0) {
-            return -1;
-        }
-//        if((mod & GLFW_MOD_SHIFT) != 0) {
-//            keystr = keystr.toUpperCase(Locale.ROOT);
+//        if (scanCode != -1) {
+//            String keystr = GLFW.glfwGetKeyName(keyCode, scanCode);
+//            if (keystr == null) {
+//                return (int) '\0';
+//            } else if (keystr.length() == 0) {
+//                return -1;
+//            }
 //        }
         return keyCode;
     }
 
-    private long mapScanCode(int key, char c) {
+    private static long mapScanCode(int key, char c) {
         if (key == GLFW_KEY_LEFT_CONTROL || key == GLFW_KEY_RIGHT_CONTROL) return 29;
         return switch (key) {
             case GLFW_KEY_DELETE -> 83;
