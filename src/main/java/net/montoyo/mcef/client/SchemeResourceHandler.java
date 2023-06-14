@@ -11,6 +11,15 @@ import org.cef.network.CefResponse;
 
 public class SchemeResourceHandler extends CefResourceHandlerAdapter {
 
+    // forge causes some problems without this
+    private static final ClassLoader clr;
+    
+    static {
+        ClassLoader c = Thread.currentThread().getContextClassLoader();
+        if (c == null) c = SchemeResourceHandler.class.getClassLoader();
+        clr = c;
+    }
+    
     private final IScheme scheme;
 
     public SchemeResourceHandler(IScheme scm) {
@@ -19,6 +28,8 @@ public class SchemeResourceHandler extends CefResourceHandlerAdapter {
 
     @Override
     public boolean processRequest(CefRequest request, CefCallback callback) {
+        Thread.currentThread().setContextClassLoader(clr);
+        
         SchemePreResponse resp = scheme.processRequest(request.getURL());
 
         switch(resp) {

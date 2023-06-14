@@ -10,7 +10,7 @@ issueTrackerURL="" #optional
 
 modId="forgecef" #mandatory
 
-version="1.2.4" #mandatory
+version="1.2.5" #mandatory
 
 displayName="MCEF" #mandatory
 

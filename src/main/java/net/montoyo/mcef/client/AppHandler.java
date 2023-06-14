@@ -7,11 +7,16 @@ import net.montoyo.mcef.utilities.Log;
 import org.cef.CefApp;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefFrame;
+import org.cef.callback.CefCallback;
 import org.cef.callback.CefSchemeHandlerFactory;
 import org.cef.callback.CefSchemeRegistrar;
 import org.cef.handler.CefAppHandlerAdapter;
 import org.cef.handler.CefResourceHandler;
+import org.cef.misc.BoolRef;
+import org.cef.misc.IntRef;
+import org.cef.misc.StringRef;
 import org.cef.network.CefRequest;
+import org.cef.network.CefResponse;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -90,8 +95,33 @@ public class AppHandler extends CefAppHandlerAdapter {
     }
     
     private static class SchemeHandlerFactory implements CefSchemeHandlerFactory {
-
-        private Class<? extends IScheme> cls;
+    
+        private static final ClassLoader clr;
+    
+        static {
+            // this may look odd, but it makes CEF load a *lot* faster, and also makes it not spam errors to console
+            ClassLoader c = Thread.currentThread().getContextClassLoader();
+            if (c == null) c = SchemeResourceHandler.class.getClassLoader();
+            clr = c;
+    
+            try {
+                //noinspection unused
+                Class<?>[] LOADER = new Class[] {
+                        IntRef.class,
+                        BoolRef.class,
+                        CefRequest.class,
+                        StringRef.class,
+                        SchemeResponseData.class,
+                        SchemeResponseHeaders.class,
+                        Class.forName("org.cef.callback.CefCallback_N"),
+                        Class.forName("org.cef.network.CefResponse_N")
+                };
+            } catch (Throwable err) {
+                err.printStackTrace();
+            }
+        }
+        
+        private final Class<? extends IScheme> cls;
 
         private SchemeHandlerFactory(Class<? extends IScheme> cls) {
             this.cls = cls;
@@ -99,6 +129,8 @@ public class AppHandler extends CefAppHandlerAdapter {
 
         @Override
         public CefResourceHandler create(CefBrowser browser, CefFrame frame, String schemeName, CefRequest request) {
+            Thread.currentThread().setContextClassLoader(clr);
+
             try {
                 return new SchemeResourceHandler(cls.newInstance());
             } catch(Throwable t) {
