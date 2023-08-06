@@ -1,0 +1,39 @@
+plugins {
+    id 'fabric-loom'
+}
+
+sourceCompatibility = JavaLanguageVersion.of(java_version as int)
+targetCompatibility = JavaLanguageVersion.of(java_version as int)
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.fabricmc.net/' }
+    mavenLocal()
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+}
+
+sourceSets {
+    jcef {
+        java {
+            srcDir "java-cef/java"
+            exclude "**/tests/**"
+        }
+    }
+
+    main {
+        compileClasspath += jcef.output
+        runtimeClasspath += jcef.output
+    }
+}
+
+idea {
+    module {
+        excludeDirs += file("java-cef/java/tests")
+        inheritOutputDirs true
+    }
+}

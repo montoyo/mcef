@@ -1,21 +1,11 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven { url = 'https://maven.minecraftforge.net/' }
-        maven { url = 'https://maven.parchmentmc.org' }
-    }
-    resolutionStrategy {
-        eachPlugin {
-            switch (requested.id.toString()) {
-                case "net.minecraftforge.gradle": {
-                    useModule("${requested.id}:ForgeGradle:${requested.version}")
-                    break
-                }
-                case "org.spongepowered.mixin": {
-                    useModule("org.spongepowered:mixingradle:${requested.version}")
-                    break;
-                }
-            }
-        }
+        maven { url = 'https://maven.fabricmc.net/' }
+        maven { url = 'https://maven.neoforged.net/releases' }
+        mavenCentral()
     }
 }
+
+rootProject.name = 'mcef'
+include('common', 'fabric', 'forge')

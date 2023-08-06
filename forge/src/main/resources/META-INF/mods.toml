@@ -1,0 +1,27 @@
+modLoader="javafml"
+loaderVersion="${forge_loader_requirement}"
+license="All rights reserved"
+issueTrackerURL="https://github.com/CinemaMod/mcef/issues"
+displayURL="https://github.com/CinemaMod/mcef"
+logoFile="icon.png"
+# credits=""
+authors="ds58"
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+updateJSONURL=""
+displayTest="NONE"
+description='''TODO desc'''
+[[dependencies.${mod_id}]]
+    modId="forge"
+    mandatory=true
+    versionRange="${forge_requirement}"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20,1.20.1]"
+    ordering="NONE"
+    side="BOTH"

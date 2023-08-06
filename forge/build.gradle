@@ -1,0 +1,131 @@
+plugins {
+    id 'net.neoforged.gradle' version '6.0.+'
+    id 'com.matthewprenger.cursegradle' version "${cursegradle_version}"
+    id 'com.github.johnrengelman.shadow' version "${shadow_version}"
+}
+
+archivesBaseName = project.archives_base_name
+version = mod_version
+group = mod_packagename
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(java_version as int)
+
+minecraft {
+    mappings channel: 'official', version: minecraft_version
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.console.level', 'debug'
+        }
+        server {
+            workingDirectory project.file('run/server')
+            property 'forge.logging.console.level', 'debug'
+            arg '--nogui'
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.shedaniel.me/' }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+configurations {
+    shadowMc.extendsFrom minecraftLibrary
+}
+
+tasks.register('prepareWorkspace') {
+
+}
+
+dependencies {
+    minecraft "net.neoforged:forge:${minecraft_version}-${forge_version}"
+
+    implementation(project(':common')) {
+        transitive false
+    }
+}
+
+tasks.register('generateJava', Copy) {
+    from project(':common').file('src/template/java')
+    into "${buildDir}/generated/java"
+    expand 'compatibility_version': mod_compatibility_version
+}
+sourceSets.main.java {
+    srcDir "${buildDir}/generated/java"
+}
+compileJava.dependsOn generateJava
+
+processResources {
+    filesMatching('**/*.toml') {
+        expand 'mod_id': mod_id,
+                'mod_version': mod_version,
+                'mod_name': mod_name,
+                'forge_loader_requirement': forge_loader_requirement,
+                'forge_requirement': forge_requirement,
+                'minecraft_version': minecraft_version
+    }
+    from("${project(':common').projectDir}/src/main/resources")
+}
+
+tasks.withType(JavaCompile).configureEach {
+    source(project(':common').sourceSets.main.allSource)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes(['Specification-Title'     : mod_name,
+                    'Specification-Vendor'    : mod_vendor,
+                    'Specification-Version'   : "1",
+                    'Implementation-Title'    : mod_name,
+                    'Implementation-Version'  : mod_version,
+                    'Implementation-Vendor'   : mod_vendor,
+                    'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+    from configurations.shadow.collect { it.isDirectory() ? it : zipTree(it) }
+}
+
+tasks.register('deobfJar', Jar) {
+    archiveClassifier = 'deobf'
+    from sourceSets.main.output
+}
+
+curseforge {
+    apiKey = file("${rootDir}/curseforge_api_key.txt").exists() ? file("${rootDir}/curseforge_api_key.txt").text : ''
+    project {
+        id = curse_id
+        releaseType = release_type
+        addGameVersion minecraft_version
+        addGameVersion 'Forge'
+        addGameVersion 'NeoForge'
+        addGameVersion "Java ${java_version}"
+        mainArtifact(jar) {
+            displayName = "[FORGE][${minecraft_version}] ${mod_name} ${mod_version}"
+        }
+    }
+}
+
+jar.finalizedBy('reobfJar')
+
+shadowJar {
+    configurations = [project.configurations.shadowMc]
+    archiveClassifier = ''
+}
+shadowJar.dependsOn('reobfJar')
+
+reobf {
+    shadowJar {}
+}
+
+artifacts {
+    archives deobfJar
+}

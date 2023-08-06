@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "TODO desc",
+  "authors": [
+    "${mod_vendor}"
+  ],
+  "contact": {
+    "homepage": "TODO",
+    "issues": "TODO",
+    "sources": "TODO",
+    "discord": "TODO"
+  },
+  "license": "All Rights Reserved",
+  "icon": "icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "com.cinemamod.mcef.FabricMCEFClientMod"
+    ],
+    "main": [
+      "com.cinemamod.mcef.FabricMCEFMod"
+    ]
+  },
+  "mixins": [
+    "mcef.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${fabric_loader_version}",
+    "minecraft": ["1.20", "1.20.1"],
+    "java": ">=${java_version}"
+  },
+  "breaks": {
+    "fabric-api": "<${min_fabric_version}"
+  }
+}

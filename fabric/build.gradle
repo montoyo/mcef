@@ -1,0 +1,116 @@
+plugins {
+    id 'fabric-loom'
+    id 'com.matthewprenger.cursegradle' version "${cursegradle_version}"
+    id 'com.github.johnrengelman.shadow' version "${shadow_version}"
+}
+
+sourceCompatibility = JavaLanguageVersion.of(java_version as int)
+targetCompatibility = JavaLanguageVersion.of(java_version as int)
+
+archivesBaseName = archives_base_name
+version = mod_version
+group = maven_group
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.fabricmc.net/' }
+    maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
+    mavenLocal()
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.officialMojangMappings()
+    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+
+    Set<String> apiModules = [
+            'fabric-api-base',
+            'fabric-command-api-v2',
+            'fabric-lifecycle-events-v1',
+            'fabric-networking-api-v1',
+            'fabric-resource-loader-v0',
+            'fabric-key-binding-api-v1'
+    ]
+
+    apiModules.forEach {
+        include(modImplementation(fabricApi.module(it, fabric_version)))
+    }
+
+    implementation project(path: ':common', configuration: 'namedElements')
+}
+
+tasks.register('generateJava', Copy) {
+    from project(':common').file('src/template/java')
+    into "${buildDir}/generated/java"
+    expand 'compatibility_version': mod_compatibility_version
+}
+sourceSets.main.java {
+    srcDir "${buildDir}/generated/java"
+}
+compileJava.dependsOn generateJava
+generateJava.dependsOn('sourcesJar')
+
+processResources {
+    filesMatching('fabric.mod.json') {
+        expand 'mod_id': mod_id,
+                'mod_name': mod_name,
+                'mod_vendor': mod_vendor,
+                'mod_version': mod_version,
+                'java_version': java_version,
+                'minecraft_dependency': minecraft_dependency,
+                'fabric_loader_version': fabric_loader_version,
+                'min_fabric_version': min_fabric_version
+    }
+    from project(":common").sourceSets.main.resources
+}
+
+tasks.withType(JavaCompile).configureEach {
+    source(project(':common').sourceSets.main.allSource)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = 'UTF-8'
+    it.options.release = java_version as int
+}
+
+java {
+    withSourcesJar()
+}
+
+jar {
+    from('LICENSE') {
+        rename { "${it}_${archivesBaseName}" }
+    }
+}
+
+curseforge {
+    apiKey = file("${rootDir}/curseforge_api_key.txt").exists() ? file("${rootDir}/curseforge_api_key.txt").text : ''
+    project {
+        id = curse_id
+        changelogType = 'markdown'
+        changelog = file('changelog.md')
+        releaseType = release_type
+        addGameVersion curseforge_minecraft_version
+        addGameVersion 'Fabric'
+        addGameVersion "Java ${java_version}"
+        mainArtifact(file("${buildDir}/libs/${archivesBaseName}-${version}.jar")) {
+            displayName = "[FABRIC][${minecraft_version}] ${mod_name} ${mod_version}"
+        }
+        afterEvaluate {
+            uploadTask.dependsOn(remapJar)
+        }
+    }
+    options {
+        forgeGradleIntegration = false
+    }
+}
+
+shadowJar {
+    configurations = [project.configurations.shadow]
+    archiveClassifier = 'shadow-dev'
+}
+
+remapJar {
+    dependsOn shadowJar
+    inputFile = shadowJar.archiveFile.get()
+}
