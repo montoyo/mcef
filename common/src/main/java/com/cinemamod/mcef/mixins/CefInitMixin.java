@@ -10,13 +10,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.HashSet;
-import java.util.Scanner;
 import java.util.Set;
 
 @Mixin(ClientPackSource.class)
@@ -49,46 +46,6 @@ public class CefInitMixin {
             mcefLibrariesDir.mkdirs();
         }
         System.setProperty("jcef.path", mcefLibrariesDir.getCanonicalPath());
-
-        //
-        // CEF library extraction
-        //
-        URL cefManifestURL = CefInitMixin.class.getClassLoader().getResource("cef/manifest.txt");
-
-        if (cefManifestURL == null) {
-            return;
-        }
-
-        try (InputStream cefManifestInputStream = cefManifestURL.openStream();
-             Scanner scanner = new Scanner(cefManifestInputStream)) {
-            while (scanner.hasNext()) {
-                String line = scanner.nextLine();
-                String fileHash = line.split("  ")[0]; // TODO: check hash
-                String relFilePath = line.split("  ")[1];
-                URL cefResourceURL = CefInitMixin.class.getClassLoader().getResource("cef/" + relFilePath);
-
-                if (cefResourceURL == null) {
-                    continue;
-                }
-
-                try (InputStream cefResourceInputStream = cefResourceURL.openStream()) {
-                    File cefResourceFile = new File(mcefLibrariesDir, relFilePath);
-
-                    if (cefResourceFile.exists()) {
-                        continue;
-                    }
-
-                    cefResourceFile.getParentFile().mkdirs(); // For when we run across a nested file, i.e. locales/sl.pak
-                    Files.copy(cefResourceInputStream, cefResourceFile.toPath());
-                    if (platform.isLinux()) {
-                        if (cefResourceFile.getName().contains("chrome-sandbox")
-                                || cefResourceFile.getName().contains("jcef_helper")) {
-                            setUnixExecutable(cefResourceFile);
-                        }
-                    }
-                }
-            }
-        }
     }
 
     @Inject(at = @At("TAIL"), method = "<init>(Ljava/nio/file/Path;)V")
