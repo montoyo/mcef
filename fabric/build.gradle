@@ -66,6 +66,7 @@ processResources {
 
 tasks.withType(JavaCompile).configureEach {
     source(project(':common').sourceSets.main.allSource)
+    source(project(':common').sourceSets.jcef.allSource)
 }
 
 tasks.withType(JavaCompile).configureEach {
