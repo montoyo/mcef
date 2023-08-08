@@ -16,11 +16,11 @@ import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 
 public class MCEFBrowser extends CefBrowserOsr {
-    public final MCEFRenderer renderer = new MCEFRenderer(true);
+    private final MCEFRenderer renderer = new MCEFRenderer(true);
 
-    public MCEFBrowser(CefClient client, String url, boolean transparent, CefRequestContext context) {
-        super(client, url, transparent, context);
-        Minecraft.getInstance().submit(renderer::initialize);
+    public MCEFBrowser(CefClient cefClient, String url, boolean transparent, CefRequestContext context) {
+        super(cefClient, url, transparent, context);
+        Minecraft.getInstance().submit(renderer::initialize); // TODO: remove this
     }
 
     @Override
@@ -99,7 +99,7 @@ public class MCEFBrowser extends CefBrowserOsr {
 
     @Override
     protected void finalize() throws Throwable {
-        Minecraft.getInstance().submit(renderer::cleanup);
+        Minecraft.getInstance().submit(renderer::cleanup); // TODO: remove this
         super.finalize();
     }
 }

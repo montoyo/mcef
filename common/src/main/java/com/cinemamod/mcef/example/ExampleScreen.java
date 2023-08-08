@@ -42,7 +42,7 @@ public class ExampleScreen extends Screen {
         return (int) sy;
     }
 
-    MCEFBrowser browser;
+    private MCEFBrowser browser;
 
     @Override
     public void resize(Minecraft minecraft, int i, int j) {

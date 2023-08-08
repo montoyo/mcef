@@ -14,20 +14,23 @@ import org.cef.network.CefRequest;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MCEFClient
-    implements CefLoadHandler, CefContextMenuHandler, CefDisplayHandler
-{
-    CefClient instance;
+public class MCEFClient implements CefLoadHandler, CefContextMenuHandler, CefDisplayHandler {
 
-    public MCEFClient(CefClient instance) {
-        this.instance = instance;
-        instance.addLoadHandler(this);
-        instance.addContextMenuHandler(this);
-        instance.addDisplayHandler(this);
+    private final CefClient handle;
+    private final List<CefLoadHandler> loadHandlers = new ArrayList<>();
+    private final List<CefContextMenuHandler> contextMenuHandlers = new ArrayList<>();
+    private final List<CefDisplayHandler> displayHandlers = new ArrayList<>();
+
+    public MCEFClient(CefClient cefClient) {
+        handle = cefClient;
+        cefClient.addLoadHandler(this);
+        cefClient.addContextMenuHandler(this);
+        cefClient.addDisplayHandler(this);
     }
 
-    /* LoadHandler */
-    List<CefLoadHandler> loadHandlers = new ArrayList<>();
+    public CefClient getHandle() {
+        return handle;
+    }
 
     public void addLoadHandler(CefLoadHandler handler) {
         loadHandlers.add(handler);
@@ -35,7 +38,8 @@ public class MCEFClient
 
     @Override
     public void onLoadingStateChange(CefBrowser browser, boolean isLoading, boolean canGoBack, boolean canGoForward) {
-        for (CefLoadHandler loadHandler : loadHandlers) loadHandler.onLoadingStateChange(browser, isLoading, canGoBack, canGoForward);
+        for (CefLoadHandler loadHandler : loadHandlers)
+            loadHandler.onLoadingStateChange(browser, isLoading, canGoBack, canGoForward);
     }
 
     @Override
@@ -50,11 +54,9 @@ public class MCEFClient
 
     @Override
     public void onLoadError(CefBrowser browser, CefFrame frame, ErrorCode errorCode, String errorText, String failedUrl) {
-        for (CefLoadHandler loadHandler : loadHandlers) loadHandler.onLoadError(browser, frame, errorCode, errorText, failedUrl);
+        for (CefLoadHandler loadHandler : loadHandlers)
+            loadHandler.onLoadError(browser, frame, errorCode, errorText, failedUrl);
     }
-
-    /* ContextMenuHandler */
-    List<CefContextMenuHandler> contextMenuHandlers = new ArrayList<>();
 
     public void addContextMenuHandler(CefContextMenuHandler handler) {
         contextMenuHandlers.add(handler);
@@ -62,7 +64,8 @@ public class MCEFClient
 
     @Override
     public void onBeforeContextMenu(CefBrowser browser, CefFrame frame, CefContextMenuParams params, CefMenuModel model) {
-        for (CefContextMenuHandler contextMenuHandler : contextMenuHandlers) contextMenuHandler.onBeforeContextMenu(browser, frame, params, model);
+        for (CefContextMenuHandler contextMenuHandler : contextMenuHandlers)
+            contextMenuHandler.onBeforeContextMenu(browser, frame, params, model);
     }
 
     @Override
@@ -70,17 +73,14 @@ public class MCEFClient
         for (CefContextMenuHandler contextMenuHandler : contextMenuHandlers)
             if (contextMenuHandler.onContextMenuCommand(browser, frame, params, commandId, eventFlags))
                 return true;
-
         return false;
     }
 
     @Override
     public void onContextMenuDismissed(CefBrowser browser, CefFrame frame) {
-        for (CefContextMenuHandler contextMenuHandler : contextMenuHandlers) contextMenuHandler.onContextMenuDismissed(browser, frame);
+        for (CefContextMenuHandler contextMenuHandler : contextMenuHandlers)
+            contextMenuHandler.onContextMenuDismissed(browser, frame);
     }
-
-    /* DisplayHandler */
-    List<CefDisplayHandler> displayHandlers = new ArrayList<>();
 
     public void addDisplayHandler(CefDisplayHandler handler) {
         displayHandlers.add(handler);

@@ -7,7 +7,8 @@ import org.cef.CefClient;
 import org.cef.CefSettings;
 
 public final class CefUtil {
-    private CefUtil() {}
+    private CefUtil() {
+    }
 
     private static boolean init;
     private static CefApp cefAppInstance;
@@ -44,15 +45,10 @@ public final class CefUtil {
     }
 
     /**
-     * Gets the {@link CefClient}
-     * For adding handlers, please use {@link MCEFClient}, as that implements handlers as lists instead of single instances
-     *
-     * @return the cef client instance
+     * Get the MCEFClient instance. MCEFClient holds an instance of CefClient.
+     * To get the CefClient instance, use {@link MCEFClient#getHandle()}
+     * @return
      */
-    public static CefClient getCefClient() {
-        return cefClientInstance;
-    }
-
     public static MCEFClient getMCEFClient() {
         return mcefClientInstance;
     }
