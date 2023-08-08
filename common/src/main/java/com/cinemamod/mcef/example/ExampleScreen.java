@@ -2,20 +2,17 @@ package com.cinemamod.mcef.example;
 
 import com.cinemamod.mcef.CefUtil;
 import com.cinemamod.mcef.api.MCEFBrowser;
-import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
-import org.lwjgl.glfw.GLFW;
 
 public class ExampleScreen extends Screen {
     protected ExampleScreen(Component component) {
@@ -25,10 +22,12 @@ public class ExampleScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        browser = CefUtil.createBrowser(
-                "https://www.google.com/",
-                minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight() - scaleY(20)
-        );
+        if (browser == null) {
+            browser = CefUtil.createBrowser(
+                    "https://www.google.com/",
+                    minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight() - scaleY(20)
+            );
+        }
     }
 
     public int scaleX(int x) {
@@ -84,54 +83,64 @@ public class ExampleScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double d, double e, int i) {
-        int x = scaleX((int) d);
-        int y = scaleY((int) e - 40);
-        browser.sendMousePress(x, y, i);
-        return super.mouseClicked(d, e, i);
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        int x = scaleX((int) mouseX);
+        int y = scaleY((int) mouseY - 40);
+        browser.sendMousePress(x, y, button);
+        browser.setFocus(true);
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
-    public boolean mouseReleased(double d, double e, int i) {
-        int x = scaleX((int) d);
-        int y = scaleY((int) e - 40);
-        browser.sendMouseRelease(x, y, i);
-        return super.mouseReleased(d, e, i);
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        int x = scaleX((int) mouseX);
+        int y = scaleY((int) mouseY - 40);
+        browser.sendMouseRelease(x, y, button);
+        browser.setFocus(true);
+        return super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
-    public void mouseMoved(double d, double e) {
-        int x = scaleX((int) d);
-        int y = scaleY((int) e - 40);
+    public void mouseMoved(double mouseX, double mouseY) {
+        int x = scaleX((int) mouseX);
+        int y = scaleY((int) mouseY - 40);
         browser.sendMouseMove(x, y);
-        super.mouseMoved(d, e);
+        super.mouseMoved(mouseX, mouseY);
     }
 
     @Override
-    public boolean mouseDragged(double d, double e, int i, double f, double g) {
-        return super.mouseDragged(d, e, i, f, g);
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
     @Override
-    public boolean mouseScrolled(double d, double e, double f) {
-        return super.mouseScrolled(d, e, f);
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        int x = scaleX((int) mouseX);
+        int y = scaleY((int) mouseY - 40);
+        browser.sendMouseWheel(x, y, (int) delta * 3, 0);
+        return super.mouseScrolled(mouseX, mouseY, delta);
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         browser.sendKeyPress(keyCode, scanCode, modifiers);
+        browser.setFocus(true);
         return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         browser.sendKeyRelease(keyCode, scanCode, modifiers);
+        browser.setFocus(true);
         return super.keyReleased(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean charTyped(char codePoint, int modifiers) {
+        if (codePoint == (char) 0) return false;
+
         browser.sendKeyTyped(codePoint, modifiers);
+        browser.setFocus(true);
         return super.charTyped(codePoint, modifiers);
     }
 }
