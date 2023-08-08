@@ -182,4 +182,10 @@ public class MCEFBrowser extends CefBrowserOsr {
         renderer.cleanup();
         super.close(true);
     }
+
+    @Override
+    protected void finalize() throws Throwable {
+        Minecraft.getInstance().submit(renderer::cleanup);
+        super.finalize();
+    }
 }
