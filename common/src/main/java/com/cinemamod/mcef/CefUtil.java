@@ -1,5 +1,6 @@
 package com.cinemamod.mcef;
 
+import com.cinemamod.mcef.api.MCEFBrowser;
 import org.cef.CefApp;
 import org.cef.CefClient;
 import org.cef.CefSettings;
@@ -41,5 +42,14 @@ public final class CefUtil {
 
     public static CefClient getCefClient() {
         return cefClientInstance;
+    }
+
+    public static MCEFBrowser createBrowser(String startUrl, int widthPx, int heightPx) {
+        if (!init) return null;
+        MCEFBrowser browser = new MCEFBrowser(cefClientInstance, startUrl, false, null);
+        browser.setCloseAllowed();
+        browser.createImmediately();
+        browser.resize(widthPx, heightPx);
+        return browser;
     }
 }
