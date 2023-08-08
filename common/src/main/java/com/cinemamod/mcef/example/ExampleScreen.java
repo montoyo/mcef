@@ -64,8 +64,6 @@ public class ExampleScreen extends Screen {
     public void render(GuiGraphics guiGraphics, int i, int j, float f) {
         super.render(guiGraphics, i, j, f);
 
-        CefUtil.getCefApp().N_DoMessageLoopWork();
-
         // TODO: clean this up
         Matrix4f positionMatrix = new Matrix4f();
         Tesselator t = Tesselator.getInstance();
