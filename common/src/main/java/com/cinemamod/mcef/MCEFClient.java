@@ -1,4 +1,4 @@
-package com.cinemamod.mcef.cef;
+package com.cinemamod.mcef;
 
 import org.cef.CefClient;
 import org.cef.CefSettings;

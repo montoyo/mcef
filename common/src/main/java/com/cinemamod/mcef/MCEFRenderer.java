@@ -1,4 +1,4 @@
-package com.cinemamod.mcef.api;
+package com.cinemamod.mcef;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 

@@ -1,7 +1,7 @@
 package com.cinemamod.mcef.example;
 
-import com.cinemamod.mcef.CefUtil;
-import com.cinemamod.mcef.api.MCEFBrowser;
+import com.cinemamod.mcef.MCEF;
+import com.cinemamod.mcef.MCEFBrowser;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -15,6 +15,8 @@ import net.minecraft.network.chat.Component;
 import org.joml.Matrix4f;
 
 public class ExampleScreen extends Screen {
+    private MCEFBrowser browser;
+
     protected ExampleScreen(Component component) {
         super(component);
     }
@@ -23,10 +25,11 @@ public class ExampleScreen extends Screen {
     protected void init() {
         super.init();
         if (browser == null) {
-            browser = CefUtil.createBrowser(
-                    "https://www.google.com/",
-                    minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight() - scaleY(20)
-            );
+            String url = "https://www.google.com";
+            boolean transparent = true;
+            int width = minecraft.getWindow().getWidth();
+            int height = minecraft.getWindow().getHeight() - scaleY(20);
+            browser = MCEF.createBrowser(url, transparent, width, height);
         }
     }
 
@@ -41,8 +44,6 @@ public class ExampleScreen extends Screen {
         double sy = ((double) y) / ((double) height) * ((double) minecraft.getWindow().getHeight());
         return (int) sy;
     }
-
-    private MCEFBrowser browser;
 
     @Override
     public void resize(Minecraft minecraft, int i, int j) {

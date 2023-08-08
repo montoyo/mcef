@@ -1,4 +1,4 @@
-package com.cinemamod.mcef.api;
+package com.cinemamod.mcef;
 
 import net.minecraft.client.Minecraft;
 import org.cef.CefClient;
@@ -20,7 +20,7 @@ public class MCEFBrowser extends CefBrowserOsr {
 
     public MCEFBrowser(CefClient cefClient, String url, boolean transparent, CefRequestContext context) {
         super(cefClient, url, transparent, context);
-        Minecraft.getInstance().submit(renderer::initialize); // TODO: remove this
+        Minecraft.getInstance().submit(renderer::initialize);
     }
 
     @Override
@@ -99,7 +99,7 @@ public class MCEFBrowser extends CefBrowserOsr {
 
     @Override
     protected void finalize() throws Throwable {
-        Minecraft.getInstance().submit(renderer::cleanup); // TODO: remove this
+        Minecraft.getInstance().submit(renderer::cleanup);
         super.finalize();
     }
 }
