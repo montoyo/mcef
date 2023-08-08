@@ -29,7 +29,7 @@ public final class MCEF {
 
     public static MCEFBrowser createBrowser(String url, boolean transparent, int width, int height) {
         assertInitialized();
-        MCEFBrowser browser = new MCEFBrowser(client.getHandle(), url, transparent, null);
+        MCEFBrowser browser = new MCEFBrowser(client, url, transparent, null);
         browser.setCloseAllowed();
         browser.createImmediately();
         browser.resize(width, height);
