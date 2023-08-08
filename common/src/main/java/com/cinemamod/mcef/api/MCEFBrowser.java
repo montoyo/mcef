@@ -25,6 +25,10 @@ public class MCEFBrowser extends CefBrowserOsr {
         renderer.onPaint(buffer, width, height);
     }
 
+    public int getTexture() {
+        return renderer.getTextureID();
+    }
+
     // glfw
 //    public void sendKeyPress(int keyCode, int modifiers, long scanCode) {
 //        CefKeyEvent e = new CefKeyEvent(keyCode, CefKeyEvent.KEY_PRESS, modifiers, (char) keyCode);
