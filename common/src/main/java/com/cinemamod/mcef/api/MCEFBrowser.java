@@ -11,6 +11,7 @@ import org.cef.event.CefMouseWheelEvent;
 
 import java.awt.*;
 import java.nio.ByteBuffer;
+import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
@@ -90,6 +91,8 @@ public class MCEFBrowser extends CefBrowserOsr {
     public void resize(int width, int height) {
         browser_rect_.setBounds(0, 0, width, height);
         wasResized(width, height);
+        renderer.cleanup();
+        renderer.initialize();
     }
 
     public void close() {
@@ -101,5 +104,18 @@ public class MCEFBrowser extends CefBrowserOsr {
     protected void finalize() throws Throwable {
         Minecraft.getInstance().submit(renderer::cleanup);
         super.finalize();
+    }
+
+    private Consumer<Integer> cursorChangeListener = (value) -> {
+    };
+
+    public void setCursorChangeListener(Consumer<Integer> cursorChangeListener) {
+        this.cursorChangeListener = cursorChangeListener;
+    }
+
+    @Override
+    public boolean onCursorChange(CefBrowser browser, int cursorType) {
+        this.cursorChangeListener.accept(cursorType);
+        return super.onCursorChange(browser, cursorType);
     }
 }
