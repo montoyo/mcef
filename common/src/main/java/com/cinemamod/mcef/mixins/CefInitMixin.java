@@ -59,11 +59,6 @@ public class CefInitMixin {
             throw new RuntimeException(e);
         }
 
-        // TODO: Move to org.cef.CefApp
-        if (platform.isLinux()) {
-            System.loadLibrary("jawt");
-        }
-
         MCEFClient client = MCEF.getClient();
 
         if (client != null) {
