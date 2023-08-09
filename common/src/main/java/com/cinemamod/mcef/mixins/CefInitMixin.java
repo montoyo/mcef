@@ -2,7 +2,7 @@ package com.cinemamod.mcef.mixins;
 
 import com.cinemamod.mcef.MCEF;
 import com.cinemamod.mcef.MCEFClient;
-import com.cinemamod.mcef.Platform;
+import com.cinemamod.mcef.MCEFPlatform;
 import net.minecraft.client.resources.ClientPackSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,7 +32,7 @@ public class CefInitMixin {
         }
     }
 
-    private static void setupLibraryPath(Platform platform) throws IOException, URISyntaxException {
+    private static void setupLibraryPath(MCEFPlatform platform) throws IOException, URISyntaxException {
         // Check for development environment
         // i.e. mcef-repo/forge/build/cef/<platform>
         File cefPlatformDir = new File("../build/cef/" + platform.getNormalizedName());
@@ -51,7 +51,7 @@ public class CefInitMixin {
 
     @Inject(at = @At("TAIL"), method = "<init>(Ljava/nio/file/Path;)V")
     private void init(CallbackInfo callbackInfo) {
-        Platform platform = Platform.getPlatform();
+        MCEFPlatform platform = MCEFPlatform.getPlatform();
 
         try {
             setupLibraryPath(platform);

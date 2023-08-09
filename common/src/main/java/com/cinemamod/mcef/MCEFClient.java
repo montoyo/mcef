@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MCEFClient implements CefLoadHandler, CefContextMenuHandler, CefDisplayHandler {
-
     private final CefClient handle;
     private final List<CefLoadHandler> loadHandlers = new ArrayList<>();
     private final List<CefContextMenuHandler> contextMenuHandlers = new ArrayList<>();

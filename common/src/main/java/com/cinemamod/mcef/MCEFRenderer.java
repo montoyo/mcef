@@ -25,11 +25,11 @@ public class MCEFRenderer {
     public int getTextureID() {
         return textureID[0];
     }
-    
+
     public boolean isTransparent() {
         return transparent;
     }
-    
+
     protected void cleanup() {
         if (textureID[0] != 0) {
             glDeleteTextures(textureID[0]);

@@ -1,6 +1,6 @@
 package com.cinemamod.mcef;
 
-public enum Platform {
+public enum MCEFPlatform {
     LINUX_AMD64,
     LINUX_ARM64,
     WINDOWS_AMD64,
@@ -24,7 +24,7 @@ public enum Platform {
         return (this == MACOS_AMD64 || this == MACOS_ARM64);
     }
 
-    public static Platform getPlatform() {
+    public static MCEFPlatform getPlatform() {
         String os = System.getProperty("os.name").toLowerCase();
         String arch = System.getProperty("os.arch").toLowerCase();
 
