@@ -21,9 +21,9 @@ public class MCEFExampleMod {
     }
 
     public void onTick(TickEvent.ClientTickEvent event) {
-        // Check if our key was pressed
+        // Check if our key was pressed and make sure the ExampleScreen isn't already open
         if (KEY_MAPPING.isDown() && !(minecraft.screen instanceof ExampleScreen)) {
-            //Display the web browser UI.
+            // Display the ExampleScreen web browser
             minecraft.setScreen(new ExampleScreen(
                     Component.literal("Example Screen")
             ));
