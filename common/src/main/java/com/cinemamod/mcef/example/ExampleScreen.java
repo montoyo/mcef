@@ -12,9 +12,10 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import org.joml.Matrix4f;
 
 public class ExampleScreen extends Screen {
+    private static final int BROWSER_DRAW_OFFSET = 20;
+
     private MCEFBrowser browser;
 
     protected ExampleScreen(Component component) {
@@ -27,32 +28,37 @@ public class ExampleScreen extends Screen {
         if (browser == null) {
             String url = "https://www.google.com";
             boolean transparent = true;
-            int width = minecraft.getWindow().getWidth();
-            int height = minecraft.getWindow().getHeight() - scaleY(20);
-            browser = MCEF.createBrowser(url, transparent, width, height);
+            browser = MCEF.createBrowser(url, transparent);
+            resizeBrowser();
         }
     }
 
-    public int scaleX(int x) {
-        assert minecraft != null;
-        double sx = ((double) x) / ((double) width) * ((double) minecraft.getWindow().getWidth());
-        return (int) sx;
+    private int mouseX(double x) {
+        return (int) ((x - BROWSER_DRAW_OFFSET) * minecraft.getWindow().getGuiScale());
     }
 
-    public int scaleY(int y) {
-        assert minecraft != null;
-        double sy = ((double) y) / ((double) height) * ((double) minecraft.getWindow().getHeight());
-        return (int) sy;
+    private int mouseY(double y) {
+        return (int) ((y - BROWSER_DRAW_OFFSET) * minecraft.getWindow().getGuiScale());
+    }
+
+    private int scaleX(double x) {
+        return (int) ((x - BROWSER_DRAW_OFFSET * 2) * minecraft.getWindow().getGuiScale());
+    }
+
+    private int scaleY(double y) {
+        return (int) ((y - BROWSER_DRAW_OFFSET * 2) * minecraft.getWindow().getGuiScale());
+    }
+
+    private void resizeBrowser() {
+        if (width > 100 && height > 100) {
+            browser.resize(scaleX(width), scaleY(height));
+        }
     }
 
     @Override
     public void resize(Minecraft minecraft, int i, int j) {
         super.resize(minecraft, i, j);
-
-        browser.resize(
-                minecraft.getWindow().getWidth(),
-                minecraft.getWindow().getHeight() - scaleY(20)
-        );
+        resizeBrowser();
     }
 
     @Override
@@ -64,46 +70,38 @@ public class ExampleScreen extends Screen {
     @Override
     public void render(GuiGraphics guiGraphics, int i, int j, float f) {
         super.render(guiGraphics, i, j, f);
-
-        // TODO: clean this up
-        Matrix4f positionMatrix = new Matrix4f();
-        Tesselator t = Tesselator.getInstance();
-        BufferBuilder vb = t.getBuilder();
+        RenderSystem.disableDepthTest();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.setShaderTexture(0, browser.getTexture());
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        // previously GL_QUADS for drawmode
-        vb.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        vb.vertex(positionMatrix, (float) 0, (float) minecraft.getWindow().getHeight(), 0.0f).uv(0.0f, 2.0f).color(255, 255, 255, 255).endVertex();
-        vb.vertex(positionMatrix, (float) minecraft.getWindow().getWidth(), (float) minecraft.getWindow().getHeight(), 0.0f).uv(2.f, 2.0f).color(255, 255, 255, 255).endVertex();
-        vb.vertex(positionMatrix, (float) minecraft.getWindow().getWidth(), (float) scaleY(20), 0.0f).uv(2.f, 0.f).color(255, 255, 255, 255).endVertex();
-        vb.vertex(positionMatrix, (float) 0, (float) scaleY(20), 0.0f).uv(0.0f, 0.0f).color(255, 255, 255, 255).endVertex();
+        Tesselator t = Tesselator.getInstance();
+        BufferBuilder buffer = t.getBuilder();
+        buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        buffer.vertex(BROWSER_DRAW_OFFSET, height - BROWSER_DRAW_OFFSET, 0).uv(0.0f, 1.0f).color(255, 255, 255, 255).endVertex();
+        buffer.vertex(width - BROWSER_DRAW_OFFSET, height - BROWSER_DRAW_OFFSET, 0).uv(1.0f, 1.0f).color(255, 255, 255, 255).endVertex();
+        buffer.vertex(width - BROWSER_DRAW_OFFSET, BROWSER_DRAW_OFFSET, 0).uv(1.0f, 0.0f).color(255, 255, 255, 255).endVertex();
+        buffer.vertex(BROWSER_DRAW_OFFSET, BROWSER_DRAW_OFFSET, 0).uv(0.0f, 0.0f).color(255, 255, 255, 255).endVertex();
         t.end();
+        RenderSystem.setShaderTexture(0, 0);
+        RenderSystem.enableDepthTest();
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        int x = scaleX((int) mouseX);
-        int y = scaleY((int) mouseY - 40);
-        browser.sendMousePress(x, y, button);
+        browser.sendMousePress(mouseX(mouseX), mouseY(mouseY), button);
         browser.setFocus(true);
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        int x = scaleX((int) mouseX);
-        int y = scaleY((int) mouseY - 40);
-        browser.sendMouseRelease(x, y, button);
+        browser.sendMouseRelease(mouseX(mouseX), mouseY(mouseY), button);
         browser.setFocus(true);
         return super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
     public void mouseMoved(double mouseX, double mouseY) {
-        int x = scaleX((int) mouseX);
-        int y = scaleY((int) mouseY - 40);
-        browser.sendMouseMove(x, y);
+        browser.sendMouseMove(mouseX(mouseX), mouseY(mouseY));
         super.mouseMoved(mouseX, mouseY);
     }
 
@@ -114,9 +112,7 @@ public class ExampleScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        int x = scaleX((int) mouseX);
-        int y = scaleY((int) mouseY - 40);
-        browser.sendMouseWheel(x, y, (int) delta * 3, 0);
+        browser.sendMouseWheel(mouseX(mouseX), mouseY(mouseY), (int) delta * 3, 0);
         return super.mouseScrolled(mouseX, mouseY, delta);
     }
 
