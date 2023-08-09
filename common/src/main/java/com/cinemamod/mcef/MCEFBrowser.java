@@ -20,24 +20,25 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class MCEFBrowser extends CefBrowserOsr {
     private final MCEFRenderer renderer = new MCEFRenderer(true);
+    
+    private int lastWidth = 0;
+    private int lastHeight = 0;
 
     public MCEFBrowser(MCEFClient client, String url, boolean transparent, CefRequestContext context) {
         super(client.getHandle(), url, transparent, context);
         Minecraft.getInstance().submit(renderer::initialize);
     }
-
-    int pw = 0, ph = 0;
     
     @Override
     public void onPaint(CefBrowser browser, boolean popup, Rectangle[] dirtyRects, ByteBuffer buffer, int width, int height) {
         if (
-                width != pw ||
-                        height != ph ||
+                width != lastWidth ||
+                        height != lastHeight ||
                         popup
         ) {
             renderer.onPaint(buffer, width, height);
-            pw = width;
-            ph = height;
+            lastWidth = width;
+            lastHeight = height;
         } else {
             if (renderer.getTextureID() == 0) return;
     
