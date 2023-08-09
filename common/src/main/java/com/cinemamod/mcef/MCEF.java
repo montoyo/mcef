@@ -1,13 +1,9 @@
 package com.cinemamod.mcef;
 
-import net.minecraft.client.Minecraft;
 import org.cef.misc.CefCursorType;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
-import java.util.function.Consumer;
-
-import static org.lwjgl.glfw.GLFW.*;
 
 public final class MCEF {
     private static MCEFApp app;
@@ -55,31 +51,20 @@ public final class MCEF {
         if (!isInitialized())
             throw new RuntimeException("Chromium Embedded Framework was never initialized.");
     }
-    
-    private static HashMap<Integer, Long> CURSORS = new HashMap<>();
-    
+
+    private static final HashMap<CefCursorType, Long> CEF_TO_GLFW_CURSORS = new HashMap<>();
+
     /**
-     * gets the glfw cursor handle for the given {@link CefCursorType} id
-     * @param type the id of the type, should match with the ordinal of the {@link CefCursorType} you want to use
-     * @return the glfw cursor handle that can be used with {@link GLFW#glfwSetCursor(long, long)}
+     * Gets the GLFW cursor handle for the given {@link CefCursorType} cursor type
+     *
+     * @param cursorType the CEF cursor type
+     * @return the GLFW cursor handle that can be used with {@link GLFW#glfwSetCursor(long, long)}
      */
-    public static long getCursor(int type) {
-        if (CURSORS.containsKey(type)) return CURSORS.get(type);
-        
-        long cur = GLFW.glfwCreateStandardCursor(type);
-        CURSORS.put(type, cur);
-        return cur;
+    public static long getGLFWCursorHandle(CefCursorType cursorType) {
+        if (CEF_TO_GLFW_CURSORS.containsKey(cursorType)) return CEF_TO_GLFW_CURSORS.get(cursorType);
+
+        long glfwCursorHandle = GLFW.glfwCreateStandardCursor(cursorType.glfwId);
+        CEF_TO_GLFW_CURSORS.put(cursorType, glfwCursorHandle);
+        return glfwCursorHandle;
     }
-    
-    public static final Consumer<Integer> setGlfwCursor = (cursor) -> {
-        CefCursorType type = CefCursorType.fromId(cursor);
-        
-        if (type == CefCursorType.NONE) {
-            GLFW.glfwSetInputMode(Minecraft.getInstance().getWindow().getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-            return;
-        } else GLFW.glfwSetInputMode(Minecraft.getInstance().getWindow().getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-        
-        int c = type.glfwId;
-        GLFW.glfwSetCursor(Minecraft.getInstance().getWindow().getWindow(), getCursor(c));
-    };
 }

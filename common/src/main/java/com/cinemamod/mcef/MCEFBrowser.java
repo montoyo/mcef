@@ -9,42 +9,58 @@ import org.cef.browser.CefRequestContext;
 import org.cef.event.CefKeyEvent;
 import org.cef.event.CefMouseEvent;
 import org.cef.event.CefMouseWheelEvent;
+import org.cef.misc.CefCursorType;
+import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
-import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
+import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
 public class MCEFBrowser extends CefBrowserOsr {
     private final MCEFRenderer renderer = new MCEFRenderer(true);
-    
+    private Consumer<Integer> cursorChangeListener;
+
     private int lastWidth = 0;
     private int lastHeight = 0;
 
     public MCEFBrowser(MCEFClient client, String url, boolean transparent, CefRequestContext context) {
         super(client.getHandle(), url, transparent, context);
         Minecraft.getInstance().submit(renderer::initialize);
+        // Default cursor change listener
+        cursorChangeListener = (cefCursorID) -> setCursor(CefCursorType.fromId(cefCursorID));
     }
-    
+
+    public MCEFRenderer getRenderer() {
+        return renderer;
+    }
+
+    public int getTexture() {
+        return renderer.getTextureID();
+    }
+
+    public Consumer<Integer> getCursorChangeListener() {
+        return cursorChangeListener;
+    }
+
+    public void setCursorChangeListener(Consumer<Integer> cursorChangeListener) {
+        this.cursorChangeListener = cursorChangeListener;
+    }
+
     @Override
     public void onPaint(CefBrowser browser, boolean popup, Rectangle[] dirtyRects, ByteBuffer buffer, int width, int height) {
-        if (
-                width != lastWidth ||
-                        height != lastHeight ||
-                        popup
-        ) {
+        if (width != lastWidth || height != lastHeight || popup) {
             renderer.onPaint(buffer, width, height);
             lastWidth = width;
             lastHeight = height;
         } else {
             if (renderer.getTextureID() == 0) return;
-    
+
             RenderSystem.bindTexture(renderer.getTextureID());
             if (renderer.isTransparent()) RenderSystem.enableBlend();
-            
+
             RenderSystem.pixelStore(GL_UNPACK_ROW_LENGTH, width);
             for (Rectangle dirtyRect : dirtyRects) {
                 GlStateManager._pixelStore(GL_UNPACK_SKIP_PIXELS, dirtyRect.x);
@@ -52,10 +68,6 @@ public class MCEFBrowser extends CefBrowserOsr {
                 renderer.onPaint(buffer, dirtyRect.x, dirtyRect.y, dirtyRect.width, dirtyRect.height);
             }
         }
-    }
-
-    public int getTexture() {
-        return renderer.getTextureID();
     }
 
     public void sendKeyPress(int keyCode, long scanCode, int modifiers) {
@@ -129,16 +141,18 @@ public class MCEFBrowser extends CefBrowserOsr {
         super.finalize();
     }
 
-    private Consumer<Integer> cursorChangeListener = (value) -> {
-    };
-
-    public void setCursorChangeListener(Consumer<Integer> cursorChangeListener) {
-        this.cursorChangeListener = cursorChangeListener;
-    }
-
     @Override
     public boolean onCursorChange(CefBrowser browser, int cursorType) {
         this.cursorChangeListener.accept(cursorType);
         return super.onCursorChange(browser, cursorType);
+    }
+
+    public void setCursor(CefCursorType cursorType) {
+        if (cursorType == CefCursorType.NONE) {
+            GLFW.glfwSetInputMode(Minecraft.getInstance().getWindow().getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        } else {
+            GLFW.glfwSetInputMode(Minecraft.getInstance().getWindow().getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            GLFW.glfwSetCursor(Minecraft.getInstance().getWindow().getWindow(), MCEF.getGLFWCursorHandle(cursorType));
+        }
     }
 }
