@@ -1,5 +1,7 @@
 package com.cinemamod.mcef;
 
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefBrowserOsr;
@@ -14,18 +16,42 @@ import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
+import static org.lwjgl.opengl.GL11.*;
 
 public class MCEFBrowser extends CefBrowserOsr {
     private final MCEFRenderer renderer = new MCEFRenderer(true);
+    
+    private int lastWidth = 0;
+    private int lastHeight = 0;
 
     public MCEFBrowser(MCEFClient client, String url, boolean transparent, CefRequestContext context) {
         super(client.getHandle(), url, transparent, context);
         Minecraft.getInstance().submit(renderer::initialize);
     }
-
+    
     @Override
     public void onPaint(CefBrowser browser, boolean popup, Rectangle[] dirtyRects, ByteBuffer buffer, int width, int height) {
-        renderer.onPaint(buffer, width, height);
+        if (
+                width != lastWidth ||
+                        height != lastHeight ||
+                        popup
+        ) {
+            renderer.onPaint(buffer, width, height);
+            lastWidth = width;
+            lastHeight = height;
+        } else {
+            if (renderer.getTextureID() == 0) return;
+    
+            RenderSystem.bindTexture(renderer.getTextureID());
+            if (renderer.isTransparent()) RenderSystem.enableBlend();
+            
+            RenderSystem.pixelStore(GL_UNPACK_ROW_LENGTH, width);
+            for (Rectangle dirtyRect : dirtyRects) {
+                GlStateManager._pixelStore(GL_UNPACK_SKIP_PIXELS, dirtyRect.x);
+                GlStateManager._pixelStore(GL_UNPACK_SKIP_ROWS, dirtyRect.y);
+                renderer.onPaint(buffer, dirtyRect.x, dirtyRect.y, dirtyRect.width, dirtyRect.height);
+            }
+        }
     }
 
     public int getTexture() {
@@ -90,8 +116,6 @@ public class MCEFBrowser extends CefBrowserOsr {
     public void resize(int width, int height) {
         browser_rect_.setBounds(0, 0, width, height);
         wasResized(width, height);
-        renderer.cleanup();
-        renderer.initialize();
     }
 
     public void close() {

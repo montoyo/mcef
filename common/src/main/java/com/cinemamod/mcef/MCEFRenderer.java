@@ -25,7 +25,11 @@ public class MCEFRenderer {
     public int getTextureID() {
         return textureID[0];
     }
-
+    
+    public boolean isTransparent() {
+        return transparent;
+    }
+    
     protected void cleanup() {
         if (textureID[0] != 0) {
             glDeleteTextures(textureID[0]);
@@ -42,5 +46,10 @@ public class MCEFRenderer {
         RenderSystem.pixelStore(GL_UNPACK_SKIP_ROWS, 0);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
                 GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer);
+    }
+
+    protected void onPaint(ByteBuffer buffer, int x, int y, int width, int height) {
+        glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, GL_BGRA,
+                GL_UNSIGNED_INT_8_8_8_8_REV, buffer);
     }
 }
