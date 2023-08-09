@@ -8,23 +8,24 @@ import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 public class MCEFExampleMod {
-    public KeyMapping key = new KeyMapping(
+    private static final Minecraft minecraft = Minecraft.getInstance();
+
+    public static final KeyMapping KEY_MAPPING = new KeyMapping(
             "Open Browser", InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_F10, "key.categories.misc"
     );
-    Minecraft mc = Minecraft.getInstance();
-
-    public void onTick() {
-        // Check if our key was pressed
-        if(key.isDown() && !(mc.screen instanceof ExampleScreen)) {
-            //Display the web browser UI.
-            mc.setScreen(new ExampleScreen(
-                    Component.literal("Example Screen")
-            ));
-        }
-    }
 
     public MCEFExampleMod() {
         ClientTickEvents.START_CLIENT_TICK.register((client) -> onTick());
+    }
+
+    public void onTick() {
+        // Check if our key was pressed
+        if (KEY_MAPPING.isDown() && !(minecraft.screen instanceof ExampleScreen)) {
+            //Display the web browser UI.
+            minecraft.setScreen(new ExampleScreen(
+                    Component.literal("Example Screen")
+            ));
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.cinemamod.mcef.api;
+package com.cinemamod.mcef;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -15,8 +15,6 @@ public class MCEFRenderer {
     }
 
     public void initialize() {
-        // TODO: fixme
-//        RenderSystem.enableTexture();
         textureID[0] = glGenTextures();
         RenderSystem.bindTexture(textureID[0]);
         RenderSystem.texParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -38,8 +36,6 @@ public class MCEFRenderer {
     protected void onPaint(ByteBuffer buffer, int width, int height) {
         if (textureID[0] == 0) return;
         if (transparent) RenderSystem.enableBlend();
-        // TODO: fixme
-//        RenderSystem.enableTexture();
         RenderSystem.bindTexture(textureID[0]);
         RenderSystem.pixelStore(GL_UNPACK_ROW_LENGTH, width);
         RenderSystem.pixelStore(GL_UNPACK_SKIP_PIXELS, 0);

@@ -10,6 +10,5 @@ public class FabricMCEFClientMod implements ClientModInitializer {
         if (FabricLoader.getInstance().isDevelopmentEnvironment()) {
             new MCEFExampleMod();
         }
-        System.out.println("CLIENT INIT MCEF");
     }
 }

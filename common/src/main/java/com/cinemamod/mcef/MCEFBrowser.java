@@ -1,7 +1,6 @@
-package com.cinemamod.mcef.api;
+package com.cinemamod.mcef;
 
 import net.minecraft.client.Minecraft;
-import org.cef.CefClient;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefBrowserOsr;
 import org.cef.browser.CefRequestContext;
@@ -17,10 +16,10 @@ import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 
 public class MCEFBrowser extends CefBrowserOsr {
-    public final MCEFRenderer renderer = new MCEFRenderer(true);
+    private final MCEFRenderer renderer = new MCEFRenderer(true);
 
-    public MCEFBrowser(CefClient client, String url, boolean transparent, CefRequestContext context) {
-        super(client, url, transparent, context);
+    public MCEFBrowser(MCEFClient client, String url, boolean transparent, CefRequestContext context) {
+        super(client.getHandle(), url, transparent, context);
         Minecraft.getInstance().submit(renderer::initialize);
     }
 

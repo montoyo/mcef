@@ -1,6 +1,6 @@
 package com.cinemamod.mcef.mixins;
 
-import com.cinemamod.mcef.CefUtil;
+import com.cinemamod.mcef.MCEF;
 import com.cinemamod.mcef.Platform;
 import net.minecraft.client.resources.ClientPackSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -64,7 +64,7 @@ public class CefInitMixin {
         }
 
         if (platform.isLinux() || platform.isWindows()) {
-            if (CefUtil.init()) {
+            if (MCEF.initialize()) {
                 System.out.println("Chromium Embedded Framework initialized");
             } else {
                 System.out.println("Could not initialize Chromium Embedded Framework");

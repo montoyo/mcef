@@ -40,8 +40,8 @@ public enum Platform {
             } else if (arch.equals("aarch64")) {
                 return WINDOWS_ARM64;
             }
-        } else if (os.startsWith("mac")) {
-            if (arch.equals("amd64")) {
+        } else if (os.startsWith("mac")) { // TODO: fix this, it's wrong
+            if (arch.equals("amd64")) { // TODO: fix this, it's wrong
                 return MACOS_AMD64;
             } else if (arch.equals("aarch64")) {
                 return MACOS_ARM64;

@@ -9,23 +9,24 @@ import net.minecraftforge.event.TickEvent;
 import org.lwjgl.glfw.GLFW;
 
 public class MCEFExampleMod {
-    public KeyMapping key = new KeyMapping(
+    private static final Minecraft minecraft = Minecraft.getInstance();
+
+    public static final KeyMapping KEY_MAPPING = new KeyMapping(
             "Open Browser", InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_F10, "key.categories.misc"
     );
-    Minecraft mc = Minecraft.getInstance();
-
-    public void onTick(TickEvent.ClientTickEvent event) {
-        // Check if our key was pressed
-        if(key.isDown() && !(mc.screen instanceof ExampleScreen)) {
-            //Display the web browser UI.
-            mc.setScreen(new ExampleScreen(
-                    Component.literal("Example Screen")
-            ));
-        }
-    }
 
     public MCEFExampleMod() {
         MinecraftForge.EVENT_BUS.addListener(this::onTick);
+    }
+
+    public void onTick(TickEvent.ClientTickEvent event) {
+        // Check if our key was pressed
+        if (KEY_MAPPING.isDown() && !(minecraft.screen instanceof ExampleScreen)) {
+            //Display the web browser UI.
+            minecraft.setScreen(new ExampleScreen(
+                    Component.literal("Example Screen")
+            ));
+        }
     }
 }
