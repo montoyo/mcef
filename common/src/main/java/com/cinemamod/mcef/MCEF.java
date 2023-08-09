@@ -4,17 +4,11 @@ public final class MCEF {
     private static MCEFApp app;
     private static MCEFClient client;
 
-    public static boolean initialize() {
+    static {
         if (CefUtil.init()) {
             app = new MCEFApp(CefUtil.getCefApp());
             client = new MCEFClient(CefUtil.getCefClient());
-            return true;
         }
-        return false;
-    }
-
-    public static boolean isInitialized() {
-        return CefUtil.isInit();
     }
 
     public static MCEFApp getApp() {
@@ -44,8 +38,12 @@ public final class MCEF {
         return browser;
     }
 
+    public static boolean isInitialized() {
+        return client != null;
+    }
+
     private static void assertInitialized() {
-        if (!CefUtil.isInit())
-            throw new RuntimeException("MCEF#initialize() must be called before you can run this.");
+        if (!isInitialized())
+            throw new RuntimeException("Chromium Embedded Framework was never initialized.");
     }
 }
