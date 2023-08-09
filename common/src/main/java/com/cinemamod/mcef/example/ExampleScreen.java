@@ -30,7 +30,6 @@ public class ExampleScreen extends Screen {
             boolean transparent = true;
             browser = MCEF.createBrowser(url, transparent);
             resizeBrowser();
-            browser.setCursorChangeListener(MCEF.setGlfwCursor);
         }
     }
 
@@ -64,7 +63,7 @@ public class ExampleScreen extends Screen {
 
     @Override
     public void onClose() {
-        MCEF.setGlfwCursor.accept(0);
+        browser.getCursorChangeListener().accept(0);
         browser.close();
         super.onClose();
     }
@@ -135,7 +134,6 @@ public class ExampleScreen extends Screen {
     @Override
     public boolean charTyped(char codePoint, int modifiers) {
         if (codePoint == (char) 0) return false;
-
         browser.sendKeyTyped(codePoint, modifiers);
         browser.setFocus(true);
         return super.charTyped(codePoint, modifiers);
