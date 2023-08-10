@@ -31,6 +31,8 @@ public class MCEFBrowser extends CefBrowserOsr {
     // a bitset representing what mouse buttons are currently pressed
     // CEF is a bit odd and implements mouse buttons as a part of modifier flags
     private int btnMask = 0;
+    
+    private boolean browserControls = true;
 
     public MCEFBrowser(MCEFClient client, String url, boolean transparent, CefRequestContext context) {
         super(client.getHandle(), url, transparent, context);
@@ -54,7 +56,23 @@ public class MCEFBrowser extends CefBrowserOsr {
     public void setCursorChangeListener(Consumer<Integer> cursorChangeListener) {
         this.cursorChangeListener = cursorChangeListener;
     }
-
+    
+    public boolean usingBrowserControls() {
+        return browserControls;
+    }
+    
+    /**
+     * Enabling browser controls tells MCEF to mimic the behavior of an actual browser
+     * ctrl+r for reload, ctrl+left for back, ctrl+right for forward, etc
+     *
+     * @param browserControls whether or not browser controls should be enabled
+     * @return the browser instance
+     */
+    public MCEFBrowser useBrowserControls(boolean browserControls) {
+        this.browserControls = browserControls;
+        return this;
+    }
+    
     @Override
     public void onPaint(CefBrowser browser, boolean popup, Rectangle[] dirtyRects, ByteBuffer buffer, int width, int height) {
         if (width != lastWidth || height != lastHeight) {
@@ -77,18 +95,68 @@ public class MCEFBrowser extends CefBrowserOsr {
     }
 
     public void sendKeyPress(int keyCode, long scanCode, int modifiers) {
+        if (browserControls) {
+            if (modifiers == GLFW_MOD_CONTROL) {
+                if (keyCode == GLFW_KEY_R) {
+                    reload();
+                    return;
+                } else if (keyCode == GLFW_KEY_EQUAL) {
+                    if (getZoomLevel() < 9) setZoomLevel(getZoomLevel() + 1);
+                    return;
+                } else if (keyCode == GLFW_KEY_MINUS) {
+                    if (getZoomLevel() > -9) setZoomLevel(getZoomLevel() - 1);
+                    return;
+                } else if (keyCode == GLFW_KEY_0) {
+                    setZoomLevel(0);
+                    return;
+                }
+            } else if (modifiers == GLFW_MOD_ALT) {
+                if (keyCode == GLFW_KEY_LEFT && canGoBack()) {
+                    goBack();
+                    return;
+                } else if (keyCode == GLFW_KEY_RIGHT && canGoForward()) {
+                    goForward();
+                    return;
+                }
+            }
+        }
+        
         CefKeyEvent e = new CefKeyEvent(CefKeyEvent.KEY_PRESS, keyCode, (char) keyCode, modifiers);
         e.scancode = scanCode;
         sendKeyEvent(e);
     }
 
     public void sendKeyRelease(int keyCode, long scanCode, int modifiers) {
+        if (browserControls) {
+            if (modifiers == GLFW_MOD_CONTROL) {
+                if (keyCode == GLFW_KEY_R) return;
+                else if (keyCode == GLFW_KEY_EQUAL) return;
+                else if (keyCode == GLFW_KEY_MINUS) return;
+                else if (keyCode == GLFW_KEY_0) return;
+            } else if (modifiers == GLFW_MOD_ALT) {
+                if (keyCode == GLFW_KEY_LEFT && canGoBack()) return;
+                else if (keyCode == GLFW_KEY_RIGHT && canGoForward()) return;
+            }
+        }
+        
         CefKeyEvent e = new CefKeyEvent(CefKeyEvent.KEY_RELEASE, keyCode, (char) keyCode, modifiers);
         e.scancode = scanCode;
         sendKeyEvent(e);
     }
 
     public void sendKeyTyped(char c, int modifiers) {
+        if (browserControls) {
+            if (modifiers == GLFW_MOD_CONTROL) {
+                if ((int) c == GLFW_KEY_R) return;
+                else if ((int) c == GLFW_KEY_EQUAL) return;
+                else if ((int) c == GLFW_KEY_MINUS) return;
+                else if ((int) c == GLFW_KEY_0) return;
+            } else if (modifiers == GLFW_MOD_ALT) {
+                if ((int) c == GLFW_KEY_LEFT && canGoBack()) return;
+                else if ((int) c == GLFW_KEY_RIGHT && canGoForward()) return;
+            }
+        }
+        
         CefKeyEvent e = new CefKeyEvent(CefKeyEvent.KEY_TYPE, c, c, modifiers);
         sendKeyEvent(e);
     }
