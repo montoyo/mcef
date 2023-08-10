@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefBrowserOsr;
 import org.cef.browser.CefRequestContext;
+import org.cef.callback.CefDragData;
 import org.cef.event.CefKeyEvent;
 import org.cef.event.CefMouseEvent;
 import org.cef.event.CefMouseWheelEvent;
@@ -32,7 +33,12 @@ public class MCEFBrowser extends CefBrowserOsr {
         // Default cursor change listener
         cursorChangeListener = (cefCursorID) -> setCursor(CefCursorType.fromId(cefCursorID));
     }
-
+    
+    @Override
+    public boolean startDragging(CefBrowser browser, CefDragData dragData, int mask, int x, int y) {
+        return false;
+    }
+    
     public MCEFRenderer getRenderer() {
         return renderer;
     }
@@ -51,7 +57,7 @@ public class MCEFBrowser extends CefBrowserOsr {
 
     @Override
     public void onPaint(CefBrowser browser, boolean popup, Rectangle[] dirtyRects, ByteBuffer buffer, int width, int height) {
-        if (width != lastWidth || height != lastHeight || popup) {
+        if (width != lastWidth || height != lastHeight) {
             renderer.onPaint(buffer, width, height);
             lastWidth = width;
             lastHeight = height;
