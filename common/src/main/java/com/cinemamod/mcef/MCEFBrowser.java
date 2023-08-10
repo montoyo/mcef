@@ -195,6 +195,12 @@ public class MCEFBrowser extends CefBrowserOsr {
     }
 
     public void sendMouseWheel(int mouseX, int mouseY, int amount, int modifiers) {
+        if (browserControls) {
+            if (amount > 0) {
+                if (getZoomLevel() < 9) setZoomLevel(getZoomLevel() + 1);
+            } else if (getZoomLevel() > -9) setZoomLevel(getZoomLevel() - 1);
+        }
+        
         CefMouseWheelEvent e = new CefMouseWheelEvent(CefMouseWheelEvent.WHEEL_UNIT_SCROLL, mouseX, mouseY, amount, modifiers);
         sendMouseWheelEvent(e);
     }
