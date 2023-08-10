@@ -47,6 +47,14 @@ public final class MCEF {
         return client != null;
     }
 
+    public static void shutdown() {
+        if (isInitialized()) {
+            CefUtil.shutdown();
+            client = null;
+            app = null;
+        }
+    }
+
     private static void assertInitialized() {
         if (!isInitialized())
             throw new RuntimeException("Chromium Embedded Framework was never initialized.");
