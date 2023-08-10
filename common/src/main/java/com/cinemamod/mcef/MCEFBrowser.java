@@ -24,19 +24,19 @@ public class MCEFBrowser extends CefBrowserOsr {
     private final MCEFRenderer renderer = new MCEFRenderer(true);
     private Consumer<Integer> cursorChangeListener;
 
+    // used to track when a full repaint should occur
     private int lastWidth = 0;
     private int lastHeight = 0;
+    
+    // a bitset representing what mouse buttons are currently pressed
+    // CEF is a bit odd and implements mouse buttons as a part of modifier flags
+    private int btnMask = 0;
 
     public MCEFBrowser(MCEFClient client, String url, boolean transparent, CefRequestContext context) {
         super(client.getHandle(), url, transparent, context);
         Minecraft.getInstance().submit(renderer::initialize);
         // Default cursor change listener
         cursorChangeListener = (cefCursorID) -> setCursor(CefCursorType.fromId(cefCursorID));
-    }
-    
-    @Override
-    public boolean startDragging(CefBrowser browser, CefDragData dragData, int mask, int x, int y) {
-        return false;
     }
     
     public MCEFRenderer getRenderer() {
@@ -92,14 +92,13 @@ public class MCEFBrowser extends CefBrowserOsr {
         CefKeyEvent e = new CefKeyEvent(CefKeyEvent.KEY_TYPE, c, c, modifiers);
         sendKeyEvent(e);
     }
-
-    int btnMask = 0;
-
+    
     public void sendMouseMove(int mouseX, int mouseY) {
         CefMouseEvent e = new CefMouseEvent(CefMouseEvent.MOUSE_MOVED, mouseX, mouseY, 0, 0, btnMask);
         sendMouseEvent(e);
     }
-
+    
+    // TODO: it may be necessary to add modifiers here
     public void sendMousePress(int mouseX, int mouseY, int button) {
         // for some reason, middle and right are swapped in MC
         if (button == 1) button = 2;
@@ -112,7 +111,8 @@ public class MCEFBrowser extends CefBrowserOsr {
         CefMouseEvent e = new CefMouseEvent(GLFW_PRESS, mouseX, mouseY, 1, button, btnMask);
         sendMouseEvent(e);
     }
-
+    
+    // TODO: it may be necessary to add modifiers here
     public void sendMouseRelease(int mouseX, int mouseY, int button) {
         // for some reason, middle and right are swapped in MC
         if (button == 1) button = 2;
@@ -126,8 +126,8 @@ public class MCEFBrowser extends CefBrowserOsr {
         else if (button == 2 && (btnMask & CefMouseEvent.BUTTON3_MASK) != 0) btnMask ^= CefMouseEvent.BUTTON3_MASK;
     }
 
-    public void sendMouseWheel(int mouseX, int mouseY, int amount, int mods) {
-        CefMouseWheelEvent e = new CefMouseWheelEvent(CefMouseWheelEvent.WHEEL_UNIT_SCROLL, mouseX, mouseY, amount, mods);
+    public void sendMouseWheel(int mouseX, int mouseY, int amount, int modifiers) {
+        CefMouseWheelEvent e = new CefMouseWheelEvent(CefMouseWheelEvent.WHEEL_UNIT_SCROLL, mouseX, mouseY, amount, modifiers);
         sendMouseWheelEvent(e);
     }
 
@@ -135,7 +135,7 @@ public class MCEFBrowser extends CefBrowserOsr {
         browser_rect_.setBounds(0, 0, width, height);
         wasResized(width, height);
     }
-
+    
     public void close() {
         renderer.cleanup();
         super.close(true);
@@ -160,5 +160,11 @@ public class MCEFBrowser extends CefBrowserOsr {
             GLFW.glfwSetInputMode(Minecraft.getInstance().getWindow().getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             GLFW.glfwSetCursor(Minecraft.getInstance().getWindow().getWindow(), MCEF.getGLFWCursorHandle(cursorType));
         }
+    }
+    
+    @Override
+    public boolean startDragging(CefBrowser browser, CefDragData dragData, int mask, int x, int y) {
+        // TODO: figure out how to support dragging properly?
+        return false; // indicates to CEF that no drag operation was successfully started
     }
 }
