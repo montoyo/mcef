@@ -55,14 +55,10 @@ public final class MCEF {
     private static final HashMap<CefCursorType, Long> CEF_TO_GLFW_CURSORS = new HashMap<>();
 
     /**
-     * Gets the GLFW cursor handle for the given {@link CefCursorType} cursor type
-     *
-     * @param cursorType the CEF cursor type
-     * @return the GLFW cursor handle that can be used with {@link GLFW#glfwSetCursor(long, long)}
+     * Helper method to get a GLFW cursor handle for the given {@link CefCursorType} cursor type
      */
-    public static long getGLFWCursorHandle(CefCursorType cursorType) {
+    static long getGLFWCursorHandle(CefCursorType cursorType) {
         if (CEF_TO_GLFW_CURSORS.containsKey(cursorType)) return CEF_TO_GLFW_CURSORS.get(cursorType);
-
         long glfwCursorHandle = GLFW.glfwCreateStandardCursor(cursorType.glfwId);
         CEF_TO_GLFW_CURSORS.put(cursorType, glfwCursorHandle);
         return glfwCursorHandle;
