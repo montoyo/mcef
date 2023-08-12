@@ -3,17 +3,25 @@ package com.cinemamod.mcef;
 import org.cef.misc.CefCursorType;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.*;
 import java.util.HashMap;
+import java.util.Properties;
 
 public final class MCEF {
     private static MCEFApp app;
     private static MCEFClient client;
 
-    static {
+    /**
+     * This gets called by {@link com.cinemamod.mcef.mixins.CefInitMixin}
+     * There is no need to call this from your project.
+     */
+    public static boolean initialize() {
         if (CefUtil.init()) {
             app = new MCEFApp(CefUtil.getCefApp());
             client = new MCEFClient(CefUtil.getCefClient());
+            return true;
         }
+        return false;
     }
 
     public static MCEFApp getApp() {
@@ -58,6 +66,33 @@ public final class MCEF {
     private static void assertInitialized() {
         if (!isInitialized())
             throw new RuntimeException("Chromium Embedded Framework was never initialized.");
+    }
+
+    public static String getJavaCefCommit() throws IOException {
+        // Try to get from resources (if loading from a jar)
+        InputStream inputStream = MCEF.class.getClassLoader().getResourceAsStream("META-INF/MANIFEST.MF");
+        Properties properties = new Properties();
+        try {
+            properties.load(inputStream);
+            if (properties.containsKey("java-cef-commit")) {
+                return properties.getProperty("java-cef-commit");
+            }
+        } catch (IOException ignored) {
+        }
+
+        // Try to get from the git submodule (if loading from development environment)
+        ProcessBuilder processBuilder = new ProcessBuilder("git", "submodule", "status", "common/java-cef");
+        processBuilder.directory(new File("../../"));
+        Process process = processBuilder.start();
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            String[] parts = line.trim().split(" ");
+            return parts[0].replace("+", "");
+        }
+
+        return null;
     }
 
     private static final HashMap<CefCursorType, Long> CEF_TO_GLFW_CURSORS = new HashMap<>();
