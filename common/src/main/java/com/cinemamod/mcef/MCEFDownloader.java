@@ -53,7 +53,7 @@ public class MCEFDownloader {
         byte[] buffer = new byte[1024];
         int count;
         int readBytes = 0;
-        while((count = inputStream.read(buffer,0,1024)) != -1)
+        while((count = inputStream.read(buffer, 0, 1024)) != -1)
         {
             outputStream.write(buffer, 0, count);
             readBytes += count;
