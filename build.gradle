@@ -2,6 +2,10 @@ plugins {
     id 'fabric-loom' version "${fabric_loom_version}" apply false
 }
 
+task cloneJcef(type: Exec) {
+    commandLine 'git', 'submodule', 'update', '--init', '--recursive', 'common/java-cef'
+}
+
 task publishAll(type: GradleBuild) {
     group = 'mcef'
     tasks = [
