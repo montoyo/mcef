@@ -204,6 +204,11 @@ public class MCEFBrowser extends CefBrowserOsr {
             }
         }
 
+        // macOS generally has a slow scroll speed that feels more natural with their magic mice / trackpads
+        if (!MCEFPlatform.getPlatform().isMacOS()) {
+            amount = amount * 3;
+        }
+
         CefMouseWheelEvent e = new CefMouseWheelEvent(CefMouseWheelEvent.WHEEL_UNIT_SCROLL, mouseX, mouseY, amount, modifiers);
         sendMouseWheelEvent(e);
     }
