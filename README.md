@@ -5,6 +5,8 @@ MCEF is based on java-cef (Java Chromium Embedded Framework), which is based on 
 
 MCEF contains a downloader system for downloading the java-cef & CEF binaries required by the Chromium browser. This requires a connection to https://mcef-download.cinemamod.com.
 
+Discussion: https://discord.gg/rNrh5kW8Ty
+
 ## Supported Platforms
 - Windows 10/11 (x86_64, arm64)
 - macOS 11 or greater (Intel, Apple Silicon)
