@@ -9,26 +9,64 @@ public class MCEFDragContext {
 	private int cursorOverride = -1;
 	private int actualCursor = -1;
 	
+	/**
+	 * Used to prevent re-selecting stuff while dragging
+	 * If the user is dragging, emulate having no buttons pressed
+	 * @param btnMask the actual mask
+	 * @return a mask modified based on if the user is dragging
+	 */
 	public int getVirtualModifiers(int btnMask) {
 		return dragData != null ? 0 : btnMask;
 	}
 	
+	/**
+	 * When the user is dragging, the browser-set cursor shouldn't be used
+	 * Instead the cursor should change based on what action would be performed when they release at the given location
+	 * However, the browser-set cursor also needs to be tracked, so this handles that as well
+	 * @param cursorType the actual cursor type (should be the result of {@link MCEFDragContext#getActualCursor()} if you're just trying to see the current cursor)
+	 * @return the drag operation modified cursor if dragging, or the actual cursor if not
+	 */
 	public int getVirtualCursor(int cursorType) {
 		actualCursor = cursorType;
 		if (cursorOverride != -1) cursorType = cursorOverride;
 		return cursorType;
 	}
 	
-	public CefDragData getDragData() {
-		return dragData;
-	}
-	
+	/**
+	 * Checks if a drag operation is currently happening
+	 * @return true if the user is dragging, elsewise false
+	 */
 	public boolean isDragging() {
 		return dragData != null;
 	}
 	
+	/**
+	 * Gets the {@link CefDragData} of the current drag operation
+	 * @return the current drag operation's data
+	 */
+	public CefDragData getDragData() {
+		return dragData;
+	}
+	
+	/**
+	 * Gets the allowed operation mask for this drag event
+	 * @return -1 for any, 0 for none, 1 for copy (TODO: others)
+	 */
 	public int getMask() {
 		return dragMask;
+	}
+	
+	/**
+	 * Gets the browser-set cursor
+	 * @return the cursor that has been set by the browser, disregarding drag operations
+	 */
+	public int getActualCursor() {
+		return actualCursor;
+	}
+	
+	public void startDragging(CefDragData dragData, int mask) {
+		this.dragData = dragData;
+		this.dragMask = mask;
 	}
 	
 	public void stopDragging() {
@@ -36,17 +74,6 @@ public class MCEFDragContext {
 		dragData = null;
 		dragMask = 0;
 		cursorOverride = -1;
-	}
-	
-	/**
-	 * @param x the x position of the mouse
-	 * @param y the y position of the mouse
-	 * @param dragData the data being dragged
-	 * @param mask allowed operations (-1 for auto, 0 for none, 1 for copy  )
-	 */
-	public void startDragging(int x, int y, CefDragData dragData, int mask) {
-		this.dragData = dragData;
-		this.dragMask = mask;
 	}
 	
 	public boolean updateCursor(int operation) {
@@ -71,9 +98,5 @@ public class MCEFDragContext {
 		}
 		
 		return currentOverride != cursorOverride && cursorOverride != -1;
-	}
-	
-	public int getActualCursor() {
-		return actualCursor;
 	}
 }

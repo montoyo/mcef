@@ -272,7 +272,7 @@ public class MCEFBrowser extends CefBrowserOsr {
     // Drag&drop
     @Override
     public boolean startDragging(CefBrowser browser, CefDragData dragData, int mask, int x, int y) {
-        dragContext.startDragging(x, y, dragData, mask);
+        dragContext.startDragging(dragData, mask);
         this.dragTargetDragEnter(dragContext.getDragData(), new Point(x, y), btnMask, dragContext.getMask());
         // Indicates to CEF to not handle the drag event natively
         // reason: native drag handling doesn't work with off screen rendering
