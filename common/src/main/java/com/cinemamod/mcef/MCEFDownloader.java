@@ -3,14 +3,12 @@ package com.cinemamod.mcef;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
-import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Files;
 import java.util.function.Consumer;
-import java.util.zip.GZIPInputStream;
 
 public class MCEFDownloader {
     private static final String JAVA_CEF_DOWNLOAD_URL = "https://mcef-download.cinemamod.com/java-cef-builds/${java-cef-commit}/${platform}.tar.gz";
@@ -56,7 +54,7 @@ public class MCEFDownloader {
         downloadFile(getJavaCefChecksumDownloadUrl(), jcefBuildHashFileTemp, percentComplete -> {});
 
         if (jcefBuildHashFile.exists()) {
-            boolean sameContent = Files.mismatch(jcefBuildHashFile.toPath(), jcefBuildHashFile.toPath()) == -1;
+            boolean sameContent = FileUtils.contentEquals(jcefBuildHashFile, jcefBuildHashFileTemp);
             if (sameContent) {
                 System.out.println("Checksums match");
                 jcefBuildHashFileTemp.delete();
