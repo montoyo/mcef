@@ -43,7 +43,7 @@ public enum MCEFPlatform {
         } else if (os.startsWith("mac os x")) {
             if (arch.equals("x86_64")) {
                 return MACOS_AMD64;
-            } else if (arch.equals("aarch64")) { // TODO: fix this, it's wrong
+            } else if (arch.equals("aarch64")) {
                 return MACOS_ARM64;
             }
         }
