@@ -88,16 +88,25 @@ public class CefInitMixin {
                 e.printStackTrace();
             }
 
-            try {
-                downloader.extractJavaCefBuild(true, System.out::println);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            downloader.extractJavaCefBuild(true, System.out::println);
         }
 
-        if (MCEFPlatform.getPlatform().isLinux()) {
-            File jcefHelperFile = new File(System.getProperty("mcef.libraries.path"), MCEFPlatform.getPlatform().getNormalizedName() + "/jcef_helper");
+        MCEFPlatform platform = MCEFPlatform.getPlatform();
+
+        if (platform.isLinux()) {
+            File jcefHelperFile = new File(System.getProperty("mcef.libraries.path"), platform.getNormalizedName() + "/jcef_helper");
             setUnixExecutable(jcefHelperFile);
+        } else if (platform.isMacOS()) {
+            File mcefLibrariesPath = new File(System.getProperty("mcef.libraries.path"));
+            File jcefHelperFile = new File(mcefLibrariesPath, platform.getNormalizedName() + "/jcef_app.app/Contents/Frameworks/jcef Helper.app/Contents/MacOS/jcef Helper");
+            File jcefHelperGPUFile = new File(mcefLibrariesPath, platform.getNormalizedName() + "/jcef_app.app/Contents/Frameworks/jcef Helper (GPU).app/Contents/MacOS/jcef Helper (GPU)");
+            File jcefHelperPluginFile = new File(mcefLibrariesPath, platform.getNormalizedName() + "/jcef_app.app/Contents/Frameworks/jcef Helper (Plugin).app/Contents/MacOS/jcef Helper (Plugin)");
+            File jcefHelperRendererFile = new File(mcefLibrariesPath, platform.getNormalizedName() + "/jcef_app.app/Contents/Frameworks/jcef Helper (Renderer).app/Contents/MacOS/jcef Helper (Renderer)");
+
+            setUnixExecutable(jcefHelperFile);
+            setUnixExecutable(jcefHelperGPUFile);
+            setUnixExecutable(jcefHelperPluginFile);
+            setUnixExecutable(jcefHelperRendererFile);
         }
 
         if (MCEF.initialize()) {

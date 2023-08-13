@@ -2,6 +2,8 @@ package com.cinemamod.mcef;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.*;
 import java.net.URL;
@@ -67,7 +69,7 @@ public class MCEFDownloader {
         return false;
     }
 
-    public void extractJavaCefBuild(boolean delete, Consumer<Float> percentCompleteConsumer) throws IOException {
+    public void extractJavaCefBuild(boolean delete, Consumer<Float> percentCompleteConsumer) {
         File mcefLibrariesPath = new File(System.getProperty("mcef.libraries.path"));
         File tarGzArchive = new File(mcefLibrariesPath, platform.getNormalizedName() + ".tar.gz");
         extractTarGz(tarGzArchive, mcefLibrariesPath, percentCompleteConsumer);
@@ -103,28 +105,26 @@ public class MCEFDownloader {
         outputStream.close();
     }
 
-    private static void extractTarGz(File tarGzFile, File outputDirectory, Consumer<Float> percentCompleteConsumer) throws IOException {
+    private static void extractTarGz(File tarGzFile, File outputDirectory, Consumer<Float> percentCompleteConsumer) {
         outputDirectory.mkdirs();
 
         long fileSize = tarGzFile.length();
         long totalBytesRead = 0;
 
-        try (InputStream inputStream = new FileInputStream(tarGzFile);
-             GZIPInputStream gzipInputStream = new GZIPInputStream(inputStream);
-             TarArchiveInputStream tarArchiveInputStream = new TarArchiveInputStream(gzipInputStream)) {
-
+        try (TarArchiveInputStream tarInput = new TarArchiveInputStream(new GzipCompressorInputStream(new FileInputStream(tarGzFile)))) {
             TarArchiveEntry entry;
-            while ((entry = tarArchiveInputStream.getNextTarEntry()) != null) {
+            while ((entry = tarInput.getNextTarEntry()) != null) {
                 if (entry.isDirectory()) {
                     continue;
                 }
+
                 File outputFile = new File(outputDirectory, entry.getName());
                 outputFile.getParentFile().mkdirs();
-                outputFile.createNewFile();
+
                 try (OutputStream outputStream = new FileOutputStream(outputFile)) {
                     byte[] buffer = new byte[4096];
                     int bytesRead;
-                    while ((bytesRead = tarArchiveInputStream.read(buffer)) != -1) {
+                    while ((bytesRead = tarInput.read(buffer)) != -1) {
                         outputStream.write(buffer, 0, bytesRead);
                         totalBytesRead += bytesRead;
                         float percentComplete = (((float) totalBytesRead / fileSize) / 2.6158204f); // Roughly the compression ratio
@@ -132,6 +132,8 @@ public class MCEFDownloader {
                     }
                 }
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         percentCompleteConsumer.accept(1.0f);
