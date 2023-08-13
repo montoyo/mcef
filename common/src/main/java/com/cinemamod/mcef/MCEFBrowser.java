@@ -204,14 +204,6 @@ public class MCEFBrowser extends CefBrowserOsr {
             }
         }
 
-        if (MCEFPlatform.getPlatform().isMacOS()) {
-            if (amount >= 1) {
-                amount = 1;
-            } else if (amount <= -1) {
-                amount = -1;
-            }
-        }
-
         CefMouseWheelEvent e = new CefMouseWheelEvent(CefMouseWheelEvent.WHEEL_UNIT_SCROLL, mouseX, mouseY, amount, modifiers);
         sendMouseWheelEvent(e);
     }
