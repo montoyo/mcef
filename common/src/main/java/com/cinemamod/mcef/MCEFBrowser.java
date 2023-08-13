@@ -194,7 +194,8 @@ public class MCEFBrowser extends CefBrowserOsr {
         else if (button == 2 && (btnMask & CefMouseEvent.BUTTON3_MASK) != 0) btnMask ^= CefMouseEvent.BUTTON3_MASK;
     }
 
-    public void sendMouseWheel(int mouseX, int mouseY, int amount, int modifiers) {
+    // TODO: smooth scrolling
+    public void sendMouseWheel(int mouseX, int mouseY, double amount, int modifiers) {
         if (browserControls) {
             if ((modifiers & GLFW_MOD_CONTROL) != 0) {
                 if (amount > 0) {
@@ -203,7 +204,20 @@ public class MCEFBrowser extends CefBrowserOsr {
                 return;
             }
         }
-        
+
+        // macOS generally has a slow scroll speed that feels more natural with their magic mice / trackpads
+        if (!MCEFPlatform.getPlatform().isMacOS()) {
+            // This removes the feeling of "smooth scroll"
+            if (amount < 0) {
+                amount = Math.floor(amount);
+            } else {
+                amount = Math.ceil(amount);
+            }
+
+            // This feels about equivalent to chromium with smooth scrolling disabled -ds58
+            amount = amount * 3;
+        }
+
         CefMouseWheelEvent e = new CefMouseWheelEvent(CefMouseWheelEvent.WHEEL_UNIT_SCROLL, mouseX, mouseY, amount, modifiers);
         sendMouseWheelEvent(e);
     }
