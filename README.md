@@ -10,7 +10,9 @@ Discussion: https://discord.gg/rNrh5kW8Ty
 ## Supported Platforms
 - Windows 10/11 (x86_64, arm64)
 - macOS 11 or greater (Intel, Apple Silicon)
-- GNU Linux glibc 2.31 or greater (x86_64, arm64)
+- GNU Linux glibc 2.31 or greater (x86_64, arm64)*
+
+*This mod will not work on Android.
 
 ## For Players
 This is the source code for MCEF. You can find the download for the mod on CurseForge.
