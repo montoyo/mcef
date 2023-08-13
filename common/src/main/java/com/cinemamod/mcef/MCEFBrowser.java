@@ -45,14 +45,18 @@ public class MCEFBrowser extends CefBrowserOsr {
     private final MCEFRenderer renderer = new MCEFRenderer(true);
     private Consumer<Integer> cursorChangeListener;
 
-    // used to track when a full repaint should occur
+    // Used to track when a full repaint should occur
     private int lastWidth = 0;
     private int lastHeight = 0;
     
-    // a bitset representing what mouse buttons are currently pressed
+    // A bitset representing what mouse buttons are currently pressed
     // CEF is a bit odd and implements mouse buttons as a part of modifier flags
     private int btnMask = 0;
     
+    // Stores information about drag and drop
+    private final MCEFDragContext dragContext = new MCEFDragContext(this);
+    
+    // Whether or not MCEF should mimic the controls of a typical web browser
     private boolean browserControls = true;
 
     public MCEFBrowser(MCEFClient client, String url, boolean transparent, CefRequestContext context) {
@@ -62,6 +66,7 @@ public class MCEFBrowser extends CefBrowserOsr {
         cursorChangeListener = (cefCursorID) -> setCursor(CefCursorType.fromId(cefCursorID));
     }
     
+    /* Expose MCEF data */
     public MCEFRenderer getRenderer() {
         return renderer;
     }
@@ -94,6 +99,11 @@ public class MCEFBrowser extends CefBrowserOsr {
         return this;
     }
     
+    public MCEFDragContext getDragContext() {
+        return dragContext;
+    }
+    
+    // Graphics
     @Override
     public void onPaint(CefBrowser browser, boolean popup, Rectangle[] dirtyRects, ByteBuffer buffer, int width, int height) {
         if (width != lastWidth || height != lastHeight) {
@@ -114,7 +124,13 @@ public class MCEFBrowser extends CefBrowserOsr {
             }
         }
     }
+    
+    public void resize(int width, int height) {
+        browser_rect_.setBounds(0, 0, width, height);
+        wasResized(width, height);
+    }
 
+    // Inputs
     public void sendKeyPress(int keyCode, long scanCode, int modifiers) {
         if (browserControls) {
             if (modifiers == GLFW_MOD_CONTROL) {
@@ -183,8 +199,11 @@ public class MCEFBrowser extends CefBrowserOsr {
     }
     
     public void sendMouseMove(int mouseX, int mouseY) {
-        CefMouseEvent e = new CefMouseEvent(CefMouseEvent.MOUSE_MOVED, mouseX, mouseY, 0, 0, btnMask);
+        CefMouseEvent e = new CefMouseEvent(CefMouseEvent.MOUSE_MOVED, mouseX, mouseY, 0, 0, dragContext.getVirtualModifiers(btnMask));
         sendMouseEvent(e);
+        
+        if (dragContext.isDragging())
+            this.dragTargetDragOver(new Point(mouseX, mouseY), 0, dragContext.getMask());
     }
     
     // TODO: it may be necessary to add modifiers here
@@ -206,15 +225,24 @@ public class MCEFBrowser extends CefBrowserOsr {
         // for some reason, middle and right are swapped in MC
         if (button == 1) button = 2;
         else if (button == 2) button = 1;
-
-        CefMouseEvent e = new CefMouseEvent(GLFW_RELEASE, mouseX, mouseY, 1, button, btnMask);
-        sendMouseEvent(e);
-
+        
         if (button == 0 && (btnMask & CefMouseEvent.BUTTON1_MASK) != 0) btnMask ^= CefMouseEvent.BUTTON1_MASK;
         else if (button == 1 && (btnMask & CefMouseEvent.BUTTON2_MASK) != 0) btnMask ^= CefMouseEvent.BUTTON2_MASK;
         else if (button == 2 && (btnMask & CefMouseEvent.BUTTON3_MASK) != 0) btnMask ^= CefMouseEvent.BUTTON3_MASK;
+        
+        CefMouseEvent e = new CefMouseEvent(GLFW_RELEASE, mouseX, mouseY, 1, button, btnMask);
+        sendMouseEvent(e);
+        
+        // drag&drop
+        if (dragContext.isDragging()) {
+            if (button == 0) {
+                dragTargetDrop(new Point(mouseX, mouseY), btnMask);
+                dragTargetDragLeave();
+                dragContext.stopDragging();
+            }
+        }
     }
-
+    
     // TODO: smooth scrolling
     public void sendMouseWheel(int mouseX, int mouseY, double amount, int modifiers) {
         if (browserControls) {
@@ -242,12 +270,23 @@ public class MCEFBrowser extends CefBrowserOsr {
         CefMouseWheelEvent e = new CefMouseWheelEvent(CefMouseWheelEvent.WHEEL_UNIT_SCROLL, mouseX, mouseY, amount, modifiers);
         sendMouseWheelEvent(e);
     }
-
-    public void resize(int width, int height) {
-        browser_rect_.setBounds(0, 0, width, height);
-        wasResized(width, height);
+    
+    // drag&drop
+    @Override
+    public boolean startDragging(CefBrowser browser, CefDragData dragData, int mask, int x, int y) {
+        // TODO: figure out how to support dragging properly?
+        dragContext.startDragging(dragData, mask);
+        this.dragTargetDragEnter(dragData, new Point(x, y), btnMask, mask);
+        return false; // indicates to CEF that no drag operation was successfully started
     }
     
+    @Override
+    public void updateDragCursor(CefBrowser browser, int operation) {
+        dragContext.updateCursor(operation);
+        super.updateDragCursor(browser, operation);
+    }
+    
+    /* closing */
     public void close() {
         renderer.cleanup();
         super.close(true);
@@ -259,8 +298,10 @@ public class MCEFBrowser extends CefBrowserOsr {
         super.finalize();
     }
 
+    /* cursor handling */
     @Override
     public boolean onCursorChange(CefBrowser browser, int cursorType) {
+        cursorType = dragContext.getVirtualCursor(cursorType);
         this.cursorChangeListener.accept(cursorType);
         return super.onCursorChange(browser, cursorType);
     }
@@ -272,11 +313,5 @@ public class MCEFBrowser extends CefBrowserOsr {
             GLFW.glfwSetInputMode(Minecraft.getInstance().getWindow().getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             GLFW.glfwSetCursor(Minecraft.getInstance().getWindow().getWindow(), MCEF.getGLFWCursorHandle(cursorType));
         }
-    }
-    
-    @Override
-    public boolean startDragging(CefBrowser browser, CefDragData dragData, int mask, int x, int y) {
-        // TODO: figure out how to support dragging properly?
-        return false; // indicates to CEF that no drag operation was successfully started
     }
 }
