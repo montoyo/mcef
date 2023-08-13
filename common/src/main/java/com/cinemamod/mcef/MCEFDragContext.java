@@ -1,6 +1,5 @@
 package com.cinemamod.mcef;
 
-import org.cef.browser.CefBrowserOsr;
 import org.cef.callback.CefDragData;
 import org.cef.misc.CefCursorType;
 
@@ -9,12 +8,6 @@ public class MCEFDragContext {
 	private int dragMask = 0;
 	private int cursorOverride = -1;
 	private int actualCursor = -1;
-	
-	private final CefBrowserOsr browser;
-	
-	public MCEFDragContext(CefBrowserOsr browser) {
-		this.browser = browser;
-	}
 	
 	public int getVirtualModifiers(int btnMask) {
 		return dragData != null ? 0 : btnMask;
@@ -43,17 +36,21 @@ public class MCEFDragContext {
 		dragData = null;
 		dragMask = 0;
 		cursorOverride = -1;
-		
-		browser.onCursorChange(browser, actualCursor);
 	}
 	
-	public void startDragging(CefDragData dragData, int mask) {
+	/**
+	 * @param x the x position of the mouse
+	 * @param y the y position of the mouse
+	 * @param dragData the data being dragged
+	 * @param mask allowed operations (-1 for auto, 0 for none, 1 for copy  )
+	 */
+	public void startDragging(int x, int y, CefDragData dragData, int mask) {
 		this.dragData = dragData;
 		this.dragMask = mask;
 	}
 	
-	public void updateCursor(int operation) {
-		if (dragData == null) return;
+	public boolean updateCursor(int operation) {
+		if (dragData == null) return false;
 		
 		int currentOverride = cursorOverride;
 		
@@ -73,7 +70,10 @@ public class MCEFDragContext {
 				cursorOverride = -1;
 		}
 		
-		if (currentOverride != cursorOverride && cursorOverride != -1)
-			browser.onCursorChange(browser, cursorOverride);
+		return currentOverride != cursorOverride && cursorOverride != -1;
+	}
+	
+	public int getActualCursor() {
+		return actualCursor;
 	}
 }

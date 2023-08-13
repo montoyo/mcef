@@ -54,7 +54,7 @@ public class MCEFBrowser extends CefBrowserOsr {
     private int btnMask = 0;
     
     // Stores information about drag and drop
-    private final MCEFDragContext dragContext = new MCEFDragContext(this);
+    private final MCEFDragContext dragContext = new MCEFDragContext();
     
     // Whether or not MCEF should mimic the controls of a typical web browser
     private boolean browserControls = true;
@@ -222,7 +222,7 @@ public class MCEFBrowser extends CefBrowserOsr {
     
     // TODO: it may be necessary to add modifiers here
     public void sendMouseRelease(int mouseX, int mouseY, int button) {
-        // for some reason, middle and right are swapped in MC
+        // For some reason, middle and right are swapped in MC
         if (button == 1) button = 2;
         else if (button == 2) button = 1;
         
@@ -236,9 +236,7 @@ public class MCEFBrowser extends CefBrowserOsr {
         // drag&drop
         if (dragContext.isDragging()) {
             if (button == 0) {
-                dragTargetDrop(new Point(mouseX, mouseY), btnMask);
-                dragTargetDragLeave();
-                dragContext.stopDragging();
+                finishDragging(mouseX, mouseY);
             }
         }
     }
@@ -271,22 +269,44 @@ public class MCEFBrowser extends CefBrowserOsr {
         sendMouseWheelEvent(e);
     }
     
-    // drag&drop
+    // Drag&drop
     @Override
     public boolean startDragging(CefBrowser browser, CefDragData dragData, int mask, int x, int y) {
-        // TODO: figure out how to support dragging properly?
-        dragContext.startDragging(dragData, mask);
-        this.dragTargetDragEnter(dragData, new Point(x, y), btnMask, mask);
-        return false; // indicates to CEF that no drag operation was successfully started
+        dragContext.startDragging(x, y, dragData, mask);
+        this.dragTargetDragEnter(dragContext.getDragData(), new Point(x, y), btnMask, dragContext.getMask());
+        // Indicates to CEF to not handle the drag event natively
+        // reason: native drag handling doesn't work with off screen rendering
+        return false;
     }
     
     @Override
     public void updateDragCursor(CefBrowser browser, int operation) {
-        dragContext.updateCursor(operation);
+        if (dragContext.updateCursor(operation))
+            // If the cursor to display for the drag event changes, then update the cursor
+            this.onCursorChange(this, dragContext.getVirtualCursor(dragContext.getActualCursor()));
+        
         super.updateDragCursor(browser, operation);
     }
     
-    /* closing */
+    // Expose drag&drop functions
+    public void startDragging(CefDragData dragData, int mask, int x, int y) { // Overload since the JCEF method requires a browser, which then goes unused
+        startDragging(dragData, mask, x, y);
+    }
+    
+    public void finishDragging(int x, int y) {
+        dragTargetDrop(new Point(x, y), btnMask);
+        dragTargetDragLeave();
+        dragContext.stopDragging();
+        this.onCursorChange(this, dragContext.getActualCursor());
+    }
+    
+    public void cancelDrag() {
+        dragTargetDragLeave();
+        dragContext.stopDragging();
+        this.onCursorChange(this, dragContext.getActualCursor());
+    }
+    
+    /* Closing */
     public void close() {
         renderer.cleanup();
         super.close(true);
@@ -298,7 +318,7 @@ public class MCEFBrowser extends CefBrowserOsr {
         super.finalize();
     }
 
-    /* cursor handling */
+    /* Cursor handling */
     @Override
     public boolean onCursorChange(CefBrowser browser, int cursorType) {
         cursorType = dragContext.getVirtualCursor(cursorType);
