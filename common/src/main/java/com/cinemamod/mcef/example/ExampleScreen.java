@@ -113,7 +113,7 @@ public class ExampleScreen extends Screen {
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        browser.sendMouseWheel(mouseX(mouseX), mouseY(mouseY), (int) delta * 3, 0);
+        browser.sendMouseWheel(mouseX(mouseX), mouseY(mouseY), delta * 3, 0);
         return super.mouseScrolled(mouseX, mouseY, delta);
     }
 
