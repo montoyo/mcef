@@ -1,7 +1,7 @@
 # MCEF (Minecraft Chromium Embedded Framework)
 MCEF is a mod and library for adding the Chromium web browser into Minecraft.
 
-MCEF is based on java-cef (Java Chromium Embedded Framework), which is based on CEF (Chromium Embedded Framework), which is based on Chromium. It was originally created by montoyo and is currently maintained by the CinemaMod group.
+MCEF is based on java-cef (Java Chromium Embedded Framework), which is based on CEF (Chromium Embedded Framework), which is based on Chromium. It was originally created by montoyo. It was rewritten and currently maintained by the CinemaMod group.
 
 The submodule for the modified version of java-cef which MCEF relies on is located in common/java-cef.
 
