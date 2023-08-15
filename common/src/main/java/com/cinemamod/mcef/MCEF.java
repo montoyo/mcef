@@ -28,6 +28,10 @@ import java.io.*;
 import java.util.HashMap;
 import java.util.Properties;
 
+/**
+ * An API to create Chromium web browsers in Minecraft. Uses
+ * a modified version of java-cef (Java Chromium Embedded Framework).
+ */
 public final class MCEF {
     private static MCEFApp app;
     private static MCEFClient client;
@@ -57,7 +61,7 @@ public final class MCEF {
 
     public static MCEFBrowser createBrowser(String url, boolean transparent) {
         assertInitialized();
-        MCEFBrowser browser = new MCEFBrowser(client, url, transparent, null);
+        MCEFBrowser browser = new MCEFBrowser(client, url, transparent);
         browser.setCloseAllowed();
         browser.createImmediately();
         return browser;
@@ -65,7 +69,7 @@ public final class MCEF {
 
     public static MCEFBrowser createBrowser(String url, boolean transparent, int width, int height) {
         assertInitialized();
-        MCEFBrowser browser = new MCEFBrowser(client, url, transparent, null);
+        MCEFBrowser browser = new MCEFBrowser(client, url, transparent);
         browser.setCloseAllowed();
         browser.createImmediately();
         browser.resize(width, height);

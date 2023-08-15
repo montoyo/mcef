@@ -84,7 +84,6 @@ public class ExampleScreen extends Screen {
 
     @Override
     public void onClose() {
-        browser.getCursorChangeListener().accept(0);
         browser.close();
         super.onClose();
     }
@@ -94,7 +93,7 @@ public class ExampleScreen extends Screen {
         super.render(guiGraphics, i, j, f);
         RenderSystem.disableDepthTest();
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-        RenderSystem.setShaderTexture(0, browser.getTexture());
+        RenderSystem.setShaderTexture(0, browser.getRenderer().getTextureID());
         Tesselator t = Tesselator.getInstance();
         BufferBuilder buffer = t.getBuilder();
         buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);

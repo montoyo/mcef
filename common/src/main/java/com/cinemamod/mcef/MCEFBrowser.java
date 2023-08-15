@@ -26,7 +26,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import org.cef.browser.CefBrowser;
 import org.cef.browser.CefBrowserOsr;
-import org.cef.browser.CefRequestContext;
 import org.cef.callback.CefDragData;
 import org.cef.event.CefKeyEvent;
 import org.cef.event.CefMouseEvent;
@@ -36,62 +35,75 @@ import org.lwjgl.glfw.GLFW;
 
 import java.awt.*;
 import java.nio.ByteBuffer;
-import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 
+/**
+ * An instance of an "Off-screen rendered" Chromium web browser.
+ * Complete with a renderer, keyboard and mouse inputs, optional
+ * browser control shortcuts, cursor handling, drag & drop support.
+ */
 public class MCEFBrowser extends CefBrowserOsr {
-    private final MCEFRenderer renderer = new MCEFRenderer(true);
-    private Consumer<Integer> cursorChangeListener;
-
-    // Used to track when a full repaint should occur
-    private int lastWidth = 0;
-    private int lastHeight = 0;
-    
-    // A bitset representing what mouse buttons are currently pressed
-    // CEF is a bit odd and implements mouse buttons as a part of modifier flags
-    private int btnMask = 0;
-    
-    // Stores information about drag and drop
+    /**
+     * The renderer for the browser.
+     */
+    private final MCEFRenderer renderer;
+    /**
+     * Stores information about drag & drop.
+     */
     private final MCEFDragContext dragContext = new MCEFDragContext();
-    
-    // Whether or not MCEF should mimic the controls of a typical web browser
+    /**
+     * A listener that defines that happens when a cursor changes in the browser.
+     * E.g. when you've hovered over a button, an input box, are selecting text, etc...
+     * A default listener is created in the constructor that sets the cursor type to
+     * the appropriate cursor based on the event.
+     */
+    private MCEFCursorChangeListener cursorChangeListener;
+    /**
+     * Whether MCEF should mimic the controls of a typical web browser.
+     * E.g. CTRL+R for reload, CTRL+Left for back, CTRL+Right for forward, etc...
+     */
     private boolean browserControls = true;
+    /**
+     * Used to track when a full repaint should occur.
+     */
+    private int lastWidth = 0, lastHeight = 0;
+    /**
+     * A bitset representing what mouse buttons are currently pressed.
+     * CEF is a bit odd and implements mouse buttons as a part of modifier flags.
+     */
+    private int btnMask = 0;
 
-    public MCEFBrowser(MCEFClient client, String url, boolean transparent, CefRequestContext context) {
-        super(client.getHandle(), url, transparent, context);
-        Minecraft.getInstance().submit(renderer::initialize);
-        // Default cursor change listener
+    public MCEFBrowser(MCEFClient client, String url, boolean transparent) {
+        super(client.getHandle(), url, transparent, null);
+        renderer = new MCEFRenderer(transparent);
         cursorChangeListener = (cefCursorID) -> setCursor(CefCursorType.fromId(cefCursorID));
+
+        Minecraft.getInstance().submit(renderer::initialize);
     }
     
-    /* Expose MCEF data */
     public MCEFRenderer getRenderer() {
         return renderer;
     }
 
-    public int getTexture() {
-        return renderer.getTextureID();
-    }
-
-    public Consumer<Integer> getCursorChangeListener() {
+    public MCEFCursorChangeListener getCursorChangeListener() {
         return cursorChangeListener;
     }
 
-    public void setCursorChangeListener(Consumer<Integer> cursorChangeListener) {
+    public void setCursorChangeListener(MCEFCursorChangeListener cursorChangeListener) {
         this.cursorChangeListener = cursorChangeListener;
     }
-    
+
     public boolean usingBrowserControls() {
         return browserControls;
     }
     
     /**
-     * Enabling browser controls tells MCEF to mimic the behavior of an actual browser
-     * ctrl+r for reload, ctrl+left for back, ctrl+right for forward, etc
+     * Enabling browser controls tells MCEF to mimic the behavior of an actual browser.
+     * CTRL+R for reload, CTRL+Left for back, CTRL+Right for forward, etc...
      *
-     * @param browserControls whether or not browser controls should be enabled
+     * @param browserControls whether browser controls should be enabled
      * @return the browser instance
      */
     public MCEFBrowser useBrowserControls(boolean browserControls) {
@@ -269,7 +281,7 @@ public class MCEFBrowser extends CefBrowserOsr {
         sendMouseWheelEvent(e);
     }
     
-    // Drag&drop
+    // Drag & drop
     @Override
     public boolean startDragging(CefBrowser browser, CefDragData dragData, int mask, int x, int y) {
         dragContext.startDragging(dragData, mask);
@@ -288,7 +300,7 @@ public class MCEFBrowser extends CefBrowserOsr {
         super.updateDragCursor(browser, operation);
     }
     
-    // Expose drag&drop functions
+    // Expose drag & drop functions
     public void startDragging(CefDragData dragData, int mask, int x, int y) { // Overload since the JCEF method requires a browser, which then goes unused
         startDragging(dragData, mask, x, y);
     }
@@ -309,6 +321,7 @@ public class MCEFBrowser extends CefBrowserOsr {
     /* Closing */
     public void close() {
         renderer.cleanup();
+        cursorChangeListener.onCursorChange(0);
         super.close(true);
     }
 
@@ -322,7 +335,7 @@ public class MCEFBrowser extends CefBrowserOsr {
     @Override
     public boolean onCursorChange(CefBrowser browser, int cursorType) {
         cursorType = dragContext.getVirtualCursor(cursorType);
-        this.cursorChangeListener.accept(cursorType);
+        cursorChangeListener.onCursorChange(cursorType);
         return super.onCursorChange(browser, cursorType);
     }
 
