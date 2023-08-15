@@ -3,17 +3,17 @@
   "id": "${mod_id}",
   "version": "${mod_version}",
   "name": "${mod_name}",
-  "description": "TODO desc",
+  "description": "A Minecraft mod and library for adding the Chromium web browser into the game (Minecraft Chromium Embedded Framework).",
   "authors": [
     "${mod_vendor}"
   ],
   "contact": {
-    "homepage": "TODO",
-    "issues": "TODO",
-    "sources": "TODO",
-    "discord": "TODO"
+    "homepage": "https://github.com/CinemaMod/mcef",
+    "issues": "https://github.com/CinemaMod/mcef/issues",
+    "sources": "https://github.com/CinemaMod/mcef",
+    "discord": "https://discord.gg/rNrh5kW8Ty"
   },
-  "license": "All Rights Reserved",
+  "license": "LGPL 2.1",
   "icon": "icon.png",
   "environment": "*",
   "entrypoints": {
