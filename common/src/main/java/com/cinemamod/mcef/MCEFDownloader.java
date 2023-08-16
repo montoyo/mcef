@@ -31,6 +31,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.function.Consumer;
 
+/**
+ * A downloader and extraction tool for java-cef builds.
+ * <p>
+ * Downloads for <a href="https://github.com/CinemaMod/java-cef">CinemaMod java-cef</a> are provided by the CinemaMod Group.
+ * Email ds58@mailbox.org for any questions or concerns regarding the file hosting.
+ */
 public class MCEFDownloader {
     private static final String JAVA_CEF_DOWNLOAD_URL = "https://mcef-download.cinemamod.com/java-cef-builds/${java-cef-commit}/${platform}.tar.gz";
     private static final String JAVA_CEF_CHECKSUM_DOWNLOAD_URL = "https://mcef-download.cinemamod.com/java-cef-builds/${java-cef-commit}/${platform}.tar.gz.sha256";
