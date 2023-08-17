@@ -34,7 +34,8 @@ import java.util.function.Consumer;
 /**
  * A downloader and extraction tool for java-cef builds.
  * <p>
- * Downloads for <a href="https://github.com/CinemaMod/java-cef">CinemaMod java-cef</a> are provided by the CinemaMod Group.
+ * Downloads for <a href="https://github.com/CinemaMod/java-cef">CinemaMod java-cef</a> are provided by the CinemaMod Group unless changed
+ * in the MCEFSettings properties file; see {@link MCEFSettings}.
  * Email ds58@mailbox.org for any questions or concerns regarding the file hosting.
  */
 public class MCEFDownloader {
