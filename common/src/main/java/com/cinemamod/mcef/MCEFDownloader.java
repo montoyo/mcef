@@ -38,15 +38,21 @@ import java.util.function.Consumer;
  * Email ds58@mailbox.org for any questions or concerns regarding the file hosting.
  */
 public class MCEFDownloader {
-    private static final String JAVA_CEF_DOWNLOAD_URL = "https://mcef-download.cinemamod.com/java-cef-builds/${java-cef-commit}/${platform}.tar.gz";
-    private static final String JAVA_CEF_CHECKSUM_DOWNLOAD_URL = "https://mcef-download.cinemamod.com/java-cef-builds/${java-cef-commit}/${platform}.tar.gz.sha256";
+    private static final String JAVA_CEF_DOWNLOAD_URL = "${host}/java-cef-builds/${java-cef-commit}/${platform}.tar.gz";
+    private static final String JAVA_CEF_CHECKSUM_DOWNLOAD_URL = "${host}/java-cef-builds/${java-cef-commit}/${platform}.tar.gz.sha256";
 
+    private final String host;
     private final String javaCefCommitHash;
     private final MCEFPlatform platform;
 
-    public MCEFDownloader(String javaCefCommitHash, MCEFPlatform platform) {
+    public MCEFDownloader(String host, String javaCefCommitHash, MCEFPlatform platform) {
+        this.host = host;
         this.javaCefCommitHash = javaCefCommitHash;
         this.platform = platform;
+    }
+
+    public String getHost() {
+        return host;
     }
 
     public String getJavaCefDownloadUrl() {
@@ -59,6 +65,7 @@ public class MCEFDownloader {
 
     private String formatURL(String url) {
         return url
+                .replace("${host}", host)
                 .replace("${java-cef-commit}", javaCefCommitHash)
                 .replace("${platform}", platform.getNormalizedName());
     }

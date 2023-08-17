@@ -33,8 +33,21 @@ import java.util.Properties;
  * a modified version of java-cef (Java Chromium Embedded Framework).
  */
 public final class MCEF {
+    private static MCEFSettings settings;
     private static MCEFApp app;
     private static MCEFClient client;
+
+    public static MCEFSettings getSettings() {
+        if (settings == null) {
+            settings = new MCEFSettings();
+            try {
+                settings.load();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return settings;
+    }
 
     /**
      * This gets called by {@link com.cinemamod.mcef.mixins.CefInitMixin}

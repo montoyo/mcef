@@ -24,6 +24,7 @@ package com.cinemamod.mcef.mixins;
 import com.cinemamod.mcef.MCEF;
 import com.cinemamod.mcef.MCEFDownloader;
 import com.cinemamod.mcef.MCEFPlatform;
+import com.cinemamod.mcef.MCEFSettings;
 import net.minecraft.client.resources.ClientPackSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -99,7 +100,8 @@ public class CefInitMixin {
 
         System.out.println("java-cef commit: " + javaCefCommit);
 
-        MCEFDownloader downloader = new MCEFDownloader(javaCefCommit, MCEFPlatform.getPlatform());
+        MCEFSettings settings = MCEF.getSettings();
+        MCEFDownloader downloader = new MCEFDownloader(settings.getDownloadMirror(), javaCefCommit, MCEFPlatform.getPlatform());
 
         boolean downloadJcefBuild = false;
 
