@@ -37,6 +37,16 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * <p>
+ *     mcef.libraries.path is where MCEF will store any required binaries. By default,
+ *     /path/to/minecraft/.mods/mcef-libraries.
+ * <p>
+ *     jcef.path is the location of the standard java-cef bundle. By default,
+ *     /path/to/mcef-libraries/<normalized platform name> where normalized platform name comes from
+ *     {@link MCEFPlatform#getNormalizedName()}. This is what java-cef uses internally to find the
+ *     installation. Also see {@link org.cef.CefApp}.
+ */
 @Mixin(ClientPackSource.class)
 public class CefInitMixin {
     private static void setUnixExecutable(File file) {
