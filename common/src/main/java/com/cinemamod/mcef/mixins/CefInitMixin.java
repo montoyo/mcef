@@ -59,7 +59,7 @@ public class CefInitMixin {
         try {
             Files.setPosixFilePermissions(file.toPath(), perms);
         } catch (IOException e) {
-            // Ignore
+            e.printStackTrace();
         }
     }
 
@@ -114,7 +114,7 @@ public class CefInitMixin {
             e.printStackTrace();
         }
 
-        if (downloadJcefBuild) {
+        if (downloadJcefBuild && !settings.isSkipDownload()) {
             try {
                 downloader.downloadJavaCefBuild(percentComplete -> {});
             } catch (IOException e) {
@@ -135,7 +135,6 @@ public class CefInitMixin {
             File jcefHelperGPUFile = new File(mcefLibrariesPath, platform.getNormalizedName() + "/jcef_app.app/Contents/Frameworks/jcef Helper (GPU).app/Contents/MacOS/jcef Helper (GPU)");
             File jcefHelperPluginFile = new File(mcefLibrariesPath, platform.getNormalizedName() + "/jcef_app.app/Contents/Frameworks/jcef Helper (Plugin).app/Contents/MacOS/jcef Helper (Plugin)");
             File jcefHelperRendererFile = new File(mcefLibrariesPath, platform.getNormalizedName() + "/jcef_app.app/Contents/Frameworks/jcef Helper (Renderer).app/Contents/MacOS/jcef Helper (Renderer)");
-
             setUnixExecutable(jcefHelperFile);
             setUnixExecutable(jcefHelperGPUFile);
             setUnixExecutable(jcefHelperPluginFile);
