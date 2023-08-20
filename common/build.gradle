@@ -1,5 +1,6 @@
 plugins {
     id 'fabric-loom'
+    id 'maven-publish'
 }
 
 sourceCompatibility = JavaLanguageVersion.of(java_version as int)
@@ -12,6 +13,33 @@ repositories {
     maven {
         name = 'ParchmentMC'
         url = 'https://maven.parchmentmc.org'
+    }
+}
+
+/*
+    Add the following to ~/.gradle/gradle.properties
+    systemProp.org.gradle.s3.endpoint=https://<the s3 endpoint>
+    MCEF_S3_PUBLISH_URL=s3://<bucket>/repositories/releases
+    MCEF_S3_PUBLISH_ACCESS_KEY=<access key>
+    MCEF_S3_PUBLISH_SECRET_KEY=<secret key>
+ */
+publishing {
+    repositories {
+        maven {
+            url findProperty('MCEF_S3_PUBLISH_URL')
+            credentials(AwsCredentials) {
+                accessKey = findProperty('MCEF_S3_PUBLISH_ACCESS_KEY')
+                secretKey = findProperty('MCEF_S3_PUBLISH_SECRET_KEY')
+            }
+        }
+    }
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            groupId = 'com.cinemamod'
+            artifactId = 'mcef'
+            version = mcef_version
+        }
     }
 }
 
@@ -36,6 +64,13 @@ sourceSets {
         compileClasspath += jcef.output
         runtimeClasspath += jcef.output
     }
+}
+
+processResources.dependsOn(processJcefResources)
+
+jar {
+    from sourceSets.jcef.output.classesDirs
+    from sourceSets.jcef.output.resourcesDir
 }
 
 idea {

@@ -13,18 +13,14 @@ task publishAll(type: GradleBuild) {
             ':forge:clean',
             ':fabric:clean',
             ':forge:curseforge',
-            ':forge:modUpdate',
-            ':fabric:curseforge',
-            ':fabric:modUpdate',
+            ':fabric:curseforge'
     ]
 }
 
-task publishSnapshot(type: GradleBuild) {
+task publishCommon(type: GradleBuild) {
     group = 'mcef'
-    tasks = [
-            ':common:clean',
-            ':fabric:clean',
-            ':fabric:curseforge',
+    tasks [
+            ':common:publish'
     ]
 }
 
