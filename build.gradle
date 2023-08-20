@@ -17,13 +17,6 @@ task publishAll(type: GradleBuild) {
     ]
 }
 
-task publishCommon(type: GradleBuild) {
-    group = 'mcef'
-    tasks [
-            ':common:publish'
-    ]
-}
-
 task fabricClient(type: GradleBuild) {
     group = 'mcef'
     tasks = [
