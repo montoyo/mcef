@@ -1,6 +1,6 @@
 modLoader="javafml"
 loaderVersion="${forge_loader_requirement}"
-license="All rights reserved"
+license="LGPL"
 issueTrackerURL="https://github.com/CinemaMod/mcef/issues"
 displayURL="https://github.com/CinemaMod/mcef"
 logoFile="icon.png"
