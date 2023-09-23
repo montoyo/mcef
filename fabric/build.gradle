@@ -7,7 +7,7 @@ plugins {
 sourceCompatibility = JavaLanguageVersion.of(java_version as int)
 targetCompatibility = JavaLanguageVersion.of(java_version as int)
 
-var mod_version = "${minecraft_version}-${mcef_version}"
+var mod_version = mcef_version
 
 archivesBaseName = archives_base_name
 version = mod_version

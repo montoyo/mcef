@@ -5,7 +5,7 @@ plugins {
     id 'com.github.johnrengelman.shadow' version "${shadow_version}"
 }
 
-var mod_version = "${minecraft_version}-${mcef_version}"
+var mod_version = mcef_version
 
 archivesBaseName = project.archives_base_name
 version = mod_version

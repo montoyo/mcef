@@ -6,16 +6,23 @@ task cloneJcef(type: Exec) {
     commandLine 'git', 'submodule', 'update', '--init', '--recursive', 'common/java-cef'
 }
 
-task publishAll(type: GradleBuild) {
+task publishMaven(type: GradleBuild) {
     group = 'mcef'
     tasks = [
-            ':common:clean',
-            ':forge:clean',
-            ':fabric:clean',
-            ':forge:curseforge',
-            ':fabric:curseforge'
+            ':common:publish'
     ]
 }
+
+//task publishAll(type: GradleBuild) {
+//    group = 'mcef'
+//    tasks = [
+//            ':common:clean',
+//            ':forge:clean',
+//            ':fabric:clean',
+//            ':forge:curseforge',
+//            ':fabric:curseforge'
+//    ]
+//}
 
 task fabricClient(type: GradleBuild) {
     group = 'mcef'
