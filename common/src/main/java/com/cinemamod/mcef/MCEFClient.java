@@ -1,5 +1,4 @@
 /*
- *
  *     MCEF (Minecraft Chromium Embedded Framework)
  *     Copyright (C) 2023 CinemaMod Group
  *
