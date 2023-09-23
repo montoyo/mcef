@@ -9,7 +9,9 @@ task cloneJcef(type: Exec) {
 task publishMaven(type: GradleBuild) {
     group = 'mcef'
     tasks = [
-            ':common:publish'
+            ':common:publish',
+            ':fabric:publish',
+            ':forge:publish'
     ]
 }
 
