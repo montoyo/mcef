@@ -122,15 +122,16 @@ public class MCEFDownloader {
         BufferedInputStream inputStream = new BufferedInputStream(url.openStream());
         FileOutputStream outputStream = new FileOutputStream(outputFile);
 
-        byte[] buffer = new byte[1024];
+        byte[] buffer = new byte[2048];
         int count;
         int readBytes = 0;
-        while((count = inputStream.read(buffer, 0, 1024)) != -1)
+        while((count = inputStream.read(buffer)) != -1)
         {
             outputStream.write(buffer, 0, count);
             readBytes += count;
             float percentComplete = (float) readBytes / fileSize;
             percentCompleteConsumer.accept(percentComplete);
+            buffer = new byte[Math.max(2048, inputStream.available())];
         }
 
         inputStream.close();
@@ -161,6 +162,7 @@ public class MCEFDownloader {
                         totalBytesRead += bytesRead;
                         float percentComplete = (((float) totalBytesRead / fileSize) / 2.6158204f); // Roughly the compression ratio
                         percentCompleteConsumer.accept(percentComplete);
+                        buffer = new byte[Math.max(4096, tarInput.available())];
                     }
                 }
             }
