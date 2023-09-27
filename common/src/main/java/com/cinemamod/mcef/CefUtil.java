@@ -87,4 +87,46 @@ public final class CefUtil {
     static CefClient getCefClient() {
         return cefClientInstance;
     }
+
+    public static String mineFromExtension(String ext) {
+//        ext = ext.toLowerCase();
+//        String ret = mimeTypeMap.get(ext);
+//        if (ret != null)
+//            return ret;
+
+        //If the mimeTypeMap couldn't be loaded, fall back to common things
+        switch (ext) {
+            case "htm":
+            case "html":
+                return "text/html";
+
+            case "css":
+                return "text/css";
+
+            case "js":
+                return "text/javascript";
+
+            case "png":
+                return "image/png";
+
+            case "jpg":
+            case "jpeg":
+                return "image/jpeg";
+
+            case "gif":
+                return "image/gif";
+
+            case "svg":
+                return "image/svg+xml";
+
+            case "xml":
+                return "text/xml";
+
+            case "txt":
+                return "text/plain";
+
+            default:
+                return null;
+        }
+    }
 }
