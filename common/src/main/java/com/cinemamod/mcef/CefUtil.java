@@ -88,7 +88,7 @@ public final class CefUtil {
         return cefClientInstance;
     }
 
-    public static String mineFromExtension(String ext) {
+    public static String mimeFromExtension(String ext) {
 //        ext = ext.toLowerCase();
 //        String ret = mimeTypeMap.get(ext);
 //        if (ret != null)

@@ -56,6 +56,12 @@ public final class MCEF {
         if (CefUtil.init()) {
             app = new MCEFApp(CefUtil.getCefApp());
             client = new MCEFClient(CefUtil.getCefClient());
+            MCEF.getApp().getHandle().registerSchemeHandlerFactory(
+                    "mod", "",
+                    (browser, frame, url, request) -> {
+                        return new ModScheme(request.getURL());
+                    }
+            );
             return true;
         }
         return false;
